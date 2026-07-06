@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import AdminProductsLoading from "./loading";
 import { getStoreConfig } from "@/lib/store-config";
+import { isFeatureEnabled } from "@/lib/queries/feature-toggles";
 
 type ProductsTab = "standard" | "gift-boxes";
 
@@ -192,7 +193,8 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   const isBestSeller = params.bestSeller === "true";
   const showInChocolateSection = params.chocolates === "true";
   const showInSoftToysSection = params.softToys === "true";
-  const tab = normalizeTab(params.tab);
+  const isGiftboxesAvailable = await isFeatureEnabled("giftboxes_available");
+  const tab = isGiftboxesAvailable ? normalizeTab(params.tab) : "standard";
   const pageRaw = Number(params.page);
   const pageSizeRaw = Number(params.pageSize);
   const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
@@ -254,13 +256,15 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
               >
                 <Link href={makeTabHref("standard")}>Standard Products ({standardCount})</Link>
               </TabsTrigger>
-              <TabsTrigger
-                value="gift-boxes"
-                asChild
-                className="h-9 px-6 text-gray-500 hover:text-[#A7066A] transition-all duration-200 ease-in-out font-semibold data-[state=active]:!bg-[#A7066A] data-[state=active]:!text-white data-[state=active]:!shadow-[0_4px_12px_rgba(167,6,106,0.25)]"
-              >
-                <Link href={makeTabHref("gift-boxes")}>Gift Boxes ({giftBoxesCount})</Link>
-              </TabsTrigger>
+              {isGiftboxesAvailable && (
+                <TabsTrigger
+                  value="gift-boxes"
+                  asChild
+                  className="h-9 px-6 text-gray-500 hover:text-[#A7066A] transition-all duration-200 ease-in-out font-semibold data-[state=active]:!bg-[#A7066A] data-[state=active]:!text-white data-[state=active]:!shadow-[0_4px_12px_rgba(167,6,106,0.25)]"
+                >
+                  <Link href={makeTabHref("gift-boxes")}>Gift Boxes ({giftBoxesCount})</Link>
+                </TabsTrigger>
+              )}
             </TabsList>
           </Tabs>
 

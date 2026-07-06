@@ -305,6 +305,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
 
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
+  const isGiftboxesAvailable = toggles?.giftboxes_available !== false;
   const form = useForm<z.infer<typeof productFormSchema>>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -1090,40 +1091,44 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
             <p className="text-xs text-[#6B5A64] mt-1">Product type, identity, and narrative details.</p>
           </div>
 
-          <div className="space-y-4">
-            <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Product Type Selection</Label>
-            <Tabs
-              value={formMode}
-              onValueChange={(val) => {
-                const nextMode = val as "item" | "box";
-                setFormMode(nextMode);
-                setWatchedValue("isPremiumGiftBox", nextMode === "box");
-              }}
-              className="w-full"
-            >
-              <TabsList className="h-11 w-full max-w-md bg-white border border-brand-border p-1 shadow-sm font-sans">
-                <TabsTrigger
-                  value="item"
-                  disabled={isEdit}
-                  className="h-9 px-6 text-gray-500 hover:text-[#A7066A] transition-all duration-200 ease-in-out font-semibold data-[state=active]:!bg-[#A7066A] data-[state=active]:!text-white data-[state=active]:!shadow-[0_4px_12px_rgba(167,6,106,0.25)]"
-                >
-                  Standard Item
-                </TabsTrigger>
-                <TabsTrigger
-                  value="box"
-                  disabled={isEdit}
-                  className="h-9 px-6 text-gray-500 hover:text-[#A7066A] transition-all duration-200 ease-in-out font-semibold data-[state=active]:!bg-[#A7066A] data-[state=active]:!text-white data-[state=active]:!shadow-[0_4px_12px_rgba(167,6,106,0.25)]"
-                >
-                  Gift Box
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            {isEdit && (
-              <p className="text-xs text-[#6B5A64]">
-                Product type cannot be changed after creation.
-              </p>
-            )}
-          </div>
+          {(isGiftboxesAvailable || isEdit) && (
+            <div className="space-y-4">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Product Type Selection</Label>
+              <Tabs
+                value={formMode}
+                onValueChange={(val) => {
+                  const nextMode = val as "item" | "box";
+                  setFormMode(nextMode);
+                  setWatchedValue("isPremiumGiftBox", nextMode === "box");
+                }}
+                className="w-full"
+              >
+                <TabsList className="h-11 w-full max-w-md bg-white border border-brand-border p-1 shadow-sm font-sans">
+                  <TabsTrigger
+                    value="item"
+                    disabled={isEdit}
+                    className="h-9 px-6 text-gray-500 hover:text-[#A7066A] transition-all duration-200 ease-in-out font-semibold data-[state=active]:!bg-[#A7066A] data-[state=active]:!text-white data-[state=active]:!shadow-[0_4px_12px_rgba(167,6,106,0.25)]"
+                  >
+                    Standard Item
+                  </TabsTrigger>
+                  {(isGiftboxesAvailable || (isEdit && formMode === "box")) && (
+                    <TabsTrigger
+                      value="box"
+                      disabled={isEdit}
+                      className="h-9 px-6 text-gray-500 hover:text-[#A7066A] transition-all duration-200 ease-in-out font-semibold data-[state=active]:!bg-[#A7066A] data-[state=active]:!text-white data-[state=active]:!shadow-[0_4px_12px_rgba(167,6,106,0.25)]"
+                    >
+                      Gift Box
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+          {isEdit && (
+            <p className="text-xs text-[#6B5A64]">
+              Product type cannot be changed after creation.
+            </p>
+          )}
 
           <div className="space-y-2">
             <Label required className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Product Name</Label>
