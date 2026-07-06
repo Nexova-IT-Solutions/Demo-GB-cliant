@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth";
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

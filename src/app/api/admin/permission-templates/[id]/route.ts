@@ -8,7 +8,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -41,7 +41,7 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -69,7 +69,7 @@ export async function DELETE(_req: Request, props: { params: Promise<{ id: strin
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

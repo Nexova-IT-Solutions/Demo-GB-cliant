@@ -61,7 +61,20 @@ async function main() {
     },
   })
 
-  console.log({ superAdmin, superAdmin1, superAdmin2, superAdmin3 })
+  const devAdminPassword = await bcrypt.hash('devadmin123', 10)
+
+  const devAdmin = await prisma.user.upsert({
+    where: { email: 'devadmin@giftbox.lk' },
+    update: {},
+    create: {
+      email: 'devadmin@giftbox.lk',
+      name: 'Dev Admin',
+      password: devAdminPassword,
+      role: 'DEV_ADMIN',
+    },
+  })
+
+  console.log({ superAdmin, superAdmin1, superAdmin2, superAdmin3, devAdmin })
 
   // Seed Sri Lankan Provinces & Cities
   const locations = [
@@ -164,6 +177,34 @@ async function main() {
   }
 
   console.log("Seeded Sri Lankan provinces and cities successfully.")
+
+  const featureToggleKeys = [
+    'storefront_section',
+    'storefront_banners',
+    'storefront_occasions',
+    'storefront_recipients',
+    'storefront_discounts',
+    'storefront_giftcards',
+    'storefront_wrapping',
+    'operations_section',
+    'operations_reviews',
+    'operations_returns',
+    'operations_suppliers',
+    'operations_shipping',
+  ]
+
+  for (const key of featureToggleKeys) {
+    await prisma.featureToggle.upsert({
+      where: { key },
+      update: {},
+      create: {
+        key,
+        isActive: true,
+      },
+    })
+  }
+
+  console.log("Seeded default feature toggles successfully.")
 }
 
 main()

@@ -275,7 +275,7 @@ export async function GET(
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -364,7 +364,7 @@ export async function PATCH(
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -532,7 +532,7 @@ export async function DELETE(
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

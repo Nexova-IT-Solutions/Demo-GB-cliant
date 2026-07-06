@@ -14,7 +14,7 @@ export default async function AdminUserCreatePage({ params, searchParams }: Page
   const query = await searchParams;
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     redirect("/");
   }
 

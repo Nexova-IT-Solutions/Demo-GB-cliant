@@ -299,7 +299,44 @@ export function AppSidebar() {
     }
   }, [session, liveUser])
 
+  // Fetch dynamic feature toggles
+  const { data: toggles } = useSWR<Record<string, boolean>>(
+    status === "authenticated" ? "/api/admin/feature-toggles" : null,
+    fetcher
+  )
+
   const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN"
+  const isDevAdmin = permissionContext?.user?.role === "DEV_ADMIN"
+
+  // Check if sections are enabled
+  const storefrontEnabled = toggles?.storefront_section !== false;
+  const operationsEnabled = toggles?.operations_section !== false;
+
+  // Filter storefront items based on toggles
+  const filteredStorefrontItems = React.useMemo(() => {
+    if (!storefrontEnabled) return [];
+    return storefrontItems.filter(item => {
+      if (item.url === "/admin/banners") return toggles?.storefront_banners !== false;
+      if (item.url === "/admin/occasions") return toggles?.storefront_occasions !== false;
+      if (item.url === "/admin/recipients") return toggles?.storefront_recipients !== false;
+      if (item.url === "/admin/discounts") return toggles?.storefront_discounts !== false;
+      if (item.url === "/admin/gift-cards") return toggles?.storefront_giftcards !== false;
+      if (item.url === "/admin/settings/wrappings") return toggles?.storefront_wrapping !== false;
+      return true;
+    });
+  }, [toggles, storefrontEnabled]);
+
+  // Filter operations items based on toggles
+  const filteredOperationsItems = React.useMemo(() => {
+    if (!operationsEnabled) return [];
+    return operationsItems.filter(item => {
+      if (item.url === "/admin/reviews") return toggles?.operations_reviews !== false;
+      if (item.url === "/admin/returns") return toggles?.operations_returns !== false;
+      if (item.url === "/admin/suppliers") return toggles?.operations_suppliers !== false;
+      if (item.url === "/admin/settings/shipping") return toggles?.operations_shipping !== false;
+      return true;
+    });
+  }, [toggles, operationsEnabled]);
 
   // Track expanded state for nested menus
   const [openMenus, setOpenMenus] = React.useState<Record<string, boolean>>({})
@@ -654,13 +691,22 @@ export function AppSidebar() {
         {renderNavGroup("Overview", overviewItems)}
         {renderNavGroup("Catalog", catalogItems)}
         {renderNavGroup("Sales & POS", salesPosItems)}
-        {renderNavGroup("Storefront", storefrontItems)}
-        {renderNavGroup("Operations", operationsItems)}
+        {renderNavGroup("Storefront", filteredStorefrontItems)}
+        {renderNavGroup("Operations", filteredOperationsItems)}
         {renderNavGroup("Reports & Analytics", reportItems)}
 
-        {isSuperAdmin && renderNavGroup("Administration", [systemItems[0]])}
+        {(isSuperAdmin || isDevAdmin) && renderNavGroup("Administration", [systemItems[0]])}
 
         {renderNavGroup("System", systemItems.slice(1))}
+
+        {isDevAdmin && renderNavGroup("Developer Tools", [
+          {
+            title: "Feature Toggles",
+            url: "/admin/feature-toggles",
+            icon: Settings,
+            requiredPermission: "",
+          }
+        ])}
       </div>
     </nav>
   )
