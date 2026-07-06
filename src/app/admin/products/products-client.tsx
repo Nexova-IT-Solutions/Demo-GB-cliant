@@ -21,6 +21,9 @@ import { Eye, Grid3X3, Layers, Package, Pencil, Search, TableProperties, Trash2,
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProductFilters } from "./ProductFilters";
 import { ReusablePagination } from "@/components/admin/reusable-pagination";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 type ProductData = {
   id: string;
@@ -112,6 +115,9 @@ export function ProductsClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
   
   const [products, setProducts] = useState<ProductData[]>(initialProducts);
   const [totalCount, setTotalCount] = useState(initialTotal);
@@ -440,11 +446,13 @@ export function ProductsClient({
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <Button asChild variant="outline" size="icon" className="h-8.5 w-8.5 border-gray-200 hover:bg-gray-50">
-                        <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer" aria-label={`Preview ${product.name}`}>
-                          <Eye className="w-3.5 h-3.5 text-gray-500" />
-                        </Link>
-                      </Button>
+                      {isWebsiteEnabled && (
+                        <Button asChild variant="outline" size="icon" className="h-8.5 w-8.5 border-gray-200 hover:bg-gray-50">
+                          <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer" aria-label={`Preview ${product.name}`}>
+                            <Eye className="w-3.5 h-3.5 text-gray-500" />
+                          </Link>
+                        </Button>
+                      )}
                       <Button asChild variant="outline" size="icon" className="h-8.5 w-8.5 border-gray-200 hover:bg-gray-50">
                         <Link href={`/admin/products/${product.id}/edit`} aria-label={`Edit ${product.name}`}>
                           <Pencil className="w-3.5 h-3.5 text-gray-500" />
@@ -548,11 +556,13 @@ export function ProductsClient({
                     <p className="mt-1 text-xs font-semibold text-[#A7066A]">LKR {product.price.toLocaleString()}</p>
                   )}
                   <div className="mt-auto pt-3 flex items-center justify-end gap-2">
-                    <Button asChild variant="outline" size="icon" className="h-8 w-8 border-brand-border hover:bg-[#FCEAF4]">
-                      <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer">
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                    </Button>
+                    {isWebsiteEnabled && (
+                      <Button asChild variant="outline" size="icon" className="h-8 w-8 border-brand-border hover:bg-[#FCEAF4]">
+                        <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer">
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                    )}
                     <Button asChild variant="outline" size="icon" className="h-8 w-8 border-brand-border hover:bg-[#FCEAF4]">
                       <Link href={`/admin/products/${product.id}/edit`}>
                         <Pencil className="w-4 h-4" />
