@@ -18,6 +18,18 @@ function extractStoragePathFromPublicUrl(publicUrl: string, bucket: string): str
 }
 
 export async function deleteFileByPublicUrl(publicUrl: string, bucket = "giftbox"): Promise<void> {
+  // If the URL is an R2 URL or not a Supabase URL, delete it via the API
+  if (publicUrl && (!publicUrl.includes("supabase.co") || publicUrl.includes("r2.dev"))) {
+    try {
+      await fetch(`/api/upload?url=${encodeURIComponent(publicUrl)}`, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.warn("R2 remove warning:", err);
+    }
+    return;
+  }
+
   if (!supabase) {
     console.warn("[Supabase] Client not initialized. Skipping file deletion.");
     return;
@@ -32,9 +44,9 @@ export async function deleteFileByPublicUrl(publicUrl: string, bucket = "giftbox
 }
 
 /**
- * Uploads a file to Supabase Storage and returns the public URL.
+ * Uploads a file to Cloudflare R2 via internal API and returns the public URL.
  * @param file The File object or a string URL (if string, returns as is).
- * @param path The path/prefix within the 'public' bucket.
+ * @param path The path/prefix within R2.
  */
 export async function uploadFile(
   file: File | string,
@@ -42,36 +54,24 @@ export async function uploadFile(
   options?: { replacePublicUrl?: string; bucket?: string }
 ): Promise<string> {
   if (typeof file === "string") return file;
-  if (!supabase) {
-    console.error("[Supabase] Attempted file upload, but Supabase is not configured.");
-    throw new Error("Supabase is not configured. File upload is unavailable.");
-  }
-  
-  const bucket = options?.bucket || "giftbox"; // Using a single bucket 'giftbox' to keep things simple
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("path", path);
   if (options?.replacePublicUrl) {
-    await deleteFileByPublicUrl(options.replacePublicUrl, bucket);
+    formData.append("replaceUrl", options.replacePublicUrl);
   }
 
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const fileName = `${Math.random().toString(36).substring(2, 12)}_${Date.now()}.${fileExt}`;
-  const filePath = `${path}/${fileName}`;
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(filePath, file);
-
-  if (error) {
-    console.error("Supabase Storage Error:", error);
-    // If the error is 'Bucket not found', we'll provide a clearer message
-    if (error.message.includes('Bucket not found')) {
-      throw new Error(`The Supabase bucket "${bucket}" was not found. Please create it in your Dashboard.`);
-    }
-    throw error;
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.message || "Failed to upload file to Cloudflare R2");
   }
 
-  const { data: { publicUrl } } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(filePath);
-
-  return publicUrl;
+  const data = await response.json();
+  return data.url;
 }
