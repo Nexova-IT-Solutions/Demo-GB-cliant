@@ -27,6 +27,9 @@ import { format } from "date-fns";
 import { generateSKU } from "@/lib/sku";
 import { cn } from "@/lib/utils";
 import { FormField } from "@/components/ui/form";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const MarkdownEditor = dynamic(() => import("@/components/ui/markdown-editor"), { ssr: false });
 const BarcodeCard = dynamic(
@@ -299,6 +302,9 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const searchParams = useSearchParams();
   const isEdit = mode === "edit";
   const { toast } = useToast();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
   const form = useForm<z.infer<typeof productFormSchema>>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -1430,93 +1436,95 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
             </Card>
           ) : null}
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="space-y-3 rounded-2xl border border-brand-border bg-[#FAFAFA] p-4">
-              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Occasions</Label>
-              <div className="flex flex-wrap gap-2">
-                {occasionOptions.map((occasion) => {
-                  const selected = selectedOccasionIds.includes(occasion.id);
-                  return (
-                    <button
-                      key={occasion.id}
-                      type="button"
-                      onClick={() => toggleOccasion(occasion.id)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                        selected
-                          ? "border-[#A7066A] bg-[#FCEAF4] text-[#A7066A]"
-                          : "border-brand-border bg-white text-[#3A2B35] hover:border-[#A7066A]/40"
-                      }`}
-                    >
-                      {occasion.name}
-                    </button>
-                  );
-                })}
-              </div>
-              {selectedOccasionIds.length > 0 ? (
+          {isWebsiteEnabled && (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-3 rounded-2xl border border-brand-border bg-[#FAFAFA] p-4">
+                <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Occasions</Label>
                 <div className="flex flex-wrap gap-2">
-                  {selectedOccasionIds.map((id) => {
-                    const occasion = occasionOptions.find((item) => item.id === id);
-                    if (!occasion) return null;
-
+                  {occasionOptions.map((occasion) => {
+                    const selected = selectedOccasionIds.includes(occasion.id);
                     return (
-                      <Badge key={id} className="bg-brand-surface text-[#1F1720] border-brand-border py-1.5 group">
+                      <button
+                        key={occasion.id}
+                        type="button"
+                        onClick={() => toggleOccasion(occasion.id)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          selected
+                            ? "border-[#A7066A] bg-[#FCEAF4] text-[#A7066A]"
+                            : "border-brand-border bg-white text-[#3A2B35] hover:border-[#A7066A]/40"
+                        }`}
+                      >
                         {occasion.name}
-                        <X
-                          className="w-3 h-3 ml-2 cursor-pointer group-hover:text-red-500"
-                          onClick={() => toggleOccasion(id)}
-                        />
-                      </Badge>
+                      </button>
                     );
                   })}
                 </div>
-              ) : (
-                <p className="text-xs text-[#6B5A64]">Select one or more occasions for this product.</p>
-              )}
-            </div>
+                {selectedOccasionIds.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedOccasionIds.map((id) => {
+                      const occasion = occasionOptions.find((item) => item.id === id);
+                      if (!occasion) return null;
 
-            <div className="space-y-3 rounded-2xl border border-brand-border bg-[#FAFAFA] p-4">
-              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Recipients</Label>
-              <div className="flex flex-wrap gap-2">
-                {recipientOptions.map((recipient) => {
-                  const selected = selectedRecipientIds.includes(recipient.id);
-                  return (
-                    <button
-                      key={recipient.id}
-                      type="button"
-                      onClick={() => toggleRecipient(recipient.id)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                        selected
-                          ? "border-[#A7066A] bg-[#FCEAF4] text-[#A7066A]"
-                          : "border-brand-border bg-white text-[#3A2B35] hover:border-[#A7066A]/40"
-                      }`}
-                    >
-                      {recipient.name}
-                    </button>
-                  );
-                })}
+                      return (
+                        <Badge key={id} className="bg-brand-surface text-[#1F1720] border-brand-border py-1.5 group">
+                          {occasion.name}
+                          <X
+                            className="w-3 h-3 ml-2 cursor-pointer group-hover:text-red-500"
+                            onClick={() => toggleOccasion(id)}
+                          />
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#6B5A64]">Select one or more occasions for this product.</p>
+                )}
               </div>
-              {selectedRecipientIds.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {selectedRecipientIds.map((id) => {
-                    const recipient = recipientOptions.find((item) => item.id === id);
-                    if (!recipient) return null;
 
+              <div className="space-y-3 rounded-2xl border border-brand-border bg-[#FAFAFA] p-4">
+                <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Recipients</Label>
+                <div className="flex flex-wrap gap-2">
+                  {recipientOptions.map((recipient) => {
+                    const selected = selectedRecipientIds.includes(recipient.id);
                     return (
-                      <Badge key={id} className="bg-brand-surface text-[#1F1720] border-brand-border py-1.5 group">
+                      <button
+                        key={recipient.id}
+                        type="button"
+                        onClick={() => toggleRecipient(recipient.id)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          selected
+                            ? "border-[#A7066A] bg-[#FCEAF4] text-[#A7066A]"
+                            : "border-brand-border bg-white text-[#3A2B35] hover:border-[#A7066A]/40"
+                        }`}
+                      >
                         {recipient.name}
-                        <X
-                          className="w-3 h-3 ml-2 cursor-pointer group-hover:text-red-500"
-                          onClick={() => toggleRecipient(id)}
-                        />
-                      </Badge>
+                      </button>
                     );
                   })}
                 </div>
-              ) : (
-                <p className="text-xs text-[#6B5A64]">Select one or more recipient groups for this product.</p>
-              )}
+                {selectedRecipientIds.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedRecipientIds.map((id) => {
+                      const recipient = recipientOptions.find((item) => item.id === id);
+                      if (!recipient) return null;
+
+                      return (
+                        <Badge key={id} className="bg-brand-surface text-[#1F1720] border-brand-border py-1.5 group">
+                          {recipient.name}
+                          <X
+                            className="w-3 h-3 ml-2 cursor-pointer group-hover:text-red-500"
+                            onClick={() => toggleRecipient(id)}
+                          />
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#6B5A64]">Select one or more recipient groups for this product.</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 
           <div className="space-y-3">
@@ -1877,290 +1885,223 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
 
         {/* Section 5: Visibility & Marketing Flags */}
         <div className="space-y-8">
-          <div className="rounded-2xl border border-brand-border bg-[#FAFAFA] px-4 py-3">
-            <p className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Section 5: Visibility & Marketing</p>
-            <p className="text-xs text-[#6B5A64] mt-1">Control storefront visibility, promotions, and merchandising surfaces.</p>
-          </div>
-
-
-          <Card className="border-[#A7066A]/25 bg-[#FFF8FC] shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-bold text-[#1F1720]">Status Toggles & Visibility Flags</CardTitle>
-              <p className="text-xs text-[#6B5A64]">
-                Control which homepage and merchandising surfaces this product can appear in.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isMounted && storefrontOptionsLocked ? (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
-                  ⚠️ Add at least one product image to enable marketing and visibility flags.
-                </p>
-              ) : null}
-              <div className={cn(
-                "grid grid-cols-1 gap-4 md:grid-cols-2",
-                !isMounted && "opacity-0"
-              )}>
-                <FormField
-                  control={control}
-                  name="isNewArrival"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">New Arrival</p>
-                        <p className="text-xs text-[#6B5A64]">Show in the new arrivals section</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="isTrending"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">Trending Now</p>
-                        <p className="text-xs text-[#6B5A64]">Show in trending lists</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="isTopRated"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">Manual Top Rated</p>
-                        <p className="text-xs text-[#6B5A64]">Mark as manually curated top rated</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="isBestSeller"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">Manual Best Seller</p>
-                        <p className="text-xs text-[#6B5A64]">Mark as manually curated bestseller</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="showInChocolateSection"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">Show in Chocolate Section</p>
-                        <p className="text-xs text-[#6B5A64]">Feature in the homepage chocolates module</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="showInSoftToysSection"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">Show in Soft Toys Section</p>
-                        <p className="text-xs text-[#6B5A64]">Feature in the homepage soft toys module</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="isAvailableInBuilder"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1F1720]">Available in Box Builder</p>
-                        <p className="text-xs text-[#6B5A64]">Make available for custom gift boxes (BYOB)</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
-                        <Switch
-                          checked={!!field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={storefrontOptionsLocked}
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
+          {isWebsiteEnabled && (
+            <>
+              <div className="rounded-2xl border border-brand-border bg-[#FAFAFA] px-4 py-3">
+                <p className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Section 5: Visibility & Marketing</p>
+                <p className="text-xs text-[#6B5A64] mt-1">Control storefront visibility, promotions, and merchandising surfaces.</p>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card className={cn(
-            "border-[#A7066A]/25 bg-[#FFF8FC] shadow-sm",
-            !isMounted && "opacity-0"
-          )}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-bold text-[#1F1720]">Promotions & Discount Options</CardTitle>
-              <p className="text-xs text-[#6B5A64]">
-                Apply a discount and control its visibility on the storefront.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-brand-border bg-white p-4">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Apply Promotion/Discount (Optional)</Label>
-                  <select
-                    className="mt-1 h-10 w-full rounded-md border border-brand-border bg-white px-3 text-sm"
-                    value={selectedDiscountId}
-                    onChange={(event) => setSelectedDiscountId(event.target.value)}
-                    disabled={isMounted && storefrontOptionsLocked}
-                  >
-                    <option value="">None</option>
-                    {discountOptions.map((discount) => (
-                      <option key={discount.id} value={discount.id}>
-                        {discount.name} ({discount.type === "PERCENTAGE" ? `${discount.value}%` : `LKR ${discount.value}`})
-                      </option>
-                    ))}
-                  </select>
-                  {optionsLoading && discountOptions.length === 0 ? (
-                    <p className="mt-1 text-xs text-[#6B5A64]">Loading discounts...</p>
+              <Card className="border-[#A7066A]/25 bg-[#FFF8FC] shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-bold text-[#1F1720]">Status Toggles & Visibility Flags</CardTitle>
+                  <p className="text-xs text-[#6B5A64]">
+                    Control which homepage and merchandising surfaces this product can appear in.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {isMounted && storefrontOptionsLocked ? (
+                    <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+                      ⚠️ Add at least one product image to enable marketing and visibility flags.
+                    </p>
                   ) : null}
-                </div>
+                  <div className={cn(
+                    "grid grid-cols-1 gap-4 md:grid-cols-2",
+                    !isMounted && "opacity-0"
+                  )}>
+                    <FormField
+                      control={control}
+                      name="isNewArrival"
+                      render={({ field }) => (
+                        <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                          <div>
+                            <p className="text-sm font-semibold text-[#1F1720]">New Arrival</p>
+                            <p className="text-xs text-[#6B5A64]">Show in the new arrivals section</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
+                            <Switch
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={storefrontOptionsLocked}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    />
+                    <FormField
+                      control={control}
+                      name="isTrending"
+                      render={({ field }) => (
+                        <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                          <div>
+                            <p className="text-sm font-semibold text-[#1F1720]">Trending</p>
+                            <p className="text-xs text-[#6B5A64]">Show in trending sections</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
+                            <Switch
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={storefrontOptionsLocked}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    />
+                    <FormField
+                      control={control}
+                      name="isBestSeller"
+                      render={({ field }) => (
+                        <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                          <div>
+                            <p className="text-sm font-semibold text-[#1F1720]">Best Seller</p>
+                            <p className="text-xs text-[#6B5A64]">Show in bestseller modules</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
+                            <Switch
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={storefrontOptionsLocked}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    />
+                    <FormField
+                      control={control}
+                      name="isTopRated"
+                      render={({ field }) => (
+                        <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                          <div>
+                            <p className="text-sm font-semibold text-[#1F1720]">Top Rated</p>
+                            <p className="text-xs text-[#6B5A64]">Show in highly-rated lists</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <SwitchStateLabel checked={field.value} disabled={storefrontOptionsLocked} />
+                            <Switch
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={storefrontOptionsLocked}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    />
+                  </div>
 
-                <div className="rounded-xl border border-brand-border bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Discount Preview</p>
-                  <p className="mt-1 text-xs text-[#6B5A64]">Base Price: {typeof price === "number" ? `LKR ${price.toLocaleString()}` : "-"}</p>
-                  <p className="mt-1 text-xs text-[#E11D48]">
-                    Discount Amount: {selectedDiscount && typeof price === "number"
-                      ? selectedDiscount.type === "FIXED"
-                        ? `LKR ${Math.min(price, selectedDiscount.value).toLocaleString()}`
-                        : `LKR ${((price * Math.min(Math.max(selectedDiscount.value, 0), 100)) / 100).toLocaleString()}`
-                      : "-"}
-                  </p>
-                  <p className="mt-1 text-lg font-bold text-[#16A34A]">
-                    Final Sale Price: {computedSalePrice !== null ? `LKR ${computedSalePrice.toLocaleString()}` : "-"}
-                  </p>
-                </div>
-              </div>
-
-              <FormField
-                control={control}
-                name="showInDiscountSection"
-                render={({ field }) => (
-                  <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#1F1720]">Show in Discount Section</p>
-                      <p className="text-xs text-[#6B5A64]">
-                        {isMounted && discountSwitchDisabled && !storefrontOptionsLocked
-                          ? "Select a promotion/discount above to enable this option."
-                          : "Feature this product in discount-driven storefront modules."}
-                      </p>
-                      {fieldErrors.showInDiscountSection ? <p className="text-xs text-destructive mt-1">{fieldErrors.showInDiscountSection}</p> : null}
+                  <div className="border-t border-brand-border/40 my-6 pt-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Store Promotion / Discount</Label>
+                      <select
+                        className="w-full h-12 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
+                        value={discountId}
+                        onChange={(event) => {
+                          const val = event.target.value;
+                          setDiscountId(val);
+                          setWatchedValue("discountId", val || null);
+                        }}
+                      >
+                        <option value="">No Active Promotion</option>
+                        {discountOptions.map((disc) => (
+                          <option key={disc.id} value={disc.id}>
+                            {disc.name} ({disc.type === "PERCENTAGE" ? `${disc.value}% Off` : `LKR ${disc.value.toLocaleString()} Off`})
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-[11px] text-[#6B5A64]">Apply an active store campaign discount to this item.</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <SwitchStateLabel checked={field.value} disabled={isMounted && discountSwitchDisabled} />
+
+                    <div className="p-4 rounded-xl border border-brand-border/50 bg-[#F9F9FB]">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Discount Preview</p>
+                      <p className="mt-1 text-xs text-[#6B5A64]">Base Price: {typeof price === "number" ? `LKR ${price.toLocaleString()}` : "-"}</p>
+                      <p className="mt-1 text-xs text-[#E11D48]">
+                        Discount Amount: {selectedDiscount && typeof price === "number"
+                          ? selectedDiscount.type === "FIXED"
+                            ? `LKR ${Math.min(price, selectedDiscount.value).toLocaleString()}`
+                            : `LKR ${((price * Math.min(Math.max(selectedDiscount.value, 0), 100)) / 100).toLocaleString()}`
+                          : "-"}
+                      </p>
+                      <p className="mt-1 text-lg font-bold text-[#16A34A]">
+                        Final Sale Price: {computedSalePrice !== null ? `LKR ${computedSalePrice.toLocaleString()}` : "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <FormField
+                    control={control}
+                    name="showInDiscountSection"
+                    render={({ field }) => (
+                      <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                        <div>
+                          <p className="text-sm font-semibold text-[#1F1720]">Show in Discount Section</p>
+                          <p className="text-xs text-[#6B5A64]">
+                            {isMounted && discountSwitchDisabled && !storefrontOptionsLocked
+                              ? "Select a promotion/discount above to enable this option."
+                              : "Feature this product in discount-driven storefront modules."}
+                          </p>
+                          {fieldErrors.showInDiscountSection ? <p className="text-xs text-destructive mt-1">{fieldErrors.showInDiscountSection}</p> : null}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <SwitchStateLabel checked={field.value} disabled={isMounted && discountSwitchDisabled} />
+                          <Switch
+                            checked={!!field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isMounted && discountSwitchDisabled}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {isWebsiteEnabled && (
+            <Card className="border-[#F2D8B6] bg-[#FFFDF8] shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-bold text-[#1F1720]">CART & UPSELL FLAGS</CardTitle>
+                <p className="text-xs text-[#6B5A64]">
+                  Control which products can surface as a cart drawer upsell and how they are ordered.
+                </p>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                  <div className="pr-4">
+                    <p className="text-sm font-semibold text-[#1F1720]">Special Touch Upsell</p>
+                    <p className="text-xs text-[#6B5A64]">Feature this product inside the cart drawer add-on rail.</p>
+                  </div>
+                  <FormField
+                    control={control}
+                    name="isSpecialTouch"
+                    render={({ field }) => (
                       <Switch
                         checked={!!field.value}
                         onCheckedChange={field.onChange}
-                        disabled={isMounted && discountSwitchDisabled}
                       />
-                    </div>
-                  </div>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          <Card className="border-[#F2D8B6] bg-[#FFFDF8] shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-bold text-[#1F1720]">CART & UPSELL FLAGS</CardTitle>
-              <p className="text-xs text-[#6B5A64]">
-                Control which products can surface as a cart drawer upsell and how they are ordered.
-              </p>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                <div className="pr-4">
-                  <p className="text-sm font-semibold text-[#1F1720]">Special Touch Upsell</p>
-                  <p className="text-xs text-[#6B5A64]">Feature this product inside the cart drawer add-on rail.</p>
+                    )}
+                  />
                 </div>
-                <FormField
-                  control={control}
-                  name="isSpecialTouch"
-                  render={({ field }) => (
-                    <Switch
-                      checked={!!field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-              </div>
-              <div className="space-y-2 rounded-xl border border-brand-border bg-white p-3">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Display Priority</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={specialTouchOrder}
-                  onChange={(event) => {
-                    const nextValue = event.target.value;
-                    setSpecialTouchOrder(nextValue === "" ? "" : Number(nextValue));
-                  }}
-                  className="h-11"
-                />
-                <p className="text-[11px] text-[#6B5A64]">Lower numbers are shown first in the cart drawer.</p>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="space-y-2 rounded-xl border border-brand-border bg-white p-3">
+                  <Label className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Display Priority</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={specialTouchOrder}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      setSpecialTouchOrder(nextValue === "" ? "" : Number(nextValue));
+                    }}
+                    className="h-11"
+                  />
+                  <p className="text-[11px] text-[#6B5A64]">Lower numbers are shown first in the cart drawer.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
 
