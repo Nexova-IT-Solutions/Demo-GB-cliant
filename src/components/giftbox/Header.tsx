@@ -70,6 +70,7 @@ export function Header() {
 
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
+  const isGiftboxesAvailable = toggles?.giftboxes_available !== false;
 
   useEffect(() => {
     if (toggles && toggles.storefront_website_enabled === false) {
@@ -250,9 +251,11 @@ export function Header() {
               )}
             </div>
 
-            <Link href="/categories?categories=gift-boxes" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
-              {t("giftBoxes")}
-            </Link>
+            {isGiftboxesAvailable && (
+              <Link href="/categories?categories=gift-boxes" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
+                {t("giftBoxes")}
+              </Link>
+            )}
             
             <Link href="/gift-card" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
               {t("giftCard")}
@@ -263,13 +266,15 @@ export function Header() {
             </Link>
 
               {/* Build Your Box */}
-              <Link
-                href="/box-builder"
-                className="flex items-center gap-2 ml-1 px-4 py-2 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] text-white rounded-full hover:shadow-lg transition-all text-sm font-medium"
-              >
-                <Sparkles className="w-4 h-4" />
-                {t("boxBuilder")}
-              </Link>
+              {isGiftboxesAvailable && (
+                <Link
+                  href="/box-builder"
+                  className="flex items-center gap-2 ml-1 px-4 py-2 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] text-white rounded-full hover:shadow-lg transition-all text-sm font-medium"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {t("boxBuilder")}
+                </Link>
+              )}
             </nav>
           )}
 
@@ -422,7 +427,7 @@ export function Header() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80 p-0">
                   <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <MobileNav onClose={() => setIsMobileMenuOpen(false)} />
+                  <MobileNav onClose={() => setIsMobileMenuOpen(false)} isGiftboxesAvailable={isGiftboxesAvailable} />
                 </SheetContent>
               </Sheet>
             )}
@@ -447,7 +452,7 @@ export function Header() {
   );
 }
 
-function MobileNav({ onClose }: { onClose: () => void }) {
+function MobileNav({ onClose, isGiftboxesAvailable }: { onClose: () => void; isGiftboxesAvailable?: boolean }) {
   const t = useTranslations("Navigation");
   const { getItemCount } = useCartStore();
   const { data: session, status } = useSession();
@@ -462,20 +467,24 @@ function MobileNav({ onClose }: { onClose: () => void }) {
         <div className="space-y-1 mb-6">
           <Link href="/" onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("home")}</Link>
           <Link href="/categories" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("categories")}</Link>
-          <Link href="/categories?categories=gift-boxes" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("giftBoxes")}</Link>
+          {isGiftboxesAvailable !== false && (
+            <Link href="/categories?categories=gift-boxes" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("giftBoxes")}</Link>
+          )}
           <Link href="/gift-card" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("giftCard")}</Link>
           <Link href="/contact" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("contact")}</Link>
         </div>
 
         {/* Build Your Box CTA */}
-        <Link
-          href="/box-builder"
-          onClick={onClose}
-          className="flex items-center justify-center gap-2 w-full p-4 mb-6 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] text-white rounded-2xl font-semibold shrink-0"
-        >
-          <Sparkles className="w-5 h-5" />
-          {t("boxBuilder")}
-        </Link>
+        {isGiftboxesAvailable !== false && (
+          <Link
+            href="/box-builder"
+            onClick={onClose}
+            className="flex items-center justify-center gap-2 w-full p-4 mb-6 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] text-white rounded-2xl font-semibold shrink-0"
+          >
+            <Sparkles className="w-5 h-5" />
+            {t("boxBuilder")}
+          </Link>
+        )}
 
         {/* Auth Links */}
         <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-3 min-h-16 shrink-0">

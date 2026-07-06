@@ -178,6 +178,8 @@ export default async function HomePage() {
     redirect("/sign-in");
   }
 
+  const isGiftboxesAvailable = await isFeatureEnabled("giftboxes_available");
+
   const t = await getTranslations("HomePage");
   const session = await getServerSession(authOptions);
   const storeConfig = await getStoreConfig();
@@ -230,35 +232,39 @@ export default async function HomePage() {
         </Suspense>
 
         {/* 8. Build Your Own Box Section */}
-        <section className="py-12 px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto w-full">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#A7066A] to-[#E91E8C] p-8 lg:p-12">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-            <div className="relative z-10 text-center">
-              <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4">
-                {t("buildYourOwnCustomBox")}
-              </h2>
-              <p className="text-white/90 mb-6 max-w-xl mx-auto">
-                {t("buildYourOwnCustomBoxDesc")}
-              </p>
-              <Button
-                asChild
-                size="lg"
-                className="bg-white text-[#A7066A] hover:bg-white/90 rounded-full px-8"
-              >
-                <Link href="/box-builder">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  {t("startBuilding")}
-                </Link>
-              </Button>
+        {isGiftboxesAvailable && (
+          <section className="py-12 px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto w-full">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#A7066A] to-[#E91E8C] p-8 lg:p-12">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+              <div className="relative z-10 text-center">
+                <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4">
+                  {t("buildYourOwnCustomBox")}
+                </h2>
+                <p className="text-white/90 mb-6 max-w-xl mx-auto">
+                  {t("buildYourOwnCustomBoxDesc")}
+                </p>
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-white text-[#A7066A] hover:bg-white/90 rounded-full px-8"
+                >
+                  <Link href="/box-builder">
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    {t("startBuilding")}
+                  </Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* 9. Premium Gift Boxes */}
-        <Suspense fallback={<div className="py-12 px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto"><SectionSkeleton /></div>}>
-          <PremiumGiftBoxesSection hideOutOfStock={hideOOS} isMobile={isMobile} />
-        </Suspense>
+        {isGiftboxesAvailable && (
+          <Suspense fallback={<div className="py-12 px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto"><SectionSkeleton /></div>}>
+            <PremiumGiftBoxesSection hideOutOfStock={hideOOS} isMobile={isMobile} />
+          </Suspense>
+        )}
 
         {/* 10. Chocolates */}
         <Suspense fallback={<div className="py-12 px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto"><SectionSkeleton /></div>}>

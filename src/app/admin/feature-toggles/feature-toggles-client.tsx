@@ -124,8 +124,12 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
 
       {/* Global Settings */}
       <Card className="border-brand-border shadow-sm overflow-hidden bg-white">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+        <CardHeader className="border-b border-brand-border/60 bg-slate-50/50 pb-4">
+          <CardTitle className="text-lg font-bold text-[#1F1720]">Global System Settings</CardTitle>
+          <CardDescription className="text-xs">Configure high-level system behaviors</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6 divide-y divide-brand-border/40 space-y-4">
+          <div className="flex items-center justify-between pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
                 <Globe className="h-5 w-5" />
@@ -140,6 +144,24 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
             <Switch
               checked={localToggles.storefront_website_enabled !== false}
               onCheckedChange={(checked) => handleToggleChange("storefront_website_enabled", checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-pink-50 text-pink-700">
+                <Box className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-bold text-[#1F1720]">Gift Boxes Available</CardTitle>
+                <CardDescription className="text-xs">
+                  Disable this to hide giftbox and box building options throughout the system.
+                </CardDescription>
+              </div>
+            </div>
+            <Switch
+              checked={localToggles.giftboxes_available !== false}
+              onCheckedChange={(checked) => handleToggleChange("giftboxes_available", checked)}
             />
           </div>
         </CardContent>

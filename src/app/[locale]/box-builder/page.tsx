@@ -241,10 +241,18 @@ export default function BoxBuilderPage() {
     getTotal
   } = useBoxBuilderStore();
 
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+
   const { addCustomBoxToCart, openCart } = useCartStore();
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+
+  useEffect(() => {
+    if (toggles && toggles.giftboxes_available === false) {
+      router.push("/");
+    }
+  }, [toggles, router]);
 
   // Variation Dialog States
   const [variationDialogOpen, setVariationDialogOpen] = useState(false);
