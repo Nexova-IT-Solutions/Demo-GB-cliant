@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SocialLoginButton } from "@/components/SocialLoginButton";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
+import { version } from "../../../../package.json";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -134,7 +135,27 @@ export default function SignInPage() {
           )}
         </div>
       </main>
-      <Footer />
+      {isWebsiteEnabled ? (
+        <Footer />
+      ) : (
+        <footer className="py-6 border-t border-brand-border/60 bg-slate-50 text-center text-xs text-[#6B5A64] mt-auto">
+          <div className="max-w-[1600px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            <p>© 2026 Sohar Pets Center. All rights reserved.</p>
+            <div className="flex items-center gap-2">
+              <a 
+                href="https://nexovaitsolutions.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:underline font-semibold text-[#A7066A]"
+              >
+                Developed by Nexova
+              </a>
+              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span>v{version}</span>
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
