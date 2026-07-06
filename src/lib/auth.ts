@@ -11,7 +11,9 @@ if (process.env.NODE_ENV === "production") {
   console.log("[Auth-Diagnostic] Checking environment variables...");
   if (!process.env.NEXTAUTH_SECRET) console.error("[Auth-Diagnostic] ❌ NEXTAUTH_SECRET is MISSING");
   if (!process.env.NEXTAUTH_URL) console.error("[Auth-Diagnostic] ❌ NEXTAUTH_URL is MISSING");
-  if (!process.env.GOOGLE_CLIENT_ID) console.error("[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING");
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    console.warn("[Auth-Diagnostic] ⚠️ GOOGLE_CLIENT_ID is missing. Google login will be disabled.");
+  }
   
   if (!process.env.FACEBOOK_CLIENT_ID) {
     console.warn("[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.");
