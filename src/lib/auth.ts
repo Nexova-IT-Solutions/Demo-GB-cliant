@@ -32,26 +32,34 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
-      profile(profile) {
-        console.log("[Auth-Debug] Facebook Profile Response Received:", profile.id);
-        return {
-          id: profile.id,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture.data.url,
-          role: "USER" as any,
-        };
-      },
-    }),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
+    ...(process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET
+      ? [
+          FacebookProvider({
+            clientId: process.env.FACEBOOK_CLIENT_ID,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
+            profile(profile) {
+              console.log("[Auth-Debug] Facebook Profile Response Received:", profile.id);
+              return {
+                id: profile.id,
+                name: profile.name,
+                email: profile.email,
+                image: profile.picture.data.url,
+                role: "USER" as any,
+              };
+            },
+          }),
+        ]
+      : []),
     ...(process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET ? [{
       id: "tiktok",
       name: "TikTok",
