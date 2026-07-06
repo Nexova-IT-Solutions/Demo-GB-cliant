@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 function extractStoragePathFromPublicUrl(publicUrl: string, bucket: string): string | null {
   try {
@@ -18,6 +18,10 @@ function extractStoragePathFromPublicUrl(publicUrl: string, bucket: string): str
 }
 
 export async function deleteFileByPublicUrl(publicUrl: string, bucket = "giftbox"): Promise<void> {
+  if (!supabase) {
+    console.warn("[Supabase] Client not initialized. Skipping file deletion.");
+    return;
+  }
   const existingPath = extractStoragePathFromPublicUrl(publicUrl, bucket);
   if (!existingPath) return;
 
@@ -38,6 +42,10 @@ export async function uploadFile(
   options?: { replacePublicUrl?: string; bucket?: string }
 ): Promise<string> {
   if (typeof file === "string") return file;
+  if (!supabase) {
+    console.error("[Supabase] Attempted file upload, but Supabase is not configured.");
+    throw new Error("Supabase is not configured. File upload is unavailable.");
+  }
   
   const bucket = options?.bucket || "giftbox"; // Using a single bucket 'giftbox' to keep things simple
   if (options?.replacePublicUrl) {
