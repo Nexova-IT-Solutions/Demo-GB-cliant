@@ -22,16 +22,16 @@ const geistMono = Geist_Mono({
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export const metadata: Metadata = {
-  title: "Giftbox.lk - Premium Gift Boxes & Custom Gifting in Sri Lanka",
-  description: "Discover the perfect gift at Giftbox.lk. Shop curated gift boxes, build your own custom gift, and send love across Sri Lanka. Birthday gifts, anniversary gifts, and special occasions made memorable.",
-  keywords: ["gift boxes Sri Lanka", "custom gifts", "birthday gifts", "anniversary gifts", "gift delivery Sri Lanka", "Giftbox.lk"],
-  authors: [{ name: "Giftbox.lk" }],
+  title: "Sohar Pets Center - Premium Pet Supplies & Care in Sohar",
+  description: "Discover premium pet products and services at Sohar Pets Center. High-quality pet food, accessories, toys, and care items for your beloved pets in Sohar.",
+  keywords: ["pet supplies Sohar", "pet shop Sohar", "dog food", "cat food", "pet accessories", "Sohar Pets Center"],
+  authors: [{ name: "Sohar Pets Center" }],
   icons: {
     icon: "/logo/logo.png",
   },
   openGraph: {
-    title: "Giftbox.lk - Premium Gift Boxes & Custom Gifting",
-    description: "Curated gift boxes and custom gifting for every occasion in Sri Lanka",
+    title: "Sohar Pets Center - Premium Pet Supplies & Care",
+    description: "Premium pet products and services for every pet in Sohar",
     type: "website",
     locale: "en_LK",
   },

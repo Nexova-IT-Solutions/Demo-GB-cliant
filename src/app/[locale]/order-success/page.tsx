@@ -88,9 +88,9 @@ export default function OrderSuccessPage() {
                 <Phone className="w-4 h-4" />
                 +94 123 456 789
               </a>
-              <a href="mailto:hello@giftbox.lk" className="flex items-center gap-2 text-[#A7066A] hover:underline">
+              <a href="mailto:hello@soharpets.com" className="flex items-center gap-2 text-[#A7066A] hover:underline">
                 <Mail className="w-4 h-4" />
-                hello@giftbox.lk
+                hello@soharpets.com
               </a>
             </div>
           </div>

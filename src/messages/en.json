@@ -129,7 +129,7 @@
     "errorCode": "Error Code",
     "status": "Status",
     "suspendedStatus": "SUSPENDED",
-    "appealSupport": "Please contact GiftBox Lanka support for appeal or clarification."
+    "appealSupport": "Please contact Sohar Pets Center support for appeal or clarification."
   },
   "Reviews": {
     "title": "Customer Reviews",
@@ -262,7 +262,7 @@
     "validForMonths": "VALID FOR 12 MONTHS",
     "instantDelivery": "Instant Delivery",
     "useAnywhere": "Use Anywhere",
-    "perfectGiftDesc": "Send the perfect gift instantly. Our digital gift cards are the ultimate way to share a GiftBox experience with friends and family.",
+    "perfectGiftDesc": "Send the perfect gift instantly. Our digital gift cards are the ultimate way to share a Sohar Pets Center experience with friends and family.",
     "noDenominations": "No gift card denominations available at the moment.",
     "quantity": "Quantity",
     "addToCart": "Add to Cart",
@@ -271,7 +271,7 @@
   },
   "SignIn": {
     "title": "Sign In",
-    "subtitle": "Welcome back to Giftbox.lk",
+    "subtitle": "Welcome back to Sohar Pets Center",
     "googleLabel": "Continue with Google",
     "tiktokLabel": "Continue with TikTok",
     "facebookLabel": "Continue with Facebook",
@@ -288,11 +288,11 @@
     "errorDescription": "Invalid credentials. Please try again."
   },
   "SignUp": {
-    "joinTitle": "Join Giftbox Lanka",
+    "joinTitle": "Join Sohar Pets Center",
     "joinHeader": "Create an account for faster checkout, saved preferences, and order updates.",
     "joinDesc": "Your account helps us personalize gifting recommendations, keep delivery details ready, and make repeat purchases easier.",
     "title": "Create Account",
-    "subtitle": "Join Giftbox.lk today",
+    "subtitle": "Join Sohar Pets Center today",
     "googleLabel": "Continue with Google",
     "tiktokLabel": "Continue with TikTok",
     "facebookLabel": "Continue with Facebook",
@@ -304,7 +304,7 @@
     "passwordPlaceholder": "Create a password",
     "confirmPasswordLabel": "Confirm Password",
     "confirmPasswordPlaceholder": "Re-enter your password",
-    "marketingConsent": "I consent to Giftbox Lanka processing my personal data in order to send personalized marketing material in accordance with the consent form and the privacy policy.",
+    "marketingConsent": "I consent to Sohar Pets Center processing my personal data in order to send personalized marketing material in accordance with the consent form and the privacy policy.",
     "privacyConsent": "By clicking 'create account', I consent to the privacy policy.",
     "createAccountButton": "Create Account",
     "creatingAccountButton": "Creating account...",
@@ -492,7 +492,7 @@
     "company": "Company",
     "getInTouch": "Get in Touch",
     "colomboSriLanka": "Colombo, Sri Lanka",
-    "allRightsReserved": "© {year} Giftbox.lk. All rights reserved.",
+    "allRightsReserved": "© {year} Sohar Pets Center. All rights reserved.",
     "builtWithLove": "Built with Love in Sri Lanka",
     "aboutUs": "About Us",
     "contactUs": "Contact Us",
@@ -516,8 +516,8 @@
   },
   "Contact": {
     "title": "Contact Us",
-    "metaTitle": "Contact Us | Giftbox Lanka",
-    "metaDescription": "Get in touch with Giftbox Lanka for any inquiries or assistance.",
+    "metaTitle": "Contact Us | Sohar Pets Center",
+    "metaDescription": "Get in touch with Sohar Pets Center for any inquiries or assistance.",
     "getInTouch": "Get in Touch",
     "heading": "Contact",
     "home": "Home",
@@ -527,7 +527,7 @@
     "websiteLabel": "Website",
     "hoursLabel": "Operating Hours",
     "hoursValue": "Mon - Sat: 8:00 AM to 8:00 PM / Sunday: Closed",
-    "companyName": "Gift Box Lanka (PVT) Ltd,",
+    "companyName": "Sohar Pets Center,",
     "addressLine1": "No 287/3/15, Pioneer Drive, Lake Road,",
     "addressLine2": "Malabe 10115",
     "needHelp": "Need Our Help! Please Send an Email.",

@@ -570,7 +570,7 @@ export async function DELETE(
           where: { id },
           data: {
             name: "Deleted User",
-            email: `deleted-user-${id}@giftbox.lk`,
+            email: `deleted-user-${id}@soharpets.com`,
             emailVerified: null,
             image: null,
             password: null,

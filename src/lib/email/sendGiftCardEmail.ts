@@ -5,7 +5,7 @@ const smtpPort = Number(process.env.SMTP_PORT || 465);
 const smtpSecure = (process.env.SMTP_SECURE || "true") === "true";
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
-const fromEmail = process.env.MAIL_FROM || smtpUser || "no-reply@giftbox.lk";
+const fromEmail = process.env.MAIL_FROM || smtpUser || "no-reply@soharpets.com";
 
 /**
  * Sends a gift card email using Nodemailer (SMTP).
@@ -39,7 +39,7 @@ export async function sendGiftCardEmail(giftCard: any) {
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eee;">
         <!-- Header -->
         <div style="background-color: #A7066A; padding: 30px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">GiftBox Lanka</h1>
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Sohar Pets Center</h1>
         </div>
         
         <!-- Content -->
@@ -48,7 +48,7 @@ export async function sendGiftCardEmail(giftCard: any) {
           
           <p style="font-size: 16px; color: #555;">
             Someone special has sent you a gift! 
-            ${senderName ? `<strong>${senderName}</strong> has sent you a GiftBox Lanka e-gift card.` : 'You have received a GiftBox Lanka e-gift card.'}
+            ${senderName ? `<strong>${senderName}</strong> has sent you a Sohar Pets Center e-gift card.` : 'You have received a Sohar Pets Center e-gift card.'}
           </p>
 
           ${personalMessage ? `
@@ -69,12 +69,12 @@ export async function sendGiftCardEmail(giftCard: any) {
 
           <p style="font-size: 15px; color: #666; text-align: center; margin-top: 30px;">
             <strong>How to redeem:</strong><br>
-            Enter this code at checkout on <a href="https://giftbox.lk" style="color: #A7066A; text-decoration: none; font-weight: 600;">giftbox.lk</a> to redeem your gift.
+            Enter this code at checkout on <a href="https://soharpets.com" style="color: #A7066A; text-decoration: none; font-weight: 600;">soharpets.com</a> to redeem your gift.
           </p>
           
           <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #eee; font-size: 13px; color: #999; text-align: center;">
             <p>This gift card expires on: <strong>${expiryDate}</strong></p>
-            <p style="margin-top: 10px;">&copy; ${new Date().getFullYear()} GiftBox Lanka. All rights reserved.</p>
+            <p style="margin-top: 10px;">&copy; ${new Date().getFullYear()} Sohar Pets Center. All rights reserved.</p>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export async function sendGiftCardEmail(giftCard: any) {
     });
 
     const info = await transporter.sendMail({
-      from: `GiftBox Lanka <${fromEmail}>`,
+      from: `Sohar Pets Center <${fromEmail}>`,
       to: recipientEmail,
       subject: `You received a LKR ${initialValue.toLocaleString()} Gift Card!`,
       html: html,

@@ -681,8 +681,8 @@ export function AppSidebar() {
       {/* Header */}
       <div className="h-16 flex items-center justify-center border-b border-brand-border px-4 shrink-0">
         <Link href={`/${isLocale ? localePrefix : "en"}`} className="flex items-center gap-2 font-bold text-xl text-[#A7066A] overflow-hidden truncate">
-          <Image src="/logo/logo.png" alt="Giftbox.lk" width={28} height={28} className="h-7 w-7 shrink-0 object-contain" priority />
-          <span className="truncate">Giftbox.lk Admin</span>
+          <Image src="/logo/logo.png" alt="Sohar Pets Center" width={28} height={28} className="h-7 w-7 shrink-0 object-contain" priority />
+          <span className="truncate">Sohar Pets Center Admin</span>
         </Link>
       </div>
 

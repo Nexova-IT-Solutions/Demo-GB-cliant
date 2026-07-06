@@ -26,7 +26,7 @@ export function Footer() {
             <Link href="/" className="inline-block mb-6 transition-opacity hover:opacity-90">
               <Image 
                 src="/logo/logo.png" 
-                alt="Giftbox.lk Logo" 
+                alt="Sohar Pets Center Logo" 
                 width={126}
                 height={36}
                 className="object-contain"
@@ -76,11 +76,11 @@ export function Footer() {
                 </div>
                 <span>+94 123 456 789</span>
               </a>
-              <a href="mailto:hello@giftbox.lk" className="group flex items-center gap-4 text-sm text-[#B8A4B0] hover:text-white transition-colors">
+              <a href="mailto:hello@soharpets.com" className="group flex items-center gap-4 text-sm text-[#B8A4B0] hover:text-white transition-colors">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
                   <Mail className="w-4 h-4" />
                 </div>
-                <span>hello@giftbox.lk</span>
+                <span>hello@soharpets.com</span>
               </a>
               <div className="group flex items-start gap-4 text-sm text-[#B8A4B0]">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">

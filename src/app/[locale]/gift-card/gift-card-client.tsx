@@ -74,7 +74,7 @@ export function GiftCardClient({ denominations }: GiftCardClientProps) {
               <div className="flex justify-between items-start z-10">
                 <div className="flex flex-col">
                   <span className="text-white/60 text-[10px] uppercase tracking-[0.2em] font-bold">{t("officialGiftCard")}</span>
-                  <span className="text-white font-black text-xl tracking-tight">GIFTBOX.LK</span>
+                  <span className="text-white font-black text-xl tracking-tight">SOHAR PETS CENTER</span>
                 </div>
                 <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl">
                   <Gift className="w-6 h-6 text-white" />

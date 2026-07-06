@@ -48,7 +48,7 @@ export function GiftCardTemplate({ voucher, index, totalCount, isCopied, onCopy 
                 <Sparkles className="w-3 h-3 text-white/60 animate-pulse" />
                 <span className="text-white/60 text-[9px] uppercase tracking-[0.3em] font-black">Official Digital Asset</span>
               </div>
-              <span className="text-white font-black text-2xl tracking-tighter">GIFTBOX.LK</span>
+              <span className="text-white font-black text-2xl tracking-tighter">SOHAR PETS CENTER</span>
             </div>
             <div className="bg-white/20 backdrop-blur-xl p-3 rounded-2xl ring-1 ring-white/30 shadow-lg">
               <Gift className="w-6 h-6 text-white" />
