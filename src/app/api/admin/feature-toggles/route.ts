@@ -5,11 +5,6 @@ import { db } from "@/lib/db";
 import { getFeatureToggles } from "@/lib/queries/feature-toggles";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.role === "USER") {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-  }
 
   try {
     const toggles = await getFeatureToggles();

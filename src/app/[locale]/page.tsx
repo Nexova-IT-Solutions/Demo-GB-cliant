@@ -15,6 +15,8 @@ import { Suspense } from "react";
 import { Prisma } from "@prisma/client";
 import { shuffleArray } from "@/lib/utils";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { isFeatureEnabled } from "@/lib/queries/feature-toggles";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -171,6 +173,11 @@ function mapDbProductToCardProduct(product: HomeProductRecord) {
 }
 
 export default async function HomePage() {
+  const isWebsiteEnabled = await isFeatureEnabled("storefront_website_enabled");
+  if (!isWebsiteEnabled) {
+    redirect("/sign-in");
+  }
+
   const t = await getTranslations("HomePage");
   const session = await getServerSession(authOptions);
   const storeConfig = await getStoreConfig();

@@ -30,6 +30,10 @@ import { useCartStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslations } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 type CatData = { id: string; name: string; slug: string; image?: string; children?: CatData[] };
 
@@ -61,6 +65,21 @@ const navigation = [
 
 export function Header() {
   const t = useTranslations("Navigation");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
+
+  useEffect(() => {
+    if (toggles && toggles.storefront_website_enabled === false) {
+      const isAuthPage = pathname.includes("/sign-in") || pathname.includes("/sign-up") || pathname.includes("/auth");
+      if (!isAuthPage) {
+        router.push("/sign-in");
+      }
+    }
+  }, [toggles, pathname, router]);
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -173,10 +192,11 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
-            <Link href="/" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
-              {t("home")}
-            </Link>
+          {isWebsiteEnabled && (
+            <nav className="hidden lg:flex items-center gap-1">
+              <Link href="/" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
+                {t("home")}
+              </Link>
 
             {/* Categories Dropdown */}
             <div 
@@ -242,15 +262,16 @@ export function Header() {
               {t("contact")}
             </Link>
 
-            {/* Build Your Box */}
-            <Link
-              href="/box-builder"
-              className="flex items-center gap-2 ml-1 px-4 py-2 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] text-white rounded-full hover:shadow-lg transition-all text-sm font-medium"
-            >
-              <Sparkles className="w-4 h-4" />
-              {t("boxBuilder")}
-            </Link>
-          </nav>
+              {/* Build Your Box */}
+              <Link
+                href="/box-builder"
+                className="flex items-center gap-2 ml-1 px-4 py-2 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] text-white rounded-full hover:shadow-lg transition-all text-sm font-medium"
+              >
+                <Sparkles className="w-4 h-4" />
+                {t("boxBuilder")}
+              </Link>
+            </nav>
+          )}
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
@@ -334,9 +355,11 @@ export function Header() {
                   <Link href="/sign-in" className="px-4 py-2 text-[#1F1720] hover:text-[#A7066A] font-medium text-sm transition-colors">
                     {t("signIn")}
                   </Link>
-                  <Link href="/sign-up" className="px-4 py-2 bg-[#1F1720] text-white hover:bg-[#A7066A] rounded-full font-medium text-sm transition-colors">
-                    {t("signUp")}
-                  </Link>
+                  {isWebsiteEnabled && (
+                    <Link href="/sign-up" className="px-4 py-2 bg-[#1F1720] text-white hover:bg-[#A7066A] rounded-full font-medium text-sm transition-colors">
+                      {t("signUp")}
+                    </Link>
+                  )}
                 </>
               )}
             </div>
@@ -346,57 +369,63 @@ export function Header() {
             </div>
 
             {/* Search Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden h-10 w-10 sm:flex items-center justify-center hover:bg-[#FCEAF4]"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            >
-              <Search className="w-5 h-5 text-[#6B5A64]" />
-            </Button>
+            {isWebsiteEnabled && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden h-10 w-10 sm:flex items-center justify-center hover:bg-[#FCEAF4]"
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+              >
+                <Search className="w-5 h-5 text-[#6B5A64]" />
+              </Button>
+            )}
 
             {/* Cart Button */}
-            <Button
-              variant="ghost"
-              className="relative h-10 rounded-full border border-brand-border/60 bg-[#F7F7FA] px-3 hover:bg-[#FCEAF4]"
-              onClick={openCart}
-            >
-              <div className="flex items-center gap-2">
-                <div className="relative flex items-center justify-center">
-                  <ShoppingCart className="w-5 h-5 text-[#6B5A64]" />
-                {mounted && displayItemCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-[#A7066A] text-white text-xs">
-                      {displayItemCount}
-                    </Badge>
-                  )}
-                </div>
+            {isWebsiteEnabled && (
+              <Button
+                variant="ghost"
+                className="relative h-10 rounded-full border border-brand-border/60 bg-[#F7F7FA] px-3 hover:bg-[#FCEAF4]"
+                onClick={openCart}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="relative flex items-center justify-center">
+                    <ShoppingCart className="w-5 h-5 text-[#6B5A64]" />
+                  {mounted && displayItemCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-[#A7066A] text-white text-xs">
+                        {displayItemCount}
+                      </Badge>
+                    )}
+                  </div>
 
-                <span className="whitespace-nowrap text-sm font-medium leading-none text-[#A7066A]">
-                  {mounted ? formattedCartTotal : "LKR 0"}
-                </span>
-              </div>
-            </Button>
+                  <span className="whitespace-nowrap text-sm font-medium leading-none text-[#A7066A]">
+                    {mounted ? formattedCartTotal : "LKR 0"}
+                  </span>
+                </div>
+              </Button>
+            )}
 
             {/* Mobile Menu */}
-            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} modal={false}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-hidden={isMobileMenuOpen}
-                  className={cn(
-                    "lg:hidden hover:bg-[#FCEAF4] transition-opacity duration-200",
-                    isMobileMenuOpen && "opacity-0 pointer-events-none"
-                  )}
-                >
-                  <Menu className="w-5 h-5 text-[#6B5A64]" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80 p-0">
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <MobileNav onClose={() => setIsMobileMenuOpen(false)} />
-              </SheetContent>
-            </Sheet>
+            {isWebsiteEnabled && (
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} modal={false}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-hidden={isMobileMenuOpen}
+                    className={cn(
+                      "lg:hidden hover:bg-[#FCEAF4] transition-opacity duration-200",
+                      isMobileMenuOpen && "opacity-0 pointer-events-none"
+                    )}
+                  >
+                    <Menu className="w-5 h-5 text-[#6B5A64]" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80 p-0">
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                  <MobileNav onClose={() => setIsMobileMenuOpen(false)} />
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
         </div>
 

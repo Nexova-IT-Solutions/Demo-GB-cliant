@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header, Footer, SectionHeading, CartDrawer } from "@/components/giftbox";
 import { Link } from "@/i18n/navigation";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,6 +14,9 @@ import { useToast } from "@/hooks/use-toast";
 import { SocialLoginButton } from "@/components/SocialLoginButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function getSignUpSchema(t: (key: string) => string) {
   return z
@@ -38,6 +41,14 @@ export default function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  
+  useEffect(() => {
+    if (toggles && toggles.storefront_website_enabled === false) {
+      router.push("/sign-in");
+    }
+  }, [toggles, router]);
 
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [name, setName] = useState("");

@@ -179,6 +179,7 @@ async function main() {
   console.log("Seeded Sri Lankan provinces and cities successfully.")
 
   const featureToggleKeys = [
+    'storefront_website_enabled',
     'storefront_section',
     'storefront_banners',
     'storefront_occasions',

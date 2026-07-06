@@ -11,12 +11,18 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { useToast } from "@/hooks/use-toast";
 import { SocialLoginButton } from "@/components/SocialLoginButton";
 import { useTranslations } from "next-intl";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function SignInPage() {
   const t = useTranslations("SignIn");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,20 +66,22 @@ export default function SignInPage() {
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-brand-border">
           <SectionHeading title={t("title")} subtitle={t("subtitle")} />
           
-          <div className="mt-8 space-y-3">
-            <SocialLoginButton provider="google" label={t("googleLabel")} callbackUrl={callbackUrl} />
-            <SocialLoginButton provider="tiktok" label={t("tiktokLabel")} callbackUrl={callbackUrl} />
-            <SocialLoginButton provider="facebook" label={t("facebookLabel")} callbackUrl={callbackUrl} />
-            
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-brand-border"></span>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-[#6B5A64]">{t("orContinueEmail")}</span>
+          {isWebsiteEnabled && (
+            <div className="mt-8 space-y-3">
+              <SocialLoginButton provider="google" label={t("googleLabel")} callbackUrl={callbackUrl} />
+              <SocialLoginButton provider="tiktok" label={t("tiktokLabel")} callbackUrl={callbackUrl} />
+              <SocialLoginButton provider="facebook" label={t("facebookLabel")} callbackUrl={callbackUrl} />
+              
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-brand-border"></span>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-[#6B5A64]">{t("orContinueEmail")}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <form className="mt-4 space-y-6" onSubmit={onSubmit}>
             <div className="space-y-4">
@@ -114,14 +122,16 @@ export default function SignInPage() {
             </Button>
           </form>
 
-          <div className="text-center pt-4">
-            <p className="text-sm text-[#6B5A64]">
-              {t("dontHaveAccount")}{" "}
-              <Link href="/sign-up" className="font-medium text-[#A7066A] hover:text-[#E91E8C]">
-                {t("signUpLink")}
-              </Link>
-            </p>
-          </div>
+          {isWebsiteEnabled && (
+            <div className="text-center pt-4">
+              <p className="text-sm text-[#6B5A64]">
+                {t("dontHaveAccount")}{" "}
+                <Link href="/sign-up" className="font-medium text-[#A7066A] hover:text-[#E91E8C]">
+                  {t("signUpLink")}
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

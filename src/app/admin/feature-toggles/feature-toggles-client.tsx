@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw } from "lucide-react";
+import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe } from "lucide-react";
 
 interface FeatureTogglesClientProps {
   initialToggles: Record<string, boolean>;
@@ -121,6 +121,29 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
           </div>
         </div>
       </div>
+
+      {/* Global Settings */}
+      <Card className="border-brand-border shadow-sm overflow-hidden bg-white">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
+                <Globe className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-bold text-[#1F1720]">Enabled StoreFront Website</CardTitle>
+                <CardDescription className="text-xs">
+                  When disabled, the public storefront is closed and users are redirected to a simplified email/password login.
+                </CardDescription>
+              </div>
+            </div>
+            <Switch
+              checked={localToggles.storefront_website_enabled !== false}
+              onCheckedChange={(checked) => handleToggleChange("storefront_website_enabled", checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Storefront Group */}
