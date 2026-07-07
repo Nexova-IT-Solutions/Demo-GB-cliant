@@ -86,6 +86,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
         select: {
           id: true,
           productId: true,
+          sku: true,
           productName: true,
           productImage: true,
           quantity: true,
