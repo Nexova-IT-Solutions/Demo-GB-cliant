@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { X, Plus, Minus, ShoppingBag, Sparkles, Tag, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { CartItem } from "@/types";
 
 interface CartItemRowProps {
@@ -163,7 +164,7 @@ function CartItemRow({
                 {hasDiscount && savedAmount > 0 && (
                   <p className="text-[9px] font-bold text-green-600 bg-green-50 px-1 rounded mt-0.5 leading-none">
                     {tCommon("save", {
-                      amount: `LKR ${Math.round(savedAmount).toLocaleString()}`,
+                      amount: formatPrice(savedAmount),
                     })}
                   </p>
                 )}
@@ -329,17 +330,13 @@ export function CartDrawer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCartOpen, items.length]);
 
-  const formatPrice = (price: number) =>
-    `LKR ${price.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+  const { formatPrice } = useCurrency();
 
   const getItemName = (item: (typeof items)[0]) => {
     if (item.type === "product") return item.product?.name ?? "Product";
     if (item.type === "giftbox") return item.giftBox?.name ?? "Gift Box";
     if (item.type === "giftcard")
-      return `Digital Gift Card – LKR ${item.virtualGiftCard?.initialValue.toLocaleString()}`;
+      return `Digital Gift Card – ${formatPrice(item.virtualGiftCard?.initialValue || 0)}`;
     return "Custom Gift Box";
   };
 

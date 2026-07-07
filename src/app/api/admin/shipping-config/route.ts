@@ -71,12 +71,23 @@ export async function PATCH(request: NextRequest) {
       expressDeliveryFee: body.expressDeliveryFee,
       isDeliveryEnabled: body.isDeliveryEnabled,
       deliveryNote: body.deliveryNote,
+      currency: body.currency,
     });
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { success: true, data: updatedConfig },
       { status: 200 }
     );
+
+    if (body.currency) {
+      response.cookies.set("store_currency", body.currency, {
+        path: "/",
+        maxAge: 31536000,
+        sameSite: "lax",
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error("[shipping-config] PATCH error:", error);
     return NextResponse.json(

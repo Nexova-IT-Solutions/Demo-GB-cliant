@@ -6,6 +6,7 @@ import { useBoxBuilderStore } from "@/store/boxBuilder";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface ProductCardProps {
   product: Product;
@@ -20,7 +21,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   } = useBoxBuilderStore();
 
   const quantity = getItemQuantity(product.id);
-  const formatPrice = (p: number) => `LKR ${p.toLocaleString()}`;
+  const { formatPrice } = useCurrency();
 
   return (
     <Card className="group relative h-full flex flex-col border-brand-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">

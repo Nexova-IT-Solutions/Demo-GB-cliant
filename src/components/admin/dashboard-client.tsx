@@ -12,6 +12,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { 
   DollarSign, 
   TrendingUp, 
@@ -107,13 +108,8 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
     }
   };
 
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("en-LK", {
-      style: "currency",
-      currency: "LKR",
-      minimumFractionDigits: 2,
-    }).format(val);
-  };
+  const { formatPrice, symbol } = useCurrency();
+  const formatCurrency = (val: number) => formatPrice(val);
 
   // Generate chart data based on dynamic daily order counts
   const chartData = Array.from({ length: 7 }).map((_, i) => {
@@ -551,7 +547,7 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
                     </div>
                     <div>
                       <p className="font-semibold text-xs text-slate-800">Order #1042 Paid</p>
-                      <p className="text-[10px] text-muted-foreground">LKR 4,200 via DirectPay • 5m ago</p>
+                      <p className="text-[10px] text-muted-foreground">{symbol}4,200 via DirectPay • 5m ago</p>
                     </div>
                   </div>
                   <div className="flex gap-3 items-start text-sm">

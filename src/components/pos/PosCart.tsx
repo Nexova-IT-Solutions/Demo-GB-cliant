@@ -14,6 +14,7 @@ import {
   X,
   ScanBarcode,
 } from "lucide-react";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -56,8 +57,7 @@ export function PosCart() {
     ? Math.max(0, subtotal - appliedVoucher.deduction)
     : subtotal;
 
-  const formatPrice = (price: number) =>
-    `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
+  const { formatPrice } = useCurrency();
 
   // ─── Apply voucher ─────────────────────────────────────────
   const handleApplyVoucher = async () => {

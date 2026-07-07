@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle } from "lucide-react";
+import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle, Coins } from "lucide-react";
 
 interface FeatureTogglesClientProps {
   initialToggles: Record<string, boolean>;
@@ -32,6 +32,16 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
   const [localToggles, setLocalToggles] = React.useState<Record<string, boolean>>(initialToggles);
   const [isSaving, setIsSaving] = React.useState(false);
 
+  // SWR fetch for shipping config / currency
+  const { data: configData, mutate: mutateConfig } = useSWR("/api/shipping-config", fetcher);
+  const [currency, setCurrency] = React.useState("LKR");
+
+  React.useEffect(() => {
+    if (configData?.success && configData?.data?.currency) {
+      setCurrency(configData.data.currency);
+    }
+  }, [configData]);
+
   // Sync SWR data with local form state when loaded
   React.useEffect(() => {
     if (toggles) {
@@ -49,6 +59,7 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // 1. Save feature toggles
       const response = await fetch("/api/admin/feature-toggles", {
         method: "POST",
         headers: {
@@ -62,13 +73,28 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
         throw new Error(data.message || "Failed to save feature toggles");
       }
 
+      // 2. Save currency configuration
+      const configRes = await fetch("/api/admin/shipping-config", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ currency }),
+      });
+
+      if (!configRes.ok) {
+        const configErr = await configRes.json().catch(() => ({}));
+        throw new Error(configErr.message || "Failed to save currency configuration");
+      }
+
       toast({
-        title: "Toggles Updated",
-        description: "System features have been updated and synced successfully.",
+        title: "Configuration Saved",
+        description: "Feature toggles and currency settings updated and synced successfully.",
       });
 
       // Mutate SWR keys globally to update the sidebar in real time
       await mutate("/api/admin/feature-toggles");
+      await mutateConfig();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -181,6 +207,29 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
               checked={localToggles.whatsapp_enabled !== false}
               onCheckedChange={(checked) => handleToggleChange("whatsapp_enabled", checked)}
             />
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-brand-border/60">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
+                <Coins className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-bold text-[#1F1720]">System Currency</CardTitle>
+                <CardDescription className="text-xs">
+                  Set the dynamic base currency formatting across the entire application storefront, POS, and admin.
+                </CardDescription>
+              </div>
+            </div>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="h-10 px-3 border border-brand-border rounded-xl bg-white text-[#1F1720] text-sm focus:outline-none focus:border-[#A7066A] shadow-sm font-semibold"
+            >
+              <option value="LKR">LKR (Rs.)</option>
+              <option value="USD">USD ($)</option>
+              <option value="OMR">OMR (Oman Rial)</option>
+            </select>
           </div>
         </CardContent>
       </Card>

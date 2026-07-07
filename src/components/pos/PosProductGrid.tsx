@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { VariantSelectorModal } from "@/components/products/VariantSelectorModal";
 import { parseProductVariants } from "@/types/variant";
 import type { VariantProductPayload, VariantSelection } from "@/types/variant";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface ProductItem {
   id: string;
@@ -236,9 +237,7 @@ export function PosProductGrid() {
     setVariantProduct(null);
   };
 
-  const formatPrice = (price: number) => {
-    return `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
-  };
+  const { formatPrice } = useCurrency();
 
   return (
     <div className="flex flex-col h-full">

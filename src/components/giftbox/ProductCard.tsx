@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { isGiftBoxEffectivelyOutOfStock } from "@/lib/gift-box-stock";
 import { VariantSelectorModal } from "@/components/products/VariantSelectorModal";
 import { type VariantSelection, type VariantProductPayload, parseProductVariants } from "@/types/variant";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface ProductCardProps {
   product: Product;
@@ -143,9 +144,7 @@ function ProductCardComponent({
     image: product.images?.[0],
   } : null;
 
-  const formatPrice = (price: number) => {
-    return `LKR ${price.toLocaleString()}`;
-  };
+  const { formatPrice } = useCurrency();
 
   const fallbackImage = "https://kvglredjnqdqqbmmhivi.supabase.co/storage/v1/object/public/giftbox/products/placeholder.jpg";
   const coverImage = product.images?.[0] || fallbackImage;

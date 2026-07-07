@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 export interface BYOBProductWithVariants {
   id: string;
@@ -58,7 +59,7 @@ export function ProductVariationDialog({
     }
   };
 
-  const formatPrice = (p: number) => `LKR ${p.toLocaleString()}`;
+  const { formatPrice } = useCurrency();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>

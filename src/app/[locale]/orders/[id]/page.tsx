@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { getCurrencyServer, formatPriceServer } from "@/lib/currency";
 
 interface OrderDetailsPageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -106,7 +107,8 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
       redirect(`/${locale}`);
     }
 
-    const formatPrice = (price: number) => `LKR ${price.toLocaleString()}`;
+    const currency = await getCurrencyServer();
+    const formatPrice = (price: number) => formatPriceServer(price, currency);
     const formatDate = (date: Date) => new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",

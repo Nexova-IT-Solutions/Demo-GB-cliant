@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/store";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 type PremiumBoxCardProps = {
   id: string;
@@ -26,6 +27,7 @@ export function PremiumBoxCard({
   inStock,
 }: PremiumBoxCardProps) {
   const { addItem, openCart } = useCartStore();
+  const { formatPrice } = useCurrency();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -95,7 +97,7 @@ export function PremiumBoxCard({
 
         <div className="flex items-center justify-between mt-auto pt-3 gap-2 w-full">
           <span className="text-sm sm:text-lg font-bold text-[#A7066A]">
-            LKR {price.toLocaleString()}
+            {formatPrice(price)}
           </span>
           {inStock ? (
             <Button

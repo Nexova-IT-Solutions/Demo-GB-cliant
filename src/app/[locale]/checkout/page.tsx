@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -516,12 +517,12 @@ export default function CheckoutPage() {
     ? Math.ceil(shippingConfig.freeDeliveryThreshold - subtotal)
     : null;
 
-  const formatPrice = (price: number) => `LKR ${price.toLocaleString()}`;
+  const { formatPrice } = useCurrency();
 
   const getItemName = (item: typeof items[0]) => {
     if (item.type === "product") return item.product?.name;
     if (item.type === "giftbox") return item.giftBox?.name;
-    if (item.type === "giftcard") return `Digital Gift Card - LKR ${item.virtualGiftCard?.initialValue.toLocaleString()}`;
+    if (item.type === "giftcard") return `Digital Gift Card - ${formatPrice(item.virtualGiftCard?.initialValue || 0)}`;
     return "Custom Gift Box";
   };
 

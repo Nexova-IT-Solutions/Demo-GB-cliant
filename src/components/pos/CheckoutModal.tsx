@@ -13,6 +13,7 @@ import {
   Banknote, CreditCard, Gift, Split, Loader2, CheckCircle2,
   Calculator, Receipt, ArrowRight, Plus, Trash2, Sparkles, ScanLine,
 } from "lucide-react";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { usePosCart } from "@/store/use-pos-cart";
 import type { SplitPaymentEntry, PosPaymentMethod, GiftCardActivation } from "@/types/pos";
 import { toast } from "sonner";
@@ -69,8 +70,7 @@ export function CheckoutModal() {
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const formatPrice = (price: number) =>
-    `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
+  const { formatPrice } = useCurrency();
 
   // ─── Gift Card Reason → Human Message ───────────────────────────────
   const reasonToMessage = (reason: string | undefined): string => {

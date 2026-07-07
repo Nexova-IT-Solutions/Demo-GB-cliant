@@ -420,6 +420,7 @@ model ShippingConfig {
   updatedAt              DateTime @updatedAt
   hideOutOfStockProducts Boolean  @default(false)
   hideEmptyCategories    Boolean  @default(false)
+  currency               String   @default("LKR")
 }
 
 model Province {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Gift, ReceiptText, WalletCards } from "lucide-react";
+import { getCurrencyServer, formatPriceServer } from "@/lib/currency";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -21,6 +22,8 @@ type PageProps = {
 export default async function ProfileOrderDetailsPage({ params }: PageProps) {
   const { locale, id } = await params;
   const session = await getServerSession(authOptions);
+  const currency = await getCurrencyServer();
+  const formatCurrency = (amount: number) => formatPriceServer(amount, currency);
 
   if (!session?.user?.id) {
     redirect(`/${locale}/sign-in`);

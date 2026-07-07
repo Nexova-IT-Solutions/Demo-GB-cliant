@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { usePosCart } from "@/store/use-pos-cart";
 import { LKR_DENOMINATIONS } from "@/types/pos";
+import { useCurrency } from "@/components/CurrencyProvider";
 import type { DenominationCount } from "@/types/pos";
 import { toast } from "sonner";
 
@@ -311,9 +312,7 @@ export function ShiftModal() {
     }
   };
 
-  const formatPrice = (price: number) => {
-    return `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
-  };
+  const { formatPrice } = useCurrency();
 
   const cashVarianceVal = useMemo(() => {
     if (!activeShift) return 0;

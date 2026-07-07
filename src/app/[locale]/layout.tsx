@@ -44,6 +44,8 @@ import WhatsAppFAB from "@/components/WhatsAppFAB";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import TopLoaderProvider from "@/components/TopLoaderProvider";
 
+import { getCurrencyServer } from "@/lib/currency";
+
 export default async function RootLayout({
   children,
   params
@@ -59,6 +61,7 @@ export default async function RootLayout({
 
   const messages = await getMessages();
   const specialTouchProducts = await getCachedSpecialTouch();
+  const initialCurrency = await getCurrencyServer();
   return (
     <html lang={locale} className="h-full overflow-x-hidden" suppressHydrationWarning>
       <body
@@ -67,7 +70,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>
-            <Providers>
+            <Providers initialCurrency={initialCurrency}>
               <TopLoaderProvider />
               <CartHydration specialTouchProducts={specialTouchProducts} />
               <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
