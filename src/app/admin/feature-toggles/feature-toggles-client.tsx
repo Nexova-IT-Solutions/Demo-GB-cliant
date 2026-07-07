@@ -266,13 +266,13 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
                     className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 ${
                       !parentEnabled
                         ? "bg-slate-50 opacity-40 border-slate-200"
-                        : localToggles[feat.key]
+                        : localToggles[feat.key] !== false
                         ? "bg-[#FFF7FB] border-[#FCEAF4]"
                         : "bg-white border-brand-border"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${localToggles[feat.key] && parentEnabled ? "bg-[#FCEAF4] text-[#A7066A]" : "bg-slate-100 text-slate-500"}`}>
+                      <div className={`p-2 rounded-xl ${localToggles[feat.key] !== false && parentEnabled ? "bg-[#FCEAF4] text-[#A7066A]" : "bg-slate-100 text-slate-500"}`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
@@ -282,7 +282,7 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
                     </div>
                     <Switch
                       disabled={!parentEnabled}
-                      checked={parentEnabled && !!localToggles[feat.key]}
+                      checked={parentEnabled && localToggles[feat.key] !== false}
                       onCheckedChange={(checked) => handleToggleChange(feat.key, checked)}
                     />
                   </div>
@@ -322,13 +322,13 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
                     className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 ${
                       !parentEnabled
                         ? "bg-slate-50 opacity-40 border-slate-200"
-                        : localToggles[feat.key]
+                        : localToggles[feat.key] !== false
                         ? "bg-purple-50/30 border-purple-100"
                         : "bg-white border-brand-border"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${localToggles[feat.key] && parentEnabled ? "bg-purple-50 text-purple-700" : "bg-slate-100 text-slate-500"}`}>
+                      <div className={`p-2 rounded-xl ${localToggles[feat.key] !== false && parentEnabled ? "bg-purple-50 text-purple-700" : "bg-slate-100 text-slate-500"}`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
@@ -338,7 +338,7 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
                     </div>
                     <Switch
                       disabled={!parentEnabled}
-                      checked={parentEnabled && !!localToggles[feat.key]}
+                      checked={parentEnabled && localToggles[feat.key] !== false}
                       onCheckedChange={(checked) => handleToggleChange(feat.key, checked)}
                     />
                   </div>
