@@ -7,6 +7,9 @@ import { Eye, Loader2, MoreHorizontal, Search, SearchX, FilterX, PackageSearch, 
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { ReusablePagination } from "@/components/admin/reusable-pagination";
 import { ExcelExportUtility } from "@/utils/excel-export";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,6 +65,12 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
 
   const [localOrders, setLocalOrders] = useState(orders);
   useEffect(() => setLocalOrders(orders), [orders]);
+
+  const { data: toggles } = useSWR<Record<string, boolean>>(
+    "/api/admin/feature-toggles",
+    fetcher
+  );
+  const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
 
   const handleExportOrders = async () => {
     try {
@@ -401,7 +410,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
                       <TableCell className="py-4 px-6 font-semibold text-gray-900 text-sm">{formatCurrency(order.total)}</TableCell>
                       <TableCell className="py-4 px-6">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild disabled={validPaymentStatuses.length === 0 || Boolean(updating && updating.orderId === order.id)}>
+                          <DropdownMenuTrigger asChild disabled={!isWebsiteEnabled || validPaymentStatuses.length === 0 || Boolean(updating && updating.orderId === order.id)}>
                             <button
                               type="button"
                               className="inline-flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7066A]/30 disabled:cursor-not-allowed"
@@ -425,7 +434,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
                       </TableCell>
                       <TableCell className="py-4 px-6">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild disabled={validOrderStatuses.length === 0 || Boolean(updating && updating.orderId === order.id)}>
+                          <DropdownMenuTrigger asChild disabled={!isWebsiteEnabled || validOrderStatuses.length === 0 || Boolean(updating && updating.orderId === order.id)}>
                             <button
                               type="button"
                               className="inline-flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7066A]/30 disabled:cursor-not-allowed"

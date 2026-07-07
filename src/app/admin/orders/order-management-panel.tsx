@@ -19,6 +19,9 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
 import { formatOrderStatusLabel, ADMIN_ORDER_STATUS_OPTIONS, ADMIN_PAYMENT_STATUS_OPTIONS } from "@/lib/admin-orders";
 import { updateOrderAction, approveAndSendGiftCards } from "./[id]/actions";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 type OrderPanelProps = {
   order: {
@@ -56,6 +59,12 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
   const [isPending, startTransition] = React.useTransition();
   const [savingNotes, setSavingNotes] = React.useState(false);
   const [isCompleted, setIsCompleted] = React.useState(false);
+
+  const { data: toggles } = useSWR<Record<string, boolean>>(
+    "/api/admin/feature-toggles",
+    fetcher
+  );
+  const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
 
   const repeatCustomer = customerOrderCount > 1;
 
@@ -183,7 +192,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-[#6B5A64]">Order Status</label>
             <Select
-              disabled={isPending}
+              disabled={isPending || !isWebsiteEnabled}
               value={draftOrderStatus}
               onValueChange={(value) => setDraftOrderStatus(value)}
             >
@@ -205,7 +214,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-[#6B5A64]">Payment Status</label>
             <Select
-              disabled={isPending}
+              disabled={isPending || !isWebsiteEnabled}
               value={draftPaymentStatus}
               onValueChange={(value) => setDraftPaymentStatus(value)}
             >
@@ -246,7 +255,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
             <Button
               type="button"
               className="h-11 w-full rounded-xl bg-[#A7066A] font-bold text-white hover:bg-[#8A0558]"
-              disabled={isPending}
+              disabled={isPending || !isWebsiteEnabled}
               onClick={handleSaveStatusChanges}
             >
               {isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
