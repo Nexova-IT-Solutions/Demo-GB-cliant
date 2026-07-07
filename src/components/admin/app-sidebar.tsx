@@ -649,7 +649,7 @@ export function AppSidebar() {
       })
       .filter((item) => {
         // Special rule: POS_ADMIN should never see the Dashboard link
-        if (item.title === "Dashboard" && permissionContext?.role === "POS_ADMIN") {
+        if (item.title === "Dashboard" && permissionContext?.user?.role === "POS_ADMIN") {
           return false;
         }
 
