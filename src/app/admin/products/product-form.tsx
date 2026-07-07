@@ -394,7 +394,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const [optionsLoading, setOptionsLoading] = useState(!categories || !occasions || !recipients || !moods || !availableGiftItems || !discounts);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<"name" | "sku" | "price" | "stock" | "categoryId" | "moodIds" | "showInDiscountSection", string>>>({});
   const [isMounted, setIsMounted] = useState(false);
-  const isHydrated = useRef(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -459,7 +459,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     setSizes(product.sizes ?? []);
     setColors(product.colors ?? []);
     setVariants(parseVariants(product.productVariants));
-    isHydrated.current = true;
+    setIsHydrated(true);
     setSelectedGiftItems(
       (product.itemsInside ?? []).map((entry, index) => {
         // Fallback to full item details from options if price/stock are missing from the relation
@@ -603,7 +603,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
 
   useEffect(() => {
     // Prevent overwriting existing variants during initial load/hydration
-    if (isEdit && !isHydrated.current) return;
+    if (isEdit && !isHydrated) return;
 
     setVariants((prev) => {
       const nextVariants: VariantData[] = [];
