@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import useSWR from "swr";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +58,11 @@ interface DashboardClientProps {
   };
 }
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function AdminDashboardClient({ user, initialData }: DashboardClientProps) {
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const showActiveBoxes = toggles?.giftboxes_available !== false;
   // 1. Date Range States
   const now = new Date();
   const [startDate, setStartDate] = useState<string>(format(startOfMonth(now), "yyyy-MM-dd"));
@@ -156,7 +161,7 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
         {/* --- DYNAMIC SNAPSHOT GRID (3 COLUMNS) --- */}
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-[#1F1720]">Today's Snapshot</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 ${showActiveBoxes ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-6`}>
             
             {/* Total Revenue Card */}
             <Card className="rounded-xl border border-gray-100 bg-gradient-to-br from-emerald-50/40 to-white shadow-xs p-6 relative overflow-hidden group hover:shadow-sm transition-all duration-200">
@@ -180,25 +185,27 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
             </Card>
 
             {/* Active Boxes / Today's Profit Card */}
-            <Card className="rounded-xl border border-gray-100 bg-gradient-to-br from-indigo-50/40 to-white shadow-xs p-6 relative overflow-hidden group hover:shadow-sm transition-all duration-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Boxes</p>
-                  <h3 className="text-2xl font-bold text-[#1F1720] mt-1 tracking-tight">
-                    {formatCurrency(initialData.kpis.todayProfit)}
-                  </h3>
+            {showActiveBoxes && (
+              <Card className="rounded-xl border border-gray-100 bg-gradient-to-br from-indigo-50/40 to-white shadow-xs p-6 relative overflow-hidden group hover:shadow-sm transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Boxes</p>
+                    <h3 className="text-2xl font-bold text-[#1F1720] mt-1 tracking-tight">
+                      {formatCurrency(initialData.kpis.todayProfit)}
+                    </h3>
+                  </div>
+                  <div className="p-3 bg-indigo-100/60 rounded-xl text-indigo-700">
+                    <PackageOpen className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="p-3 bg-indigo-100/60 rounded-xl text-indigo-700">
-                  <PackageOpen className="w-5 h-5" />
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-semibold">Today's Profit</span>
+                  <Badge className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-none font-semibold text-[10px] px-2 py-0.5">
+                    Net Margins
+                  </Badge>
                 </div>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-semibold">Today's Profit</span>
-                <Badge className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-none font-semibold text-[10px] px-2 py-0.5">
-                  Net Margins
-                </Badge>
-              </div>
-            </Card>
+              </Card>
+            )}
 
             {/* Orders Card */}
             <Card className="rounded-xl border border-gray-100 bg-gradient-to-br from-amber-50/40 to-white shadow-xs p-6 relative overflow-hidden group hover:shadow-sm transition-all duration-200">
