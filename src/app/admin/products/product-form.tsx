@@ -1856,7 +1856,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                               type="number"
                               step="0.01"
                               className="h-9 border-brand-border focus:border-[#A7066A]"
-                              value={variant.price === 0 ? "" : variant.price}
+                              value={variant.price ?? ""}
                               onChange={(event) => {
                                 setVariants((prev) => {
                                   const edited = [...prev];
@@ -1871,7 +1871,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                               type="number"
                               step="1"
                               className="h-9 border-brand-border focus:border-[#A7066A]"
-                              value={variant.stock === 0 ? "" : variant.stock}
+                              value={variant.stock ?? ""}
                               onChange={(event) => {
                                 setVariants((prev) => {
                                   const edited = [...prev];
