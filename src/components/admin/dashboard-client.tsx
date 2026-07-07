@@ -64,6 +64,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function AdminDashboardClient({ user, initialData }: DashboardClientProps) {
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const showActiveBoxes = toggles?.giftboxes_available !== false;
+  const showShipping = toggles?.operations_section !== false && toggles?.operations_shipping !== false;
   // 1. Date Range States
   const now = new Date();
   const [startDate, setStartDate] = useState<string>(format(startOfMonth(now), "yyyy-MM-dd"));
@@ -525,10 +526,12 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
                   <Plus className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-slate-700">Add Product</span>
                 </a>
-                <a href="/admin/settings/shipping" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
-                  <Settings className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-slate-700">Shipping</span>
-                </a>
+                {showShipping && (
+                  <a href="/admin/settings/shipping" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
+                    <Settings className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-semibold text-slate-700">Shipping</span>
+                  </a>
+                )}
                 <a href="/admin/pos/shifts" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
                   <ShoppingCart className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-slate-700">POS Shifts</span>
