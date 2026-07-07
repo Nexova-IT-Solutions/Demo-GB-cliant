@@ -4,7 +4,7 @@ import { getStoreConfig } from "./store-config";
 export const CURRENCY_MAP = {
   LKR: { symbol: "LKR ", locale: "en-LK", decimals: 2 },
   USD: { symbol: "$", locale: "en-US", decimals: 2 },
-  OMR: { symbol: "OMR ", locale: "en-OM", decimals: 3 },
+  OMR: { symbol: "OMR ", locale: "en-OM", decimals: 2 },
 } as const;
 
 export type CurrencyCode = keyof typeof CURRENCY_MAP;
@@ -14,7 +14,10 @@ export function formatPriceServer(amount: number | string, currency: string = "L
   if (isNaN(numericAmount)) return "LKR 0.00";
   
   const config = CURRENCY_MAP[currency as CurrencyCode] || CURRENCY_MAP.LKR;
-  return `${config.symbol}${numericAmount.toLocaleString(config.locale, {
+  const factor = Math.pow(10, config.decimals);
+  const truncatedAmount = Math.trunc(numericAmount * factor) / factor;
+
+  return `${config.symbol}${truncatedAmount.toLocaleString(config.locale, {
     minimumFractionDigits: config.decimals,
     maximumFractionDigits: config.decimals,
   })}`;

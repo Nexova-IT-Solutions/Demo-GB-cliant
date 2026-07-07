@@ -6,7 +6,7 @@ import useSWR from "swr";
 const CURRENCY_MAP = {
   LKR: { symbol: "LKR ", locale: "en-LK", decimals: 2 },
   USD: { symbol: "$", locale: "en-US", decimals: 2 },
-  OMR: { symbol: "OMR ", locale: "en-OM", decimals: 3 },
+  OMR: { symbol: "OMR ", locale: "en-OM", decimals: 2 },
 } as const;
 
 type CurrencyCode = keyof typeof CURRENCY_MAP;
@@ -54,7 +54,11 @@ export function CurrencyProvider({
     const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
     if (isNaN(numericAmount)) return `${config.symbol}0.00`;
     
-    return `${config.symbol}${numericAmount.toLocaleString(config.locale, {
+    // No round ups: truncate to 2 decimals
+    const factor = Math.pow(10, config.decimals);
+    const truncatedAmount = Math.trunc(numericAmount * factor) / factor;
+    
+    return `${config.symbol}${truncatedAmount.toLocaleString(config.locale, {
       minimumFractionDigits: config.decimals,
       maximumFractionDigits: config.decimals,
     })}`;
