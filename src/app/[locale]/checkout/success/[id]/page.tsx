@@ -7,6 +7,7 @@ import { CheckCircle2, Package, Truck, Phone, Mail, Inbox, Building2, Info, Mess
 import { SuccessClient } from "./SuccessClient";
 import { OrderDetailActions } from "@/components/profile/orders/order-detail-actions";
 import { ResendGiftCardButton } from "./ResendGiftCardButton";
+import { isFeatureEnabled } from "@/lib/queries/feature-toggles";
 
 export default async function CheckoutSuccessPage({
   params,
@@ -14,6 +15,8 @@ export default async function CheckoutSuccessPage({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id: orderId } = await params;
+
+  const isWhatsappEnabled = await isFeatureEnabled("whatsapp_enabled");
 
   // Fetch order details to check for digital items
   const order = await db.order.findUnique({
@@ -163,30 +166,44 @@ export default async function CheckoutSuccessPage({
                   ))}
                 </div>
 
-                <div className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-green-50 border border-green-100">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shadow-sm">
-                    <MessageCircle className="w-6 h-6 text-green-600 fill-green-600/10" />
+                {isWhatsappEnabled ? (
+                  <div className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-green-50 border border-green-100 w-full">
+                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shadow-sm">
+                      <MessageCircle className="w-6 h-6 text-green-600 fill-green-600/10" />
+                    </div>
+                    <div className="text-center space-y-3">
+                      <div>
+                        <p className="text-xs font-bold text-green-800 uppercase tracking-widest">Verification Step</p>
+                        <p className="text-xs text-green-700 mt-1 font-medium">
+                          Once paid, please send your bank slip via WhatsApp to speed up fulfillment.
+                        </p>
+                      </div>
+                      <Button asChild className="bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-full px-8 h-11 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <a 
+                          href={`https://wa.me/94779911825?text=${encodeURIComponent(`Hello, here is my bank slip for Order ID: ${order.orderNumber || orderId}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          <MessageCircle className="w-5 h-5 fill-white text-white" />
+                          Send Slip via WhatsApp
+                        </a>
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-center space-y-3">
-                    <div>
-                      <p className="text-xs font-bold text-green-800 uppercase tracking-widest">Verification Step</p>
-                      <p className="text-xs text-green-700 mt-1 font-medium">
-                        Once paid, please send your bank slip via WhatsApp to speed up fulfillment.
+                ) : (
+                  <div className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 w-full">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center shadow-sm">
+                      <Landmark className="w-6 h-6 text-slate-600" />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="text-xs font-bold text-slate-800 uppercase tracking-widest">Order Processing</p>
+                      <p className="text-xs text-slate-600 mt-1 font-medium">
+                        Once paid, your order transfer will be verified and processed by our team.
                       </p>
                     </div>
-                    <Button asChild className="bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-full px-8 h-11 shadow-lg hover:shadow-xl transition-all duration-300">
-                      <a 
-                        href={`https://wa.me/94779911825?text=${encodeURIComponent(`Hello, here is my bank slip for Order ID: ${order.orderNumber || orderId}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <MessageCircle className="w-5 h-5 fill-white text-white" />
-                        Send Slip via WhatsApp
-                      </a>
-                    </Button>
                   </div>
-                </div>
+                )}
               </div>
             )}
             <h2 className="text-lg font-semibold text-[#1F1720]">What Happens Next?</h2>
@@ -203,7 +220,9 @@ export default async function CheckoutSuccessPage({
                       <div className="text-left">
                         <h3 className="font-bold text-[#1F1720] text-lg">Verification Pending</h3>
                         <p className="text-sm text-[#6B5A64] mt-1 leading-relaxed">
-                          Gift cards will be emailed once your bank transfer is verified. Please send your bank slip via WhatsApp to speed up the process.
+                          {isWhatsappEnabled 
+                            ? "Gift cards will be emailed once your bank transfer is verified. Please send your bank slip via WhatsApp to speed up the process."
+                            : "Gift cards will be emailed once your bank transfer is verified."}
                         </p>
                       </div>
                     </>

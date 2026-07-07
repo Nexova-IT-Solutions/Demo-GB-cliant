@@ -1,7 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function WhatsAppButton() {
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isWhatsappEnabled = toggles?.whatsapp_enabled !== false;
+
+  if (!isWhatsappEnabled) return null;
+
   return (
     <Link
       href="https://wa.me/94779911825"

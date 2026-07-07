@@ -5,12 +5,18 @@ import { MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function WhatsAppFAB() {
   const constraintsRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isWhatsappEnabled = toggles?.whatsapp_enabled !== false;
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -20,7 +26,7 @@ export default function WhatsAppFAB() {
   // Hide on admin routes
   const isAdminRoute = pathname?.split('/').some(part => part === 'admin');
 
-  if (!mounted || isAdminRoute) return null;
+  if (!mounted || isAdminRoute || !isWhatsappEnabled) return null;
 
   return (
     <>

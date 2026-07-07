@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe } from "lucide-react";
+import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle } from "lucide-react";
 
 interface FeatureTogglesClientProps {
   initialToggles: Record<string, boolean>;
@@ -162,6 +162,24 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
             <Switch
               checked={localToggles.giftboxes_available !== false}
               onCheckedChange={(checked) => handleToggleChange("giftboxes_available", checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-brand-border/60">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-green-50 text-green-700">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-bold text-[#1F1720]">WhatsApp Enabled</CardTitle>
+                <CardDescription className="text-xs">
+                  Disable this to hide WhatsApp floating action buttons and slip upload integrations.
+                </CardDescription>
+              </div>
+            </div>
+            <Switch
+              checked={localToggles.whatsapp_enabled !== false}
+              onCheckedChange={(checked) => handleToggleChange("whatsapp_enabled", checked)}
             />
           </div>
         </CardContent>
