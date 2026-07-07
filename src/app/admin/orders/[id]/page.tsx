@@ -334,7 +334,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                           </div>
                         </TableCell>
                         <TableCell className="text-[#6B5A64]">{item.quantity}</TableCell>
-                        <TableCell className="font-mono text-xs text-[#6B5A64]">{item.productId || "-"}</TableCell>
+                        <TableCell className="font-mono text-xs text-[#6B5A64]">{item.sku || "-"}</TableCell>
                         <TableCell className="text-[#6B5A64]">{formatCurrency(item.salePrice || item.unitPrice)}</TableCell>
                         <TableCell className="text-[#6B5A64]">
                           {item.discountName ? (
