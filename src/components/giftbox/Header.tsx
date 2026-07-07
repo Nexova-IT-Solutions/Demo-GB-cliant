@@ -184,8 +184,8 @@ export function Header() {
               <Image 
                 src="/logo/logo.png" 
                 alt="SPC Logo" 
-                width={84}
-                height={24}
+                width={113}
+                height={32}
                 className="object-contain"
                 priority
               />

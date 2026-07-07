@@ -681,7 +681,7 @@ export function AppSidebar() {
       {/* Header */}
       <div className="h-16 flex items-center justify-center border-b border-brand-border px-4 shrink-0">
         <Link href={`/${isLocale ? localePrefix : "en"}`} className="flex items-center gap-2 font-bold text-xl text-[#A7066A] overflow-hidden truncate">
-          <Image src="/logo/logo.png" alt="SPC" width={28} height={28} className="h-7 w-7 shrink-0 object-contain" priority />
+          <Image src="/logo/logo.png" alt="SPC" width={38} height={38} className="h-[38px] w-[38px] shrink-0 object-contain" priority />
           <span className="truncate">SPC Admin</span>
         </Link>
       </div>
