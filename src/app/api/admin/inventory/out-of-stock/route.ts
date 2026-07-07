@@ -9,7 +9,7 @@ async function authorize() {
   if (!session) return false;
 
   const role = session.user.role as string;
-  if (["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(role)) {
+  if (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(role)) {
     return true;
   }
 

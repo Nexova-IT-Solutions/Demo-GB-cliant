@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
 
 // Sri Lanka is UTC+5:30 (330 minutes ahead of UTC)
 const SL_OFFSET_MINUTES = 330;

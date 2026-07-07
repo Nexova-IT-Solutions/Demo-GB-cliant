@@ -15,7 +15,7 @@ export default async function SuppliersPage({
 
   if (
     !session ||
-    !["SUPER_ADMIN", "ADMIN"].includes(session.user.role as string)
+    !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role as string)
   ) {
     redirect("/");
   }

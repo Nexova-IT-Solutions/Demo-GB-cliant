@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role as string)) {
+    if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role as string)) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 
@@ -42,7 +42,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role as string)) {
+    if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role as string)) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 

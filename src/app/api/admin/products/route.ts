@@ -68,7 +68,7 @@ function revalidateHomePaths() {
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
+  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -178,7 +178,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
+  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

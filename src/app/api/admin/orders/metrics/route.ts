@@ -13,7 +13,7 @@ export async function GET() {
   }
 
   const role = session.user.role as string;
-  const hasFullAccess = ["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(role);
+  const hasFullAccess = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(role);
 
   if (!hasFullAccess) {
     if (!hasPermission(session, "pos.manage_orders")) {

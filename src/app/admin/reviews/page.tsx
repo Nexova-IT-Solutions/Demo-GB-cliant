@@ -13,7 +13,7 @@ export default async function AdminReviewsPage({
   const { locale } = await params;
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "PRODUCT_MANAGER")) {
+  if (!session?.user || ((session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN") && session.user.role !== "PRODUCT_MANAGER")) {
     redirect(`/${locale || "en"}/sign-in`);
   }
 

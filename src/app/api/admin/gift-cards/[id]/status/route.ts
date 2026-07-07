@@ -26,7 +26,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !["SUPER_ADMIN", "ADMIN"].includes(session.user.role as string)) {
+    if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role as string)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

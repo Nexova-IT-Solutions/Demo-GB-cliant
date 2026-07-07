@@ -7,7 +7,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 async function authorize() {
   const session = await getServerSession(authOptions);
   if (!session) return { error: "Unauthorized", status: 401 };
-  if (session.user.role !== "SUPER_ADMIN") return { error: "Forbidden", status: 403 };
+  if ((session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) return { error: "Forbidden", status: 403 };
   return { session };
 }
 

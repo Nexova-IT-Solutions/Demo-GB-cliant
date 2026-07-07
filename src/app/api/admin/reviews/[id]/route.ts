@@ -13,7 +13,7 @@ export async function PATCH(
     const { id } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !["SUPER_ADMIN", "PRODUCT_MANAGER"].includes(session.user.role)) {
+    if (!session?.user || !["SUPER_ADMIN", "DEV_ADMIN", "PRODUCT_MANAGER"].includes(session.user.role)) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 

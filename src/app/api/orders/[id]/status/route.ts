@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"];
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"];
 
 export async function PUT(
   request: Request,

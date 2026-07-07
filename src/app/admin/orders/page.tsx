@@ -15,7 +15,7 @@ type PageProps = {
 };
 
 /** Roles that can access orders without needing a specific privilege key */
-const ORDERS_FULL_ACCESS_ROLES = ["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"] as const;
+const ORDERS_FULL_ACCESS_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"] as const;
 
 /** Permission key that grants order access for restricted roles (e.g. POS_ADMIN) */
 const ORDERS_PERMISSION_KEY = "pos.manage_orders";

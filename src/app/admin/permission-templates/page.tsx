@@ -7,7 +7,7 @@ import { TemplatesClient } from "./templates-client";
 export default async function PermissionTemplatesPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SUPER_ADMIN") {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     redirect(`/admin`);
   }
 

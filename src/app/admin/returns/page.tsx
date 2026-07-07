@@ -6,7 +6,7 @@ import { hasPermission } from "@/lib/permissions";
 import { ReturnsTable } from "./returns-table";
 import { RefreshCcw } from "lucide-react";
 
-const RETURNS_FULL_ACCESS_ROLES = ["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"] as const;
+const RETURNS_FULL_ACCESS_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"] as const;
 const RETURNS_PERMISSION_KEY = "pos.manage_returns";
 
 export const dynamic = "force-dynamic";

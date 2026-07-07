@@ -11,7 +11,7 @@ async function authorize() {
   const session = await getServerSession(authOptions);
   if (
     !session ||
-    !["SUPER_ADMIN", "ADMIN"].includes(session.user.role as string)
+    !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role as string)
   ) {
     return false;
   }

@@ -305,7 +305,7 @@ export function AppSidebar() {
     fetcher
   )
 
-  const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN"
+  const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN" || permissionContext?.user?.role === "DEV_ADMIN"
   const isDevAdmin = permissionContext?.user?.role === "DEV_ADMIN"
 
   // Check if sections are enabled

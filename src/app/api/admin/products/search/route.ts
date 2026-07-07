@@ -30,7 +30,7 @@ type CountRow = { count: bigint };
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+  if (!session || !["ADMIN", "SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role as string)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

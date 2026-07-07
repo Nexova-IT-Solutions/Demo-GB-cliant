@@ -73,7 +73,7 @@ export interface Product {
   sizes?: string[];
   colors?: string[];
   productVariants?: any[];
-  isPremiumGiftBox: boolean;
+  isPremiumGiftBox?: boolean;
   isEGiftCard?: boolean;
   giftCardValue?: number;
   itemsInside?: Array<{

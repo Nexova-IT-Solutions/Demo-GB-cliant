@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { nanoid } from "nanoid";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
 
 /**
  * POST /api/admin/pos/gift-cards/bulk-register

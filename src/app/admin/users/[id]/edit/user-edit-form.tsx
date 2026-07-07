@@ -219,6 +219,7 @@ export function UserEditForm({ locale, user, templates }: UserEditFormProps) {
                   <option value="USER">USER</option>
                   <option value="ADMIN">ADMIN</option>
                   <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                  <option value="DEV_ADMIN">DEV_ADMIN</option>
                   <option value="POS_ADMIN">POS_ADMIN</option>
                   <option value="STOREFRONT_ADMIN">STOREFRONT_ADMIN</option>
                   <option value="CUSTOM_ROLE">CUSTOM_ROLE</option>

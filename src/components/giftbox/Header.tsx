@@ -320,7 +320,7 @@ export function Header() {
                         <p className="text-xs leading-none text-muted-foreground">
                           {session.user?.email}
                         </p>
-                        {session.user?.role === "SUPER_ADMIN" && (
+                        {(session.user?.role === "SUPER_ADMIN" || session.user?.role === "DEV_ADMIN") && (
                           <Badge className="mt-2 w-fit bg-[#A7066A] hover:bg-[#8A0558]">Super Admin</Badge>
                         )}
                       </div>
@@ -507,7 +507,7 @@ function MobileNav({ onClose, isGiftboxesAvailable }: { onClose: () => void; isG
                 <div className="min-w-0">
                   <p className="font-semibold text-[#1F1720] truncate">{session.user?.name || "User"}</p>
                   <p className="text-xs text-[#6B5A64] truncate">{session.user?.email}</p>
-                  {session.user?.role === "SUPER_ADMIN" && (
+                  {(session.user?.role === "SUPER_ADMIN" || session.user?.role === "DEV_ADMIN") && (
                     <Badge className="mt-1 bg-[#A7066A] text-[10px] h-4">Super Admin</Badge>
                   )}
                 </div>

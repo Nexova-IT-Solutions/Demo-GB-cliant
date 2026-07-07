@@ -14,7 +14,7 @@ export default async function OutOfStockPage() {
 
   if (
     !session ||
-    !["SUPER_ADMIN", "ADMIN"].includes(session.user.role as string)
+    !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role as string)
   ) {
     redirect("/");
   }

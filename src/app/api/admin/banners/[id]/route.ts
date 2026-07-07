@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "STOREFRONT_ADMIN", "ADMIN"] as const;
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"] as const;
 
 export async function PUT(req: Request, context: RouteContext) {
   try {

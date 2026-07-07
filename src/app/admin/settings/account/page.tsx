@@ -14,7 +14,7 @@ export default async function AdminAccountSettingsPage({
   const { locale } = await params
   const session = await getServerSession(authOptions)
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN")) {
+  if (!session || ((session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN") && session.user.role !== "ADMIN")) {
     redirect("/")
   }
 

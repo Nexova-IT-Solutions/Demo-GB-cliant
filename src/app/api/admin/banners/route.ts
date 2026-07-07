@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 const ALLOWED_BANNER_KEYS = ["promo_1", "promo_2"] as const;
-const ALLOWED_ROLES = ["SUPER_ADMIN", "STOREFRONT_ADMIN", "ADMIN"] as const;
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"] as const;
 
 export async function GET(req: Request) {
   try {

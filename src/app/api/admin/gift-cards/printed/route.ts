@@ -7,7 +7,7 @@ import crypto from "crypto";
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !["SUPER_ADMIN", "ADMIN", "POS_ADMIN"].includes(session.user.role as string)) {
+    if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN"].includes(session.user.role as string)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

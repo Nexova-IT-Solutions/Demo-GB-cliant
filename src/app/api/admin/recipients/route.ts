@@ -24,7 +24,7 @@ function slugify(value: string) {
 
 async function authorize() {
   const session = await getServerSession(authOptions);
-  return Boolean(session && ["SUPER_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string));
+  return Boolean(session && ["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string));
 }
 
 export async function GET(req: Request) {

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "POS_ADMIN"];
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN"];
 
 const createDenominationSchema = z.object({
   value: z.number().int().positive("Value must be a positive integer"),

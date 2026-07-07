@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 const ALLOWED_ROLES = [
-  "SUPER_ADMIN",
+  "SUPER_ADMIN", "DEV_ADMIN",
   "ADMIN",
   "POS_ADMIN",
   "STOREFRONT_ADMIN",

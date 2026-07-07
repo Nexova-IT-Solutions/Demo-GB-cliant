@@ -14,7 +14,7 @@ export async function PATCH(request: NextRequest, props: RouteProps) {
     const session = await getServerSession(authOptions);
     
     // Only ADMIN or SUPER_ADMIN can update stock
-    if (!session || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
+    if (!session || !["ADMIN", "SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role)) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 

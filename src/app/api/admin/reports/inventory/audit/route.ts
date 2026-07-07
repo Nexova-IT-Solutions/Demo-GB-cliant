@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
+const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
 
 /**
  * GET /api/admin/reports/inventory/audit

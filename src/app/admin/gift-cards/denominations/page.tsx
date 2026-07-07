@@ -7,7 +7,7 @@ import { DenominationsClient } from "./denominations-client";
 export default async function DenominationsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role as string)) {
+  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role as string)) {
     redirect("/");
   }
 
