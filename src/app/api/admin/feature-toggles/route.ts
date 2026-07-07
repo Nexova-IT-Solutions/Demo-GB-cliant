@@ -57,6 +57,13 @@ export async function POST(req: Request) {
         sameSite: "lax",
       });
     }
+    if (toggles.storefront_giftcards !== undefined) {
+      response.cookies.set("storefront_giftcards", toggles.storefront_giftcards ? "true" : "false", {
+        path: "/",
+        maxAge: 31536000,
+        sameSite: "lax",
+      });
+    }
 
     return response;
   } catch (error) {

@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Eye, Grid3X3, Layers, Package, Pencil, Search, TableProperties, Trash2, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProductFilters } from "./ProductFilters";
@@ -115,6 +116,7 @@ export function ProductsClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
 
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
@@ -310,15 +312,15 @@ export function ProductsClient({
                     {product.salePrice && product.salePrice < product.price ? (
                       <div className="flex flex-col">
                         <div className="text-sm font-bold text-red-600">
-                           LKR {product.salePrice.toLocaleString()}
+                           {formatPrice(product.salePrice)}
                         </div>
                         <div className="text-xs text-gray-400 line-through">
-                           LKR {product.price.toLocaleString()}
+                           {formatPrice(product.price)}
                         </div>
                       </div>
                     ) : (
                       <div className="text-sm font-bold text-[#A7066A]">
-                         LKR {product.price.toLocaleString()}
+                         {formatPrice(product.price)}
                       </div>
                     )}
                   </td>

@@ -71,6 +71,7 @@ export function Header() {
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
   const isGiftboxesAvailable = toggles?.giftboxes_available !== false;
+  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
 
   useEffect(() => {
     if (toggles && toggles.storefront_website_enabled === false) {
@@ -257,9 +258,11 @@ export function Header() {
               </Link>
             )}
             
-            <Link href="/gift-card" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
-              {t("giftCard")}
-            </Link>
+            {isGiftcardsEnabled && (
+              <Link href="/gift-card" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
+                {t("giftCard")}
+              </Link>
+            )}
             
             <Link href="/contact" prefetch={true} className="px-3 py-2 text-[#1F1720] hover:text-[#A7066A] transition-colors rounded-lg hover:bg-[#FCEAF4] font-medium text-sm">
               {t("contact")}
@@ -470,7 +473,9 @@ function MobileNav({ onClose, isGiftboxesAvailable }: { onClose: () => void; isG
           {isGiftboxesAvailable !== false && (
             <Link href="/categories?categories=gift-boxes" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("giftBoxes")}</Link>
           )}
-          <Link href="/gift-card" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("giftCard")}</Link>
+          {isGiftcardsEnabled && (
+            <Link href="/gift-card" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("giftCard")}</Link>
+          )}
           <Link href="/contact" prefetch={true} onClick={onClose} className="block px-4 py-3 text-[#1F1720] font-medium rounded-xl hover:bg-[#FCEAF4] transition-colors">{t("contact")}</Link>
         </div>
 

@@ -31,11 +31,13 @@ export async function getInitialFeatureToggles(): Promise<Record<string, boolean
     const cookieStore = await cookies();
     const storefrontWebsiteEnabled = cookieStore.get("storefront_website_enabled")?.value;
     const giftboxesAvailable = cookieStore.get("giftboxes_available")?.value;
+    const storefrontGiftcards = cookieStore.get("storefront_giftcards")?.value;
     
-    if (storefrontWebsiteEnabled !== undefined && giftboxesAvailable !== undefined) {
+    if (storefrontWebsiteEnabled !== undefined && giftboxesAvailable !== undefined && storefrontGiftcards !== undefined) {
       return {
         storefront_website_enabled: storefrontWebsiteEnabled !== "false",
         giftboxes_available: giftboxesAvailable !== "false",
+        storefront_giftcards: storefrontGiftcards !== "false",
       };
     }
   } catch (err) {

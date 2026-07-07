@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle, Coins } from "lucide-react";
+import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle, Coins, Split } from "lucide-react";
 
 interface FeatureTogglesClientProps {
   initialToggles: Record<string, boolean>;
@@ -127,6 +127,7 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
     { key: "operations_returns", label: "Returns", icon: ArrowRightLeft, desc: "Process order refunds and returns" },
     { key: "operations_suppliers", label: "Suppliers", icon: Building2, desc: "Manage distributor contacts & inventory history" },
     { key: "operations_shipping", label: "Shipping", icon: Truck, desc: "Configure carrier fees & delivery coverage" },
+    { key: "operations_split_payment", label: "Split Payment", icon: Split, desc: "Enable split billing/payment options in POS Checkout" },
   ];
 
   return (

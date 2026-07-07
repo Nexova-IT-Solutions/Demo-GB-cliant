@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCurrency } from "@/components/CurrencyProvider";
+import useSWR from "swr";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -518,6 +519,8 @@ export default function CheckoutPage() {
     : null;
 
   const { formatPrice } = useCurrency();
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
+  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
 
   const getItemName = (item: typeof items[0]) => {
     if (item.type === "product") return item.product?.name;
@@ -1795,11 +1798,13 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4">
-                    {/* Pass the full extraFees so setGiftCard computes the correct deduction
-                        even if delivery city hasn't been selected yet (deliveryFee = 0) */}
-                    <GiftCardInput extraFees={extraFees} />
-                  </div>
+                  {isGiftcardsEnabled && (
+                    <div className="mt-4">
+                      {/* Pass the full extraFees so setGiftCard computes the correct deduction
+                          even if delivery city hasn't been selected yet (deliveryFee = 0) */}
+                      <GiftCardInput extraFees={extraFees} />
+                    </div>
+                  )}
 
                   <Button
                     className="w-full mt-6 bg-gradient-to-r from-[#A7066A] to-[#E91E8C] hover:opacity-90"

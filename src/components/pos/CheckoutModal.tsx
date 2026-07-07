@@ -17,6 +17,7 @@ import { useCurrency } from "@/components/CurrencyProvider";
 import { usePosCart } from "@/store/use-pos-cart";
 import type { SplitPaymentEntry, PosPaymentMethod, GiftCardActivation } from "@/types/pos";
 import { toast } from "sonner";
+import useSWR from "swr";
 
 const QUICK_CASH_AMOUNTS = [500, 1000, 2000, 3000, 5000, 10000];
 
@@ -42,6 +43,10 @@ export function CheckoutModal() {
   const getSubtotal = usePosCart((s) => s.getSubtotal);
   const getTotal = usePosCart((s) => s.getTotal);
   const fetchActiveShift = usePosCart((s) => s.fetchActiveShift);
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
+  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
+  const isSplitEnabled = toggles?.operations_split_payment !== false;
 
   const [isValidatingGiftCard, setIsValidatingGiftCard] = useState(false);
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);
@@ -221,8 +226,8 @@ export function CheckoutModal() {
   const paymentMethods: { method: PosPaymentMethod; label: string; icon: any }[] = [
     { method: "POS_CASH", label: "Cash", icon: Banknote },
     { method: "POS_CARD", label: "Card", icon: CreditCard },
-    { method: "POS_GIFT_CARD", label: "Gift Card", icon: Gift },
-    { method: "POS_SPLIT", label: "Split", icon: Split },
+    ...(isGiftcardsEnabled ? [{ method: "POS_GIFT_CARD", label: "Gift Card", icon: Gift }] : []),
+    ...(isSplitEnabled ? [{ method: "POS_SPLIT", label: "Split", icon: Split }] : []),
   ];
 
   return (
@@ -472,7 +477,7 @@ export function CheckoutModal() {
                       </div>
 
                       {/* Partial payment warning + one-click switch to Split */}
-                      {giftCardBalance < total && (
+                      {giftCardBalance < total && isSplitEnabled && (
                         <div className="border-t border-emerald-200 pt-3 space-y-2">
                           <p className="text-[11px] text-amber-700 font-medium">
                             ⚠️ Card balance is Rs.{formatPrice(total - payment.giftCardDeduction)} short of the total.
@@ -531,7 +536,7 @@ export function CheckoutModal() {
                         <option value="POS_CASH">Cash</option>
                         <option value="CREDIT_CARD">Credit Card</option>
                         <option value="DEBIT_CARD">Debit Card</option>
-                        <option value="POS_GIFT_CARD">Gift Card</option>
+                        {isGiftcardsEnabled && <option value="POS_GIFT_CARD">Gift Card</option>}
                       </select>
                       <Input type="number" min={0} step={0.01}
                         value={entry.amount || ""}

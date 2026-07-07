@@ -1,10 +1,16 @@
 import { Header, Footer, SectionHeading, CartDrawer } from "@/components/giftbox";
 import { GiftCardClient } from "./gift-card-client";
-import { db } from "@/lib/db";
+import { getInitialFeatureToggles } from "@/lib/queries/feature-toggles";
+import { redirect } from "next/navigation";
 
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function GiftCardPage() {
+  const toggles = await getInitialFeatureToggles();
+  if (toggles.storefront_giftcards === false) {
+    redirect("/");
+  }
+
   const denominations = await db.giftCardDenomination.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
