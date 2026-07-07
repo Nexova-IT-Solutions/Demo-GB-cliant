@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { startOfDay, startOfMonth, endOfDay } from "date-fns";
+import { startOfDay, startOfMonth, endOfDay, subDays } from "date-fns";
 
 export async function getAdminDashboardStats() {
   const now = new Date();
@@ -137,6 +137,29 @@ export async function getAdminDashboardStats() {
     take: 5,
   });
 
+  // 8. Weekly Order Counts (actual daily counts for the last 7 days)
+  const sevenDaysAgo = startOfDay(subDays(now, 6));
+  const recentOrdersList = await db.order.findMany({
+    where: {
+      createdAt: {
+        gte: sevenDaysAgo,
+      },
+    },
+    select: {
+      createdAt: true,
+    },
+  });
+
+  const weeklyOrderVolume = Array.from({ length: 7 }).map((_, i) => {
+    const d = subDays(now, 6 - i);
+    const dayStart = startOfDay(d);
+    const dayEnd = endOfDay(d);
+    return recentOrdersList.filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= dayStart && orderDate <= dayEnd;
+    }).length;
+  });
+
   return {
     kpis: {
       todaySales: todaySales._sum.total ?? 0,
@@ -151,5 +174,6 @@ export async function getAdminDashboardStats() {
     })),
     unratedProducts,
     outOfStockProducts,
+    weeklyOrderVolume,
   };
 }

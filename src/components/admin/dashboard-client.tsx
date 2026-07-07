@@ -55,6 +55,7 @@ interface DashboardClientProps {
     }>;
     unratedProducts: any[];
     outOfStockProducts: any[];
+    weeklyOrderVolume?: number[];
   };
 }
 
@@ -120,10 +121,9 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
   const chartData = Array.from({ length: 7 }).map((_, i) => {
     const d = subDays(now, 6 - i);
     const dayName = format(d, "EEE");
-    const isToday = i === 6;
     return {
       name: dayName,
-      orders: isToday ? initialData.kpis.dailyOrderCount : Math.floor(Math.random() * 12) + 4
+      orders: initialData.weeklyOrderVolume?.[i] ?? 0
     };
   });
 
