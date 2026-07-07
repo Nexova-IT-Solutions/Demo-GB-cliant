@@ -185,6 +185,9 @@ export function PosProductGrid() {
         colors,
         productVariants: parsedVariants,
         image: product.image,
+        discountName: product.discountName,
+        discountValue: product.discountValue,
+        discountType: product.discountType,
       });
       setVariantModalOpen(true);
       return;
@@ -222,9 +225,9 @@ export function PosProductGrid() {
       salePrice: variantProduct.salePrice ?? null,
       stock: selection.stock,
       image: variantProduct.image ?? null,
-      discountName: null,
-      discountValue: null,
-      discountType: null,
+      discountName: variantProduct.discountName,
+      discountValue: variantProduct.discountValue,
+      discountType: variantProduct.discountType,
       isEGiftCard: false,
       giftCardValue: null,
     });

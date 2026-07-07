@@ -29,6 +29,9 @@ export interface VariantProductPayload {
   colors: string[];
   productVariants: ProductVariantData[];
   image?: string | null;
+  discountName?: string | null;
+  discountValue?: number | null;
+  discountType?: string | null;
 }
 
 /**
