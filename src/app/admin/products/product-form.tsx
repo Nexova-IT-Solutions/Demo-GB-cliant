@@ -2026,10 +2026,10 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                     <Label className="text-xs font-bold text-[#6B5A64] uppercase tracking-wider">Apply Promotion/Discount (Optional)</Label>
                     <select
                       className="w-full h-12 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
-                      value={discountId}
+                      value={selectedDiscountId}
                       onChange={(event) => {
                         const val = event.target.value;
-                        setDiscountId(val);
+                        setSelectedDiscountId(val);
                         setWatchedValue("discountId", val || null);
                       }}
                     >
