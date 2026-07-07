@@ -37,6 +37,7 @@ export const metadata: Metadata = {
 };
 
 import { getCurrencyServer } from "@/lib/currency";
+import { getInitialFeatureToggles } from "@/lib/queries/feature-toggles";
 
 export default async function AdminLayout({
   children,
@@ -52,6 +53,7 @@ export default async function AdminLayout({
   // Load English translations for the admin panel by default
   const messages = await getMessages({ locale: 'en' });
   const initialCurrency = await getCurrencyServer();
+  const initialToggles = await getInitialFeatureToggles();
 
   return (
     <html lang="en" className="h-full overflow-hidden" suppressHydrationWarning>
@@ -61,7 +63,7 @@ export default async function AdminLayout({
       >
         <NextIntlClientProvider messages={messages} locale="en">
           <NuqsAdapter>
-            <Providers initialCurrency={initialCurrency}>
+            <Providers initialCurrency={initialCurrency} initialToggles={initialToggles}>
               <TopLoaderProvider />
               <SidebarProvider>
                 <AdminLayoutShell sidebar={<AppSidebar />}>

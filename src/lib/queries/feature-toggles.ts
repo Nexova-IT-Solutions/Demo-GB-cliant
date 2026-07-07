@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { cookies } from "next/headers";
 
 export async function isFeatureEnabled(key: string): Promise<boolean> {
   try {
@@ -23,4 +24,23 @@ export async function getFeatureToggles(): Promise<Record<string, boolean>> {
     console.error("Failed to fetch feature toggles:", error);
     return {};
   }
+}
+
+export async function getInitialFeatureToggles(): Promise<Record<string, boolean>> {
+  try {
+    const cookieStore = await cookies();
+    const storefrontWebsiteEnabled = cookieStore.get("storefront_website_enabled")?.value;
+    const giftboxesAvailable = cookieStore.get("giftboxes_available")?.value;
+    
+    if (storefrontWebsiteEnabled !== undefined && giftboxesAvailable !== undefined) {
+      return {
+        storefront_website_enabled: storefrontWebsiteEnabled !== "false",
+        giftboxes_available: giftboxesAvailable !== "false",
+      };
+    }
+  } catch (err) {
+    // cookies() might fail if not in dynamic context
+  }
+  
+  return getFeatureToggles();
 }

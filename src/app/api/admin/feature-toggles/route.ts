@@ -40,7 +40,25 @@ export async function POST(req: Request) {
 
     await db.$transaction(updates);
 
-    return NextResponse.json({ message: "Feature toggles updated successfully" });
+    const response = NextResponse.json({ message: "Feature toggles updated successfully" });
+
+    // Set cookies for critical toggles to prevent hydration/layout flash
+    if (toggles.storefront_website_enabled !== undefined) {
+      response.cookies.set("storefront_website_enabled", toggles.storefront_website_enabled ? "true" : "false", {
+        path: "/",
+        maxAge: 31536000,
+        sameSite: "lax",
+      });
+    }
+    if (toggles.giftboxes_available !== undefined) {
+      response.cookies.set("giftboxes_available", toggles.giftboxes_available ? "true" : "false", {
+        path: "/",
+        maxAge: 31536000,
+        sameSite: "lax",
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error("Failed to update feature toggles API:", error);
     return NextResponse.json({ message: "Internal Error" }, { status: 500 });

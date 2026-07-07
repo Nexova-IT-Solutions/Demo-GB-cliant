@@ -45,6 +45,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import TopLoaderProvider from "@/components/TopLoaderProvider";
 
 import { getCurrencyServer } from "@/lib/currency";
+import { getInitialFeatureToggles } from "@/lib/queries/feature-toggles";
 
 export default async function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   const specialTouchProducts = await getCachedSpecialTouch();
   const initialCurrency = await getCurrencyServer();
+  const initialToggles = await getInitialFeatureToggles();
   return (
     <html lang={locale} className="h-full overflow-x-hidden" suppressHydrationWarning>
       <body
@@ -70,7 +72,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>
-            <Providers initialCurrency={initialCurrency}>
+            <Providers initialCurrency={initialCurrency} initialToggles={initialToggles}>
               <TopLoaderProvider />
               <CartHydration specialTouchProducts={specialTouchProducts} />
               <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
