@@ -249,11 +249,13 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.templateId = (user as any).templateId;
         token.image = user.image;
+      }
 
+      if (token?.id) {
         // Fetch direct custom permissions and permission template dynamically
         try {
           const dbUser = await db.user.findUnique({
-            where: { id: user.id },
+            where: { id: token.id as string },
             select: {
               email: true,
               role: true,
@@ -271,6 +273,8 @@ export const authOptions: NextAuthOptions = {
           if (dbUser) {
             if (dbUser.email === "devadmin@mail.com") {
               token.role = "DEV_ADMIN";
+            } else {
+              token.role = dbUser.role;
             }
             // First load template-level permissions if available
             if (dbUser.template?.permissions && typeof dbUser.template.permissions === "object") {
@@ -288,7 +292,9 @@ export const authOptions: NextAuthOptions = {
           token.customPermissions = mergedPermissions;
         } catch (error) {
           console.error("[Auth-JWT] Failed to load granular permissions:", error);
-          token.customPermissions = {};
+          if (!token.customPermissions) {
+            token.customPermissions = {};
+          }
         }
       }
       return token;
