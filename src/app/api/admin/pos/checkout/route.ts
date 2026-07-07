@@ -611,10 +611,10 @@ export async function POST(req: NextRequest) {
           });
           
           if (variant) {
-            if (variant.variantId || variant.id) {
-              resolvedSku = variant.variantId || variant.id;
-            } else if (variant.sku) {
+            if (variant.sku) {
               resolvedSku = variant.sku;
+            } else if (variant.variantId || variant.id) {
+              resolvedSku = variant.variantId || variant.id;
             }
             
             variantDetails = {
