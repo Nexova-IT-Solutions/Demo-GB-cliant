@@ -57,7 +57,7 @@ const overviewItems: NavItem[] = [
     title: "Dashboard",
     url: "/admin",
     icon: LayoutGrid,
-    requiredPermission: "reports.sales_summary",
+    requiredPermission: "",
   },
 ]
 
