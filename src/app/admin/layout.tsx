@@ -29,8 +29,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - Sohar Pets Center",
-  description: "Sohar Pets Center Admin Panel",
+  title: "Admin Dashboard - SPC",
+  description: "SPC Admin Panel",
   icons: {
     icon: "/logo/logo.png",
   },

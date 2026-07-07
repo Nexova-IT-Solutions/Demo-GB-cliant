@@ -183,7 +183,7 @@ export function Header() {
             <div className="relative group-hover:scale-105 transition-transform flex items-center">
               <Image 
                 src="/logo/logo.png" 
-                alt="Sohar Pets Center Logo" 
+                alt="SPC Logo" 
                 width={84}
                 height={24}
                 className="object-contain"

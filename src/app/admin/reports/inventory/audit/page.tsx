@@ -221,7 +221,7 @@ export default function StockAuditReportPage() {
       {/* Print-Only Sheet Header */}
       <div className="hidden print-header mb-6">
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-          Sohar Pets Center — Physical Inventory Audit
+          SPC — Physical Inventory Audit
         </h1>
         <p className="text-xs text-slate-500 mt-1">
           Generated on: {new Date().toLocaleString()} | Filter: Category ({selectedCategory}), Supplier ({selectedSupplier})

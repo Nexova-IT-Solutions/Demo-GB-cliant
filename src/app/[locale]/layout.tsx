@@ -22,15 +22,15 @@ const geistMono = Geist_Mono({
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export const metadata: Metadata = {
-  title: "Sohar Pets Center - Premium Pet Supplies & Care in Sohar",
-  description: "Discover premium pet products and services at Sohar Pets Center. High-quality pet food, accessories, toys, and care items for your beloved pets in Sohar.",
-  keywords: ["pet supplies Sohar", "pet shop Sohar", "dog food", "cat food", "pet accessories", "Sohar Pets Center"],
-  authors: [{ name: "Sohar Pets Center" }],
+  title: "SPC - Premium Pet Supplies & Care in Sohar",
+  description: "Discover premium pet products and services at SPC. High-quality pet food, accessories, toys, and care items for your beloved pets in Sohar.",
+  keywords: ["pet supplies Sohar", "pet shop Sohar", "dog food", "cat food", "pet accessories", "SPC"],
+  authors: [{ name: "SPC" }],
   icons: {
     icon: "/logo/logo.png",
   },
   openGraph: {
-    title: "Sohar Pets Center - Premium Pet Supplies & Care",
+    title: "SPC - Premium Pet Supplies & Care",
     description: "Premium pet products and services for every pet in Sohar",
     type: "website",
     locale: "en_LK",

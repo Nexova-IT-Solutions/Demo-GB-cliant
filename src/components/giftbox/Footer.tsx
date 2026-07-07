@@ -26,7 +26,7 @@ export function Footer() {
             <Link href="/" className="inline-block mb-6 transition-opacity hover:opacity-90">
               <Image 
                 src="/logo/logo.png" 
-                alt="Sohar Pets Center Logo" 
+                alt="SPC Logo" 
                 width={126}
                 height={36}
                 className="object-contain"

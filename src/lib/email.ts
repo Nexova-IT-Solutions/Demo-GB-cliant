@@ -19,13 +19,13 @@ function buildResetTemplate(resetUrl: string) {
     <table role="presentation" style="max-width:600px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid #f0e6ed;">
       <tr>
         <td style="background:#A7066A; color:#ffffff; padding:20px 24px; font-size:22px; font-weight:700;">
-          Sohar Pets Center Password Reset
+          SPC Password Reset
         </td>
       </tr>
       <tr>
         <td style="padding:24px; color:#1F1720; line-height:1.6; font-size:15px;">
           <p style="margin:0 0 12px 0;">Hello,</p>
-          <p style="margin:0 0 16px 0;">We received a request to reset your Sohar Pets Center account password. Click the button below to continue.</p>
+          <p style="margin:0 0 16px 0;">We received a request to reset your SPC account password. Click the button below to continue.</p>
           <p style="margin:24px 0;">
             <a href="${resetUrl}" style="display:inline-block; background:#A7066A; color:#ffffff; text-decoration:none; padding:12px 20px; border-radius:999px; font-weight:600;">Reset Password</a>
           </p>
@@ -51,9 +51,9 @@ export async function sendPasswordResetEmail(params: { to: string; resetUrl: str
   });
 
   await transporter.sendMail({
-    from: `Sohar Pets Center <${fromEmail}>`,
+    from: `SPC <${fromEmail}>`,
     to: params.to,
-    subject: "Reset your Sohar Pets Center password",
+    subject: "Reset your SPC password",
     html: buildResetTemplate(params.resetUrl),
   });
 }
