@@ -201,24 +201,31 @@ export async function POST(req: NextRequest) {
         // Separate variant validation logic if requested
         // If variantIdSuffix exists OR we have explicit color/size
         if ((variantIdSuffix || item.color || item.size) && Array.isArray(product.productVariants)) {
-          const variant = (product.productVariants as any[]).find(v => {
+          const variants = product.productVariants as any[];
+          const variant = variants.find((v, idx) => {
+            // Reconstruct the same fallback variantId generated client-side in parseProductVariants
+            const size = typeof v.size === 'string' ? v.size : '';
+            const color = typeof v.color === 'string' ? v.color : '';
+            const generatedId = v.variantId || `v-${size || 'default'}-${color || 'default'}-${idx}`;
+
             // First try strict ID match if we have a suffix
             if (variantIdSuffix) {
-              if (v.variantId === variantIdSuffix || v.id === variantIdSuffix || item.productId.includes(v.variantId) || item.productId.includes(v.id)) {
-                return true;
-              }
-              if (v.sku && (variantIdSuffix === v.sku || variantIdSuffix.includes(v.sku))) {
-                return true;
-              }
-              if (v.color && variantIdSuffix.toLowerCase().includes(v.color.split('|')[0].toLowerCase().trim())) {
-                return true;
-              }
+              // Match against stored variantId, generated fallback id, or raw v.id
+              if (generatedId === variantIdSuffix || v.id === variantIdSuffix) return true;
+              // Match by productId containing the variantId
+              if (v.variantId && item.productId.includes(v.variantId)) return true;
+              if (v.id && item.productId.includes(v.id)) return true;
+              // Match by SKU
+              if (v.sku && (variantIdSuffix === v.sku || variantIdSuffix.includes(v.sku))) return true;
+              // Match if suffix contains the color name
+              if (v.color && variantIdSuffix.toLowerCase().includes(v.color.split('|')[0].toLowerCase().trim())) return true;
+              // Match if suffix contains the size name
+              if (v.size && variantIdSuffix.toLowerCase().includes(v.size.toLowerCase().trim())) return true;
             }
             
-            // If no ID match, fallback to the requested case-insensitive matching
+            // Fallback: match by color+size if explicitly provided
             const dbColor = v.color?.split('|')[0]?.toLowerCase().trim();
             const reqColor = item.color?.toLowerCase().trim();
-            
             const dbSize = v.size?.toLowerCase().trim();
             const reqSize = item.size?.toLowerCase().trim();
 
@@ -233,7 +240,11 @@ export async function POST(req: NextRequest) {
               reqColor: item.color, 
               reqSize: item.size, 
               variantIdSuffix,
-              available: product.productVariants 
+              available: (product.productVariants as any[]).map((v: any, i: number) => ({
+                stored: v.variantId,
+                generated: v.variantId || `v-${v.size || 'default'}-${v.color || 'default'}-${i}`,
+                size: v.size, color: v.color, sku: v.sku
+              }))
             });
             throw new Error(`Variant not found for product: ${product.name}`);
           }
@@ -278,16 +289,19 @@ export async function POST(req: NextRequest) {
         if (variantIdSuffix || item.color || item.size) {
           const product = productDataMap.get(item.productId);
           if (product && Array.isArray(product.productVariants)) {
-            const updatedVariants = product.productVariants.map((v: any) => {
+            const updatedVariants = product.productVariants.map((v: any, idx: number) => {
+              const size = typeof v.size === 'string' ? v.size : '';
+              const color = typeof v.color === 'string' ? v.color : '';
+              const generatedId = v.variantId || `v-${size || 'default'}-${color || 'default'}-${idx}`;
+
               let isMatch = false;
               if (variantIdSuffix) {
-                isMatch = v.variantId === variantIdSuffix || v.id === variantIdSuffix || item.productId.includes(v.variantId) || item.productId.includes(v.id);
-                if (!isMatch && v.sku && (variantIdSuffix === v.sku || variantIdSuffix.includes(v.sku))) {
-                  isMatch = true;
-                }
-                if (!isMatch && v.color && variantIdSuffix.toLowerCase().includes(v.color.split('|')[0].toLowerCase().trim())) {
-                  isMatch = true;
-                }
+                isMatch = generatedId === variantIdSuffix || v.id === variantIdSuffix;
+                if (!isMatch && v.variantId && item.productId.includes(v.variantId)) isMatch = true;
+                if (!isMatch && v.id && item.productId.includes(v.id)) isMatch = true;
+                if (!isMatch && v.sku && (variantIdSuffix === v.sku || variantIdSuffix.includes(v.sku))) isMatch = true;
+                if (!isMatch && v.color && variantIdSuffix.toLowerCase().includes(v.color.split('|')[0].toLowerCase().trim())) isMatch = true;
+                if (!isMatch && v.size && variantIdSuffix.toLowerCase().includes(v.size.toLowerCase().trim())) isMatch = true;
               }
               if (!isMatch && (item.color || item.size)) {
                 const dbColor = v.color?.split('|')[0]?.toLowerCase().trim();
@@ -571,11 +585,19 @@ export async function POST(req: NextRequest) {
         let variantDetails: any = null;
         
         if ((variantIdSuffix || item.color || item.size) && Array.isArray(productData?.productVariants)) {
-          const variant = productData.productVariants.find((v: any) => {
+          const variants = productData.productVariants as any[];
+          const variant = variants.find((v: any, idx: number) => {
+            const size = typeof v.size === 'string' ? v.size : '';
+            const color = typeof v.color === 'string' ? v.color : '';
+            const generatedId = v.variantId || `v-${size || 'default'}-${color || 'default'}-${idx}`;
+
             if (variantIdSuffix) {
-              if (v.variantId === variantIdSuffix || v.id === variantIdSuffix || item.productId.includes(v.variantId) || item.productId.includes(v.id)) return true;
+              if (generatedId === variantIdSuffix || v.id === variantIdSuffix) return true;
+              if (v.variantId && item.productId.includes(v.variantId)) return true;
+              if (v.id && item.productId.includes(v.id)) return true;
               if (v.sku && (variantIdSuffix === v.sku || variantIdSuffix.includes(v.sku))) return true;
               if (v.color && variantIdSuffix.toLowerCase().includes(v.color.split('|')[0].toLowerCase().trim())) return true;
+              if (v.size && variantIdSuffix.toLowerCase().includes(v.size.toLowerCase().trim())) return true;
             }
             const dbColor = v.color?.split('|')[0]?.toLowerCase().trim();
             const reqColor = item.color?.toLowerCase().trim();
