@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is admin
-    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "STOREFRONT_ADMIN") {
+    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "STOREFRONT_ADMIN" && session.user.role !== "DEV_ADMIN") {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
         { status: 403 }
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Check if user is admin
-    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "STOREFRONT_ADMIN") {
+    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "STOREFRONT_ADMIN" && session.user.role !== "DEV_ADMIN") {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
         { status: 403 }
