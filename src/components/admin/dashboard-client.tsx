@@ -65,6 +65,7 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const showActiveBoxes = toggles?.giftboxes_available !== false;
   const showShipping = toggles?.operations_section !== false && toggles?.operations_shipping !== false;
+  const showReviews = toggles?.operations_section !== false && toggles?.operations_reviews !== false;
   // 1. Date Range States
   const now = new Date();
   const [startDate, setStartDate] = useState<string>(format(startOfMonth(now), "yyyy-MM-dd"));
@@ -430,45 +431,47 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
             </Card>
 
             {/* Lists: Unrated & Out of stock */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className={`grid grid-cols-1 ${showReviews ? "md:grid-cols-2" : ""} gap-6`}>
               {/* Unrated Products List */}
-              <Card className="border border-gray-100 shadow-xs rounded-xl overflow-hidden bg-white p-6">
-                <CardHeader className="p-0 pb-4">
-                  <div className="flex items-center gap-2">
-                    <StarOff className="w-4.5 h-4.5 text-amber-500" />
-                    <CardTitle className="text-base font-bold text-[#1F1720]">Unrated Products</CardTitle>
-                  </div>
-                  <CardDescription>Items missing customer reviews</CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="divide-y divide-gray-50">
-                    {initialData.unratedProducts.length > 0 ? initialData.unratedProducts.map((product) => (
-                      <div key={product.id} className="py-3 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden relative">
-                            {Array.isArray(product.productImages) && (product.productImages as any)[0]?.url ? (
-                              <Image 
-                                src={(product.productImages as any)[0].url} 
-                                alt={product.name} 
-                                fill 
-                                className="object-cover"
-                              />
-                            ) : (
-                              <PackageOpen className="w-5 h-5 m-2.5 text-gray-400" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-xs font-semibold text-[#1F1720] line-clamp-1">{product.name}</p>
-                            <p className="text-[10px] font-semibold text-[#6B5A64] mt-0.5">{formatCurrency(product.price)}</p>
+              {showReviews && (
+                <Card className="border border-gray-100 shadow-xs rounded-xl overflow-hidden bg-white p-6">
+                  <CardHeader className="p-0 pb-4">
+                    <div className="flex items-center gap-2">
+                      <StarOff className="w-4.5 h-4.5 text-amber-500" />
+                      <CardTitle className="text-base font-bold text-[#1F1720]">Unrated Products</CardTitle>
+                    </div>
+                    <CardDescription>Items missing customer reviews</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-gray-50">
+                      {initialData.unratedProducts.length > 0 ? initialData.unratedProducts.map((product) => (
+                        <div key={product.id} className="py-3 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden relative">
+                              {Array.isArray(product.productImages) && (product.productImages as any)[0]?.url ? (
+                                <Image 
+                                  src={(product.productImages as any)[0].url} 
+                                  alt={product.name} 
+                                  fill 
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <PackageOpen className="w-5 h-5 m-2.5 text-gray-400" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-[#1F1720] line-clamp-1">{product.name}</p>
+                              <p className="text-[10px] font-semibold text-[#6B5A64] mt-0.5">{formatCurrency(product.price)}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )) : (
-                      <div className="py-6 text-center text-xs text-muted-foreground">All products have reviews!</div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      )) : (
+                        <div className="py-6 text-center text-xs text-muted-foreground">All products have reviews!</div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Out of Stock Products List */}
               <Card className="border border-gray-100 shadow-xs rounded-xl overflow-hidden bg-white p-6">
