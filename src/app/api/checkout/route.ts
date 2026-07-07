@@ -659,11 +659,7 @@ export async function POST(request: NextRequest) {
               unitPrice = variant.price;
               salePrice = variant.price;
             }
-            if (variant.sku) {
-              resolvedSku = variant.sku;
-            } else if (variant.variantId || variant.id) {
-              resolvedSku = variant.variantId || variant.id;
-            }
+            // Business rule: Always use the base product's SKU, do not override with variant.sku or variantId
             variantDetails = {
               color: variant.color || null,
               size: variant.size || null,
