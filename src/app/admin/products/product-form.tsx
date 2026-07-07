@@ -28,6 +28,7 @@ import { generateSKU } from "@/lib/sku";
 import { cn } from "@/lib/utils";
 import { FormField } from "@/components/ui/form";
 import useSWR from "swr";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -302,6 +303,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const searchParams = useSearchParams();
   const isEdit = mode === "edit";
   const { toast } = useToast();
+  const { currency, formatPrice } = useCurrency();
 
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
@@ -1368,7 +1370,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                                 <div>
                                   <p className="text-sm font-medium text-[#1F1720]">{item.name}</p>
                                   <p className="text-xs text-[#6B5A64]">
-                                    {item.category?.name ?? "Uncategorized"} • LKR {item.price.toLocaleString()} • Stock {item.stock}
+                                    {item.category?.name ?? "Uncategorized"} • {formatPrice(item.price)} • Stock {item.stock}
                                   </p>
                                 </div>
                                 <Check className="h-4 w-4 text-[#A7066A] opacity-0" />
@@ -1387,7 +1389,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                           <div className="flex flex-col gap-1">
                             <p className="text-sm font-semibold text-[#1F1720]">{entry.item?.name || entry.itemId}</p>
                             <div className="flex items-center gap-2 text-xs font-medium">
-                              <span className="text-[#A7066A]">LKR {entry.item?.price?.toLocaleString() ?? "0"}</span>
+                              <span className="text-[#A7066A]">{formatPrice(entry.item?.price ?? 0)}</span>
                               <span className="text-[#6B5A64]">/ unit</span>
                               <span className="h-1 w-1 rounded-full bg-[#6B5A64]/30" />
                               <span className={`${(entry.item?.stock ?? 0) > 0 ? "text-green-600" : "text-red-600"}`}>
@@ -1438,7 +1440,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-black text-[#A7066A]">
-                            LKR {selectedGiftItems.reduce((sum, entry) => sum + ((entry.item?.price ?? 0) * entry.quantity), 0).toLocaleString()}
+                            {formatPrice(selectedGiftItems.reduce((sum, entry) => sum + ((entry.item?.price ?? 0) * entry.quantity), 0))}
                           </p>
                         </div>
                       </div>
@@ -1601,7 +1603,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label required className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Base Price (LKR)</Label>
+                <Label required className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Base Price ({currency})</Label>
                 {formMode === "box" && selectedGiftItems.length > 0 && (
                   <Badge variant="outline" className="text-[10px] uppercase tracking-tighter h-5">Auto-calculated</Badge>
                 )}
@@ -1667,7 +1669,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Cost Price (LKR)</Label>
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Cost Price ({currency})</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -2021,7 +2023,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                         <option value="">No Active Promotion</option>
                         {discountOptions.map((disc) => (
                           <option key={disc.id} value={disc.id}>
-                            {disc.name} ({disc.type === "PERCENTAGE" ? `${disc.value}% Off` : `LKR ${disc.value.toLocaleString()} Off`})
+                            {disc.name} ({disc.type === "PERCENTAGE" ? `${disc.value}% Off` : `${formatPrice(disc.value)} Off`})
                           </option>
                         ))}
                       </select>
@@ -2030,16 +2032,16 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
 
                     <div className="p-4 rounded-xl border border-brand-border/50 bg-[#F9F9FB]">
                       <p className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Discount Preview</p>
-                      <p className="mt-1 text-xs text-[#6B5A64]">Base Price: {typeof price === "number" ? `LKR ${price.toLocaleString()}` : "-"}</p>
+                      <p className="mt-1 text-xs text-[#6B5A64]">Base Price: {typeof price === "number" ? formatPrice(price) : "-"}</p>
                       <p className="mt-1 text-xs text-[#E11D48]">
                         Discount Amount: {selectedDiscount && typeof price === "number"
                           ? selectedDiscount.type === "FIXED"
-                            ? `LKR ${Math.min(price, selectedDiscount.value).toLocaleString()}`
-                            : `LKR ${((price * Math.min(Math.max(selectedDiscount.value, 0), 100)) / 100).toLocaleString()}`
+                            ? formatPrice(Math.min(price, selectedDiscount.value))
+                            : formatPrice((price * Math.min(Math.max(selectedDiscount.value, 0), 100)) / 100)
                           : "-"}
                       </p>
                       <p className="mt-1 text-lg font-bold text-[#16A34A]">
-                        Final Sale Price: {computedSalePrice !== null ? `LKR ${computedSalePrice.toLocaleString()}` : "-"}
+                        Final Sale Price: {computedSalePrice !== null ? formatPrice(computedSalePrice) : "-"}
                       </p>
                     </div>
                   </div>
@@ -2203,7 +2205,7 @@ function ProductPreview({
   isGiftBox,
   includedItems = []
 }: any) {
-  const formatPrice = (p: number) => `LKR ${p.toLocaleString()}`;
+  const { formatPrice } = useCurrency();
   const displayPrice = salePrice || price || 0;
   const originalPrice = salePrice ? price : null;
 
