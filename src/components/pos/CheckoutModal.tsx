@@ -200,9 +200,10 @@ export function CheckoutModal() {
       const data = await res.json();
 
       if (!res.ok) {
+        console.error("[POS Checkout] API Error:", res.status, data);
         if (data.errors && Array.isArray(data.errors)) {
           data.errors.forEach((err: string) => toast.error(err));
-        } else { toast.error(data.message || "Checkout failed"); }
+        } else { toast.error(data.message || `Checkout failed (${res.status})`); }
         return;
       }
 
@@ -213,11 +214,13 @@ export function CheckoutModal() {
         activatedCodes: data.order.activatedCodes ?? [],
       });
       setLastOrderNumber(data.order.orderNumber);
+      // Clear the cart so the success screen renders cleanly
+      clearCart();
       toast.success(`Order ${data.order.orderNumber} completed!`);
       fetchActiveShift();
     } catch (error) {
       console.error("Checkout error:", error);
-      toast.error("Payment processing failed");
+      toast.error("Payment processing failed. Please try again.");
     } finally { setProcessing(false); }
   };
 
