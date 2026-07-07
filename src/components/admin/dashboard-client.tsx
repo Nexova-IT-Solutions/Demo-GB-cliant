@@ -57,11 +57,12 @@ interface DashboardClientProps {
     outOfStockProducts: any[];
     weeklyOrderVolume?: number[];
   };
+  hasSalesSummaryPermission?: boolean;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function AdminDashboardClient({ user, initialData }: DashboardClientProps) {
+export default function AdminDashboardClient({ user, initialData, hasSalesSummaryPermission = true }: DashboardClientProps) {
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const showActiveBoxes = toggles?.giftboxes_available !== false;
   const showShipping = toggles?.operations_section !== false && toggles?.operations_shipping !== false;
@@ -85,8 +86,10 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
 
   useEffect(() => {
     setMounted(true);
-    fetchSalesSummary();
-  }, []);
+    if (hasSalesSummaryPermission) {
+      fetchSalesSummary();
+    }
+  }, [hasSalesSummaryPermission]);
 
   // 3. Fetch Sales Summary Data
   const fetchSalesSummary = async () => {
@@ -234,6 +237,7 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
         </div>
 
         {/* --- SALES SUMMARY SECTION --- */}
+        {hasSalesSummaryPermission && (
         <div className="bg-white p-6 rounded-xl shadow-xs border border-gray-100 space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
@@ -321,6 +325,7 @@ export default function AdminDashboardClient({ user, initialData }: DashboardCli
             />
           </div>
         </div>
+        )}
 
         {/* --- MAIN PAGE RESPONSIVE 3-COLUMN CONTAINER --- */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

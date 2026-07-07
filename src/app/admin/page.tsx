@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAdminDashboardStats } from "@/lib/queries/admin-dashboard";
 import AdminDashboardClient from "@/components/admin/dashboard-client";
+import { hasPermission } from "@/lib/permissions";
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -17,6 +18,8 @@ export default async function AdminDashboardPage() {
 
   // Fetch initial dashboard stats on the server
   const initialData = await getAdminDashboardStats();
+  
+  const hasSalesSummaryPermission = hasPermission(session, "reports.sales_summary");
 
   return (
     <AdminDashboardClient
@@ -26,6 +29,7 @@ export default async function AdminDashboardPage() {
         role: session.user.role,
       }}
       initialData={initialData}
+      hasSalesSummaryPermission={hasSalesSummaryPermission}
     />
   );
 }
