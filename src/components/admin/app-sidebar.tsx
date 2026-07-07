@@ -697,7 +697,7 @@ export function AppSidebar() {
 
         {(isSuperAdmin || isDevAdmin) && renderNavGroup("Administration", [systemItems[0]])}
 
-        {renderNavGroup("System", systemItems.slice(1))}
+        {(isDevAdmin || isSuperAdmin) && renderNavGroup("System", systemItems.slice(1))}
 
         {isDevAdmin && renderNavGroup("Developer Tools", [
           {

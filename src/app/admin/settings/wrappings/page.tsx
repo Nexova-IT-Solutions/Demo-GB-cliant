@@ -9,7 +9,7 @@ import { WrappingsClient } from "./wrappings-client";
 export default async function AdminGiftWrappingsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
+  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
     redirect("/");
   }
 
