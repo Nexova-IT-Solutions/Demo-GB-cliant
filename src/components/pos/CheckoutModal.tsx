@@ -299,7 +299,7 @@ export function CheckoutModal() {
 
 
               {/* Payment Method Tabs */}
-              <div className="grid grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl">
+              <div className="grid gap-1.5 bg-slate-100 p-1 rounded-xl" style={{ gridTemplateColumns: `repeat(${paymentMethods.length}, minmax(0, 1fr))` }}>
                 {paymentMethods.map(({ method, label, icon: Icon }) => (
                   <button key={method} onClick={() => {
                     setPaymentMethod(method);

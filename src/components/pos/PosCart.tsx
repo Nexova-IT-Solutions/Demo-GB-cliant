@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/button";
+import useSWR from "swr";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -41,6 +42,9 @@ export function PosCart() {
 
   const subtotal = getSubtotal();
   const itemCount = getItemCount();
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
+  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
 
   // ─── Voucher state ─────────────────────────────────────────
   const [voucherInput, setVoucherInput] = useState("");
@@ -205,7 +209,7 @@ export function PosCart() {
       )}
 
       {/* ─── Gift Card / Voucher Widget ─────────────────────── */}
-      {items.length > 0 && (
+      {items.length > 0 && isGiftcardsEnabled && (
         <div className="px-4 py-3 border-t border-slate-100 space-y-2">
           <p className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
             <Gift className="h-3 w-3 text-[#A7066A]" />

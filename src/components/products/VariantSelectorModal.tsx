@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import type {
   ProductVariantData,
   VariantProductPayload,
@@ -50,6 +51,7 @@ export function VariantSelectorModal({
 }: VariantSelectorModalProps) {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const { formatPrice } = useCurrency();
   const [isValidating, setIsValidating] = useState(false);
 
   // Reset selections when modal opens with a new product
@@ -391,7 +393,7 @@ export function VariantSelectorModal({
               <div className="flex items-center justify-between pt-2 border-t border-green-100/60 mt-1">
                 <span className="text-green-800/80 text-xs font-medium">Selected Variant Price</span>
                 <span className="text-lg font-bold text-[#A7066A]">
-                  LKR {(matchingVariant.price ?? product.price).toLocaleString()}
+                  {formatPrice(matchingVariant.price ?? product.price)}
                 </span>
               </div>
             </div>

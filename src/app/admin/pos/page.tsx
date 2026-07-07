@@ -19,9 +19,12 @@ import { useSidebarStore } from "@/store/use-sidebar-store";
 import { useBarcodeScanner } from "@/hooks/use-barcode-scanner";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import useSWR from "swr";
 
 export default function PosTerminalPage() {
   const { data: session } = useSession();
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
+  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
   const [scannerActive, setScannerActive] = useState(true);
   const [isGiftCardActivationOpen, setIsGiftCardActivationOpen] = useState(false);
 
@@ -194,15 +197,17 @@ export default function PosTerminalPage() {
 
           {/* Shift actions */}
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsGiftCardActivationOpen(true)}
-              className="h-8 border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-semibold px-3 flex items-center gap-1 shadow-sm"
-            >
-              <Gift className="h-3.5 w-3.5 text-amber-500" />
-              Activate Card
-            </Button>
+            {isGiftcardsEnabled && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsGiftCardActivationOpen(true)}
+                className="h-8 border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-semibold px-3 flex items-center gap-1 shadow-sm"
+              >
+                <Gift className="h-3.5 w-3.5 text-amber-500" />
+                Activate Card
+              </Button>
+            )}
             {!activeShift ? (
               <Button
                 size="sm"
