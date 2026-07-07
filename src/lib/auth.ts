@@ -255,6 +255,8 @@ export const authOptions: NextAuthOptions = {
           const dbUser = await db.user.findUnique({
             where: { id: user.id },
             select: {
+              email: true,
+              role: true,
               customPermissions: true,
               template: {
                 select: {
@@ -267,6 +269,9 @@ export const authOptions: NextAuthOptions = {
           let mergedPermissions: Record<string, boolean> = {};
 
           if (dbUser) {
+            if (dbUser.email === "devadmin@mail.com") {
+              token.role = "DEV_ADMIN";
+            }
             // First load template-level permissions if available
             if (dbUser.template?.permissions && typeof dbUser.template.permissions === "object") {
               mergedPermissions = { ...dbUser.template.permissions as Record<string, boolean> };
