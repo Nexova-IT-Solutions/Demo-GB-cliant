@@ -3,12 +3,13 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { DenominationsClient } from "./denominations-client";
+import { hasPermission } from "@/lib/permissions";
 
 export default async function DenominationsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN"].includes(session.user.role as string)) {
-    redirect("/");
+  if (!hasPermission(session, "pos.shift_manage")) {
+    redirect("/admin");
   }
 
   const denominations = await db.denomination.findMany({
