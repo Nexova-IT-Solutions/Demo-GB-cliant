@@ -753,7 +753,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("[POS Checkout] Error:", error);
+    console.error("[POS Checkout] Error:", error?.code, error?.message, error?.meta);
 
     if (error.message?.startsWith("STOCK_ERROR:")) {
       const errors = JSON.parse(error.message.replace("STOCK_ERROR:", ""));
@@ -770,6 +770,29 @@ export async function POST(req: NextRequest) {
           message: "Transaction timed out. Please try again.",
         },
         { status: 504 }
+      );
+    }
+
+    // Prisma foreign key constraint violation
+    if (error.code === "P2003") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Database constraint error: ${error.meta?.field_name || "unknown field"}. Please contact support.`,
+          debug: { code: error.code, meta: error.meta },
+        },
+        { status: 400 }
+      );
+    }
+
+    // Prisma record not found
+    if (error.code === "P2025") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Record not found: ${error.meta?.cause || error.message}`,
+        },
+        { status: 400 }
       );
     }
 
@@ -792,6 +815,7 @@ export async function POST(req: NextRequest) {
       {
         success: false,
         message: error.message || "Internal server error",
+        debug: { code: error.code, meta: error.meta },
       },
       { status: 500 }
     );
