@@ -216,13 +216,14 @@ export function PosProductGrid() {
     if (!variantProduct) return;
 
     const variantLabel = [selection.size, selection.color].filter(Boolean).join(" / ");
+    const isCustomPrice = selection.price !== undefined && selection.price !== variantProduct.price;
 
     addItem({
       id: `${variantProduct.id}-${selection.variantId}`,
       name: `${variantProduct.name} (${variantLabel})`,
       sku: selection.sku || null,
       price: selection.price ?? variantProduct.price,
-      salePrice: variantProduct.salePrice ?? null,
+      salePrice: isCustomPrice ? null : (variantProduct.salePrice ?? null),
       stock: selection.stock,
       image: variantProduct.image ?? null,
       discountName: variantProduct.discountName,

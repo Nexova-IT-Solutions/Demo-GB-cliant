@@ -183,6 +183,7 @@ export async function GET(req: NextRequest) {
           typeof resolvedVariant.variantId === "string"
             ? resolvedVariant.variantId
             : `${variantSize || "default"}:${variantColor || "default"}`;
+        const isCustomPrice = typeof resolvedVariant.price === "number" && resolvedVariant.price !== variantMatch.price;
 
         return NextResponse.json({
           success: true,
@@ -192,7 +193,7 @@ export async function GET(req: NextRequest) {
             name: `${variantMatch.name} (${[variantSize, variantColor ? variantColor.split('|')[0] : ""].filter(Boolean).join(" / ")})`,
             sku: variantSku,
             price: typeof resolvedVariant.price === "number" ? resolvedVariant.price : variantMatch.price,
-            salePrice: variantMatch.salePrice,
+            salePrice: isCustomPrice ? null : variantMatch.salePrice,
             stock: variantStock,
             image: image,
             isActive: variantMatch.isActive,
