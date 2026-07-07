@@ -51,9 +51,9 @@ export default async function AdminLayout({
   const messages = await getMessages({ locale: 'en' });
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="h-full overflow-hidden" suppressHydrationWarning>
       <body
-        className={`${plusJakarta.variable} ${geistMono.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${plusJakarta.variable} ${geistMono.variable} font-sans antialiased bg-background text-foreground h-full w-full overflow-hidden`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider messages={messages} locale="en">
