@@ -1044,7 +1044,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   };
 
   return (
-    <div className="flex flex-row h-full w-full overflow-hidden bg-gray-50 min-h-0">
+    <div className="flex flex-row h-[calc(100vh-4rem)] w-full overflow-hidden bg-gray-50 min-h-0">
       {/* Middle Column: Product Form Content Area */}
       <div className="flex-1 h-full overflow-y-auto p-6 min-w-0 custom-scrollbar">
         <div className="max-w-4xl mx-auto space-y-6 bg-white p-8 rounded-3xl shadow-xl border border-brand-border">
