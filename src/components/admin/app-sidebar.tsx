@@ -648,6 +648,11 @@ export function AppSidebar() {
         return item
       })
       .filter((item) => {
+        // Special rule: POS_ADMIN should never see the Dashboard link
+        if (item.title === "Dashboard" && permissionContext?.role === "POS_ADMIN") {
+          return false;
+        }
+
         // Parent must pass permission validation
         if (!hasPermission(permissionContext, item.requiredPermission)) {
           return false
