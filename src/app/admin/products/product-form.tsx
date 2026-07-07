@@ -308,6 +308,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
   const isGiftboxesAvailable = toggles?.giftboxes_available !== false;
+  const isDiscountsEnabled = toggles?.storefront_section !== false && toggles?.storefront_discounts !== false;
   const form = useForm<z.infer<typeof productFormSchema>>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -2008,69 +2009,77 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                     />
                   </div>
 
-                  <div className="border-t border-brand-border/40 my-6 pt-6 space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Store Promotion / Discount</Label>
-                      <select
-                        className="w-full h-12 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
-                        value={discountId}
-                        onChange={(event) => {
-                          const val = event.target.value;
-                          setDiscountId(val);
-                          setWatchedValue("discountId", val || null);
-                        }}
-                      >
-                        <option value="">No Active Promotion</option>
-                        {discountOptions.map((disc) => (
-                          <option key={disc.id} value={disc.id}>
-                            {disc.name} ({disc.type === "PERCENTAGE" ? `${disc.value}% Off` : `${formatPrice(disc.value)} Off`})
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-[11px] text-[#6B5A64]">Apply an active store campaign discount to this item.</p>
-                    </div>
+                  {isDiscountsEnabled && (
+                    <div className="border-t border-brand-border/40 my-6 pt-6 space-y-6">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-[#1F1720]">Promotions & Discount Options</h4>
+                        <p className="text-xs text-[#6B5A64]">Apply a discount and control its visibility on the storefront.</p>
+                      </div>
 
-                    <div className="p-4 rounded-xl border border-brand-border/50 bg-[#F9F9FB]">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Discount Preview</p>
-                      <p className="mt-1 text-xs text-[#6B5A64]">Base Price: {typeof price === "number" ? formatPrice(price) : "-"}</p>
-                      <p className="mt-1 text-xs text-[#E11D48]">
-                        Discount Amount: {selectedDiscount && typeof price === "number"
-                          ? selectedDiscount.type === "FIXED"
-                            ? formatPrice(Math.min(price, selectedDiscount.value))
-                            : formatPrice((price * Math.min(Math.max(selectedDiscount.value, 0), 100)) / 100)
-                          : "-"}
-                      </p>
-                      <p className="mt-1 text-lg font-bold text-[#16A34A]">
-                        Final Sale Price: {computedSalePrice !== null ? formatPrice(computedSalePrice) : "-"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <FormField
-                    control={control}
-                    name="showInDiscountSection"
-                    render={({ field }) => (
-                      <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
-                        <div>
-                          <p className="text-sm font-semibold text-[#1F1720]">Show in Discount Section</p>
-                          <p className="text-xs text-[#6B5A64]">
-                            {isMounted && discountSwitchDisabled && !storefrontOptionsLocked
-                              ? "Select a promotion/discount above to enable this option."
-                              : "Feature this product in discount-driven storefront modules."}
-                          </p>
-                          {fieldErrors.showInDiscountSection ? <p className="text-xs text-destructive mt-1">{fieldErrors.showInDiscountSection}</p> : null}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold text-[#6B5A64] uppercase tracking-wider">Apply Promotion/Discount (Optional)</Label>
+                          <select
+                            className="w-full h-12 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
+                            value={discountId}
+                            onChange={(event) => {
+                              const val = event.target.value;
+                              setDiscountId(val);
+                              setWatchedValue("discountId", val || null);
+                            }}
+                          >
+                            <option value="">None</option>
+                            {discountOptions.map((disc) => (
+                              <option key={disc.id} value={disc.id}>
+                                {disc.name} ({disc.type === "PERCENTAGE" ? `${disc.value}% Off` : `${formatPrice(disc.value)} Off`})
+                              </option>
+                            ))}
+                          </select>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <SwitchStateLabel checked={field.value} disabled={isMounted && discountSwitchDisabled} />
-                          <Switch
-                            checked={!!field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={isMounted && discountSwitchDisabled}
-                          />
+
+                        <div className="p-4 rounded-xl border border-brand-border/50 bg-[#F9F9FB]">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-[#6B5A64]">Discount Preview</p>
+                          <p className="mt-1 text-xs text-[#6B5A64]">Base Price: {typeof price === "number" ? formatPrice(price) : "-"}</p>
+                          <p className="mt-1 text-xs text-[#E11D48]">
+                            Discount Amount: {selectedDiscount && typeof price === "number"
+                              ? selectedDiscount.type === "FIXED"
+                                ? formatPrice(Math.min(price, selectedDiscount.value))
+                                : formatPrice((price * Math.min(Math.max(selectedDiscount.value, 0), 100)) / 100)
+                              : "-"}
+                          </p>
+                          <p className="mt-1 text-lg font-bold text-[#16A34A]">
+                            Final Sale Price: {computedSalePrice !== null ? formatPrice(computedSalePrice) : "-"}
+                          </p>
                         </div>
                       </div>
-                    )}
-                  />
+
+                      <FormField
+                        control={control}
+                        name="showInDiscountSection"
+                        render={({ field }) => (
+                          <div className="flex items-center justify-between rounded-xl border border-brand-border bg-white p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-[#1F1720]">Show in Discount Section</p>
+                              <p className="text-xs text-[#6B5A64]">
+                                {isMounted && discountSwitchDisabled && !storefrontOptionsLocked
+                                  ? "Select a promotion/discount above to enable this option."
+                                  : "Feature this product in discount-driven storefront modules."}
+                              </p>
+                              {fieldErrors.showInDiscountSection ? <p className="text-xs text-destructive mt-1">{fieldErrors.showInDiscountSection}</p> : null}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <SwitchStateLabel checked={field.value} disabled={isMounted && discountSwitchDisabled} />
+                              <Switch
+                                  checked={!!field.value}
+                                  onCheckedChange={field.onChange}
+                                  disabled={isMounted && discountSwitchDisabled}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </>
