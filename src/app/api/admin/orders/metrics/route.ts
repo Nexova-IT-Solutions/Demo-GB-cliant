@@ -22,6 +22,7 @@ export async function GET() {
   }
 
   const pendingOrders = await db.order.count({ where: { orderStatus: "PENDING" } });
+  const totalOrders = await db.order.count();
 
-  return NextResponse.json({ success: true, pendingOrders });
+  return NextResponse.json({ success: true, pendingOrders, totalOrders });
 }

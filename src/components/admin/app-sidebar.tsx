@@ -272,7 +272,7 @@ const systemItems: NavItem[] = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { data: session, status } = useSession()
-  const [pendingOrderCount, setPendingOrderCount] = React.useState(0)
+  const [totalOrderCount, setTotalOrderCount] = React.useState(0)
   const [pendingReviewCount, setPendingReviewCount] = React.useState(0)
   const [pendingReturnCount, setPendingReturnCount] = React.useState(0)
   const [outOfStockCount, setOutOfStockCount] = React.useState(0)
@@ -368,7 +368,7 @@ export function AppSidebar() {
 
     const controller = new AbortController()
 
-    const fetchPendingOrderCount = async () => {
+    const fetchTotalOrderCount = async () => {
       try {
         const response = await fetch("/api/admin/orders/metrics", {
           cache: "no-store",
@@ -378,15 +378,15 @@ export function AppSidebar() {
         if (!response.ok) return
 
         const payload = await response.json()
-        if (typeof payload.pendingOrders === "number") {
-          setPendingOrderCount(payload.pendingOrders)
+        if (typeof payload.totalOrders === "number") {
+          setTotalOrderCount(payload.totalOrders)
         }
       } catch {
         // Sidebar alert is best-effort only.
       }
     }
 
-    void fetchPendingOrderCount()
+    void fetchTotalOrderCount()
 
     return () => controller.abort()
   }, [permissionContext, status])
@@ -602,9 +602,9 @@ export function AppSidebar() {
           <span className="truncate">{item.title}</span>
           {item.url === "/admin/orders" && (
             <Badge className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold flex items-center justify-center min-w-[20px] ${
-              isItemActive ? "bg-white text-[#A7066A]" : (pendingOrderCount > 0 ? "bg-rose-100 text-rose-700" : "bg-slate-100 text-slate-600")
+              isItemActive ? "bg-white text-[#A7066A]" : (totalOrderCount > 0 ? "bg-[#FCEAF4] text-[#A7066A]" : "bg-slate-100 text-slate-600")
             }`}>
-              {pendingOrderCount}
+              {totalOrderCount}
             </Badge>
           )}
           {item.url === "/admin/reviews" && (
