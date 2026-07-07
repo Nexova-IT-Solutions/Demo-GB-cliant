@@ -50,9 +50,10 @@ export default function SignInPage() {
       setLoading(false);
     } else {
       const refreshedSession = await getSession();
+      const role = refreshedSession?.user?.role;
       const destination = callbackUrl !== "/" 
         ? callbackUrl 
-        : (refreshedSession?.user?.role && refreshedSession.user.role !== "USER" ? "/admin" : "/");
+        : (role === "POS_ADMIN" ? "/admin/pos" : (role && role !== "USER" ? "/admin" : "/"));
 
       router.push(destination);
       router.refresh(); // Refresh to update session

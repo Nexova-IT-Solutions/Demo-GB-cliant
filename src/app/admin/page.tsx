@@ -11,6 +11,10 @@ export default async function AdminDashboardPage() {
     redirect("/"); 
   }
 
+  if (session.user.role === "POS_ADMIN") {
+    redirect("/admin/pos");
+  }
+
   // Fetch initial dashboard stats on the server
   const initialData = await getAdminDashboardStats();
 
