@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -392,6 +392,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const [optionsLoading, setOptionsLoading] = useState(!categories || !occasions || !recipients || !moods || !availableGiftItems || !discounts);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<"name" | "sku" | "price" | "stock" | "categoryId" | "moodIds" | "showInDiscountSection", string>>>({});
   const [isMounted, setIsMounted] = useState(false);
+  const isHydrated = useRef(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -456,6 +457,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     setSizes(product.sizes ?? []);
     setColors(product.colors ?? []);
     setVariants(parseVariants(product.productVariants));
+    isHydrated.current = true;
     setSelectedGiftItems(
       (product.itemsInside ?? []).map((entry, index) => {
         // Fallback to full item details from options if price/stock are missing from the relation
@@ -598,6 +600,9 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   }, [availableGiftItems]);
 
   useEffect(() => {
+    // Prevent overwriting existing variants during initial load/hydration
+    if (isEdit && !isHydrated.current) return;
+
     setVariants((prev) => {
       const nextVariants: VariantData[] = [];
       const sizesList = sizes.length > 0 ? sizes : [""];
@@ -610,7 +615,12 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           const key = `${sizeValue}:${colorValue}`;
           if (removedVariants.includes(key)) return;
 
-          const existing = prev.find((variant) => variant.size === sizeValue && variant.color === colorValue);
+          // Case-insensitive, trimmed comparison to prevent mismatches
+          const existing = prev.find(
+            (variant) =>
+              variant.size.trim().toLowerCase() === sizeValue.trim().toLowerCase() &&
+              variant.color.trim().toLowerCase() === colorValue.trim().toLowerCase()
+          );
           nextVariants.push({
             size: sizeValue,
             color: colorValue,
