@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { Building2 } from "lucide-react";
 import { SupplierTable } from "@/components/admin/suppliers/SupplierTable";
 import type { Supplier } from "@/types/supplier";
+import { hasPermission } from "@/lib/permissions";
 
 export default async function SuppliersPage({
   searchParams,
@@ -13,11 +14,8 @@ export default async function SuppliersPage({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (
-    !session ||
-    !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role as string)
-  ) {
-    redirect("/");
+  if (!hasPermission(session, "catalog.manage_inventory")) {
+    redirect("/admin");
   }
 
   const resolvedParams = await searchParams;
