@@ -220,7 +220,7 @@ export function CheckoutModal() {
         subtotal,
         changeDue,
         paymentMethod: payment.method === "POS_CARD" && cardType ? cardType : payment.method,
-        items: items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
+        items: items.map(i => ({ name: i.name, sku: i.sku, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
         activatedCodes: data.order.activatedCodes ?? [],
       });
       setLastOrderNumber(data.order.orderNumber);

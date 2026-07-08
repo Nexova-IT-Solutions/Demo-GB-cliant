@@ -114,32 +114,37 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.text(`Payment: ${data.paymentMethod.replace("POS_", "")}`, 5, currentY);
     currentY += 4;
 
-    // Items Table
+    // Items Table mapping
     const tableData = data.items.map((item) => {
       let itemName = item.name;
-      if (item.discountPercent) {
-        itemName += `\n(-${item.discountPercent}%)`;
+      if (item.sku) {
+        itemName += `\nSKU: ${item.sku}`;
       }
+      
+      const discountText = item.discountPercent ? `${item.discountPercent}%` : "-";
+
       return [
         itemName,
         item.quantity.toString(),
         `OMR ${item.price.toFixed(2)}`,
+        discountText,
         `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
       ];
     });
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item", "Qty", "Price", "Total"]],
+      head: [["Item", "Qty", "Price", "Disc", "Total"]],
       body: tableData,
       theme: "plain",
       styles: { fontSize: 8, cellPadding: 1 },
       headStyles: { fontStyle: "bold" },
       columnStyles: {
-        0: { cellWidth: 30 }, // Item
-        1: { cellWidth: 10, halign: "center" }, // Qty
-        2: { cellWidth: 15, halign: "right" }, // Price
-        3: { cellWidth: 15, halign: "right" }, // Total
+        0: { cellWidth: 26 }, // Item
+        1: { cellWidth: 8, halign: "center" }, // Qty
+        2: { cellWidth: 12, halign: "right" }, // Price
+        3: { cellWidth: 10, halign: "center" }, // Disc
+        4: { cellWidth: 14, halign: "right" }, // Total
       },
       margin: { left: 5, right: 5 },
     });
@@ -268,32 +273,37 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     currentY = Math.max(currentY, rightY) + 15;
 
-    // Items Table
+    // Items Table mapping
     const tableData = data.items.map((item) => {
       let itemName = item.name;
-      if (item.discountPercent) {
-        itemName += `\n(-${item.discountPercent}% discount)`;
+      if (item.sku) {
+        itemName += `\nSKU: ${item.sku}`;
       }
+      
+      const discountText = item.discountPercent ? `${item.discountPercent}%` : "-";
+
       return [
         itemName,
         item.quantity.toString(),
         `OMR ${item.price.toFixed(2)}`,
+        discountText,
         `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
       ];
     });
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item Description", "Qty", "Unit Price", "Total"]],
+      head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
       headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "bold" },
       styles: { fontSize: 10, cellPadding: 4 },
       columnStyles: {
-        0: { cellWidth: 100 },
+        0: { cellWidth: 80 },
         1: { cellWidth: 20, halign: "center" },
         2: { cellWidth: 30, halign: "right" },
-        3: { cellWidth: 30, halign: "right" },
+        3: { cellWidth: 20, halign: "center" },
+        4: { cellWidth: 30, halign: "right" },
       },
       margin: { left: 15, right: 15 },
     });
