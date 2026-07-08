@@ -50,170 +50,75 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
   const logoBase64 = await getBase64ImageFromUrl("/logo/logo.png");
 
   if (format === "print") {
-    // THERMAL PRINTER FORMAT
-    const doc = new jsPDF({
-      unit: "mm",
-      format: [80, 200], // 80mm roll width
-    });
-    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
-    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
-
-    let currentY = 10;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const alignCenter = { align: "center" as const };
-
-    // Logo
-    if (logoBase64) {
-      // Assuming square logo, center it. 20x20 mm
-      doc.addImage(logoBase64, "PNG", (pageWidth - 20) / 2, currentY, 20, 20);
-      currentY += 24;
-    }
-
-    // Company Name
+    // THERMAL PRINTER RAW TEXT FORMAT
     const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    const splitCompanyName = doc.splitTextToSize(companyName, pageWidth - 10);
-    doc.text(splitCompanyName, pageWidth / 2, currentY, alignCenter);
-    currentY += splitCompanyName.length * 5 + 1;
-
-    // Company Details
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
     
-    if (data.companyDetails?.address) {
-      const splitAddress = doc.splitTextToSize(data.companyDetails.address, pageWidth - 10);
-      doc.text(splitAddress, pageWidth / 2, currentY, alignCenter);
-      currentY += splitAddress.length * 4;
-    }
-    
-    if (data.companyDetails?.mobileNumber) {
-      doc.text(`Tel: ${data.companyDetails.mobileNumber}`, pageWidth / 2, currentY, alignCenter);
-      currentY += 4;
-    }
-    
-    if (data.companyDetails?.email) {
-      doc.text(data.companyDetails.email, pageWidth / 2, currentY, alignCenter);
-      currentY += 4;
-    }
-    
-    if (data.companyDetails?.website) {
-      doc.text(data.companyDetails.website, pageWidth / 2, currentY, alignCenter);
-      currentY += 4;
-    }
-    
-    if (data.companyDetails?.crNumber) {
-      doc.text(`CR: ${data.companyDetails.crNumber}`, pageWidth / 2, currentY, alignCenter);
-      currentY += 4;
-    }
+    const rawLines = [
+      '\x1B\x40', // Init printer
+      '\x1B\x61\x01', // Center align
+      '\x1B\x45\x01', // Bold on
+      `${companyName}\n`,
+      '\x1B\x45\x00', // Bold off
+    ];
 
-    currentY += 2;
-    doc.setLineWidth(0.5);
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(5, currentY, pageWidth - 5, currentY);
-    currentY += 4;
-
-    // Order Details
-    doc.setFontSize(8);
-    doc.text(`Order: ${data.orderNumber}`, 5, currentY);
-    currentY += 4;
-    doc.text(`Date: ${data.date}`, 5, currentY);
-    currentY += 4;
-    doc.text(`Payment: ${data.paymentMethod.replace("POS_", "")}`, 5, currentY);
-    currentY += 4;
-
-    // Items Table mapping
-    const tableData = data.items.map((item) => {
-      let itemName = item.name;
-      if (item.nameAr) {
-        itemName += `\n${item.nameAr}`;
-      }
-      if (item.sku) {
-        itemName += `\nSKU: ${item.sku}`;
-      }
-      
-      const discountText = item.discountPercent ? `${item.discountPercent}%` : "-";
-
-      return [
-        itemName,
-        item.quantity.toString(),
-        `OMR ${item.price.toFixed(2)}`,
-        discountText,
-        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
-      ];
+    if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
+    if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
+    if (data.companyDetails?.email) rawLines.push(`${data.companyDetails.email}\n`);
+    if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
+    if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
+    
+    rawLines.push(
+      '--------------------------------\n',
+      '\x1B\x61\x00', // Left align
+      `Order: ${data.orderNumber}\n`,
+      `Date: ${data.date}\n`,
+      `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
+      '--------------------------------\n'
+    );
+    
+    // Items
+    data.items.forEach(item => {
+      rawLines.push(`${item.name}\n`);
+      if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
+      const qtyPrice = `${item.quantity} x OMR ${item.price.toFixed(2)}`;
+      const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
+      // Pad to roughly 32 chars
+      let padding = 32 - qtyPrice.length - total.length;
+      if (padding < 1) padding = 1;
+      rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
     });
-
-    autoTable(doc, {
-      startY: currentY,
-      head: [["Item / العنصر", "Qty / الكمية", "Price / سعر الوحدة", "Disc / خصم", "Total / المجموع"]],
-      body: tableData,
-      theme: "plain",
-      styles: { font: "Amiri", fontSize: 8, cellPadding: 1 },
-      headStyles: { fontStyle: "normal", font: "Amiri", halign: "center" },
-      columnStyles: {
-        0: { cellWidth: 22 }, // Item
-        1: { cellWidth: 12, halign: "center" }, // Qty
-        2: { cellWidth: 12, halign: "right" }, // Price
-        3: { cellWidth: 10, halign: "center" }, // Disc
-        4: { cellWidth: 14, halign: "right" }, // Total
-      },
-      margin: { left: 5, right: 5 },
-    });
-
-    currentY = (doc as any).lastAutoTable.finalY + 4;
-
-    doc.setLineWidth(0.5);
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(5, currentY, pageWidth - 5, currentY);
-    currentY += 4;
-
-    // Totals
-    doc.setFont("Amiri", "normal");
-    doc.setFontSize(9);
-    doc.text("Subtotal / المجموع الفرعي:", 5, currentY);
-    doc.text(`OMR ${data.subtotal.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
-    currentY += 5;
-
-    doc.setFontSize(10);
-    doc.setFont("Amiri", "normal");
-    doc.text("Total / المجموع:", 5, currentY);
-    doc.text(`OMR ${data.total.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
-    currentY += 5;
-
+    
+    rawLines.push(
+      '--------------------------------\n',
+      '\x1B\x61\x02', // Right align
+      `Subtotal: OMR ${data.subtotal.toFixed(2)}\n`,
+      `Total: OMR ${data.total.toFixed(2)}\n`
+    );
+    
     if (data.changeDue > 0) {
-      doc.setFontSize(9);
-      doc.setFont("Amiri", "normal");
-      doc.text("Change Due / الباقي:", 5, currentY);
-      doc.text(`OMR ${data.changeDue.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
-      currentY += 5;
+      rawLines.push(`Change Due: OMR ${data.changeDue.toFixed(2)}\n`);
     }
-
-    currentY += 4;
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.text("Thank you for your purchase!", pageWidth / 2, currentY, alignCenter);
+    
+    rawLines.push(
+      '\x1B\x61\x01', // Center align
+      '\nThank you for your purchase!\n',
+      '\n\n\n\n\n\n', // Feed paper
+      '\x1D\x56\x41\x10' // Full cut
+    );
 
     if (data.companyDetails?.posPrinterName) {
       try {
         if (!qz.websocket.isActive()) {
           await qz.websocket.connect({ retries: 0 });
         }
-        const config = qz.configs.create(data.companyDetails.posPrinterName, {
-          rasterize: true, // Fix for thermal printers getting stuck in queue
-          margins: 0,
-          scaleContent: false
-        });
-        const base64Str = doc.output("datauristring").split(",")[1];
-        const printData = [{ type: 'pixel', format: 'pdf', flavor: 'base64', data: base64Str }];
-        await qz.print(config, printData);
-        return; // successfully printed via QZ, bypass normal save
+        const config = qz.configs.create(data.companyDetails.posPrinterName);
+        await qz.print(config, rawLines);
+        return;
       } catch (e) {
-        console.error("QZ print failed, falling back to download", e);
+        console.error("QZ raw print failed", e);
       }
     }
-
-    doc.save(`Receipt-${data.orderNumber}.pdf`);
-
+    return;
   } else {
     // COLORFUL A4 INVOICE FORMAT
     const doc = new jsPDF({
