@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Gift, Printer, Loader2, Save, CheckCircle2, PackageSearch } from "lucide-react";
+import { Gift, Printer, Loader2, Save, CheckCircle2, PackageSearch, Download } from "lucide-react";
+import { format } from "date-fns";
+import { generateReceiptPdf } from "@/lib/pdf-receipt";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +36,9 @@ type OrderPanelProps = {
     customerEmail: string;
     customerPhone: string;
     userId: string;
+    orderNumber: string;
+    createdAt: string;
+    items: { name: string; sku?: string; quantity: number; price: number; discountPercent?: number }[];
     total: number;
     subtotal: number;
     deliveryFee: number;
@@ -64,6 +69,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
     "/api/admin/feature-toggles",
     fetcher
   );
+  const { data: companyDetails } = useSWR("/api/admin/company-details", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
 
   const repeatCustomer = customerOrderCount > 1;
@@ -72,6 +78,19 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
   const showApproval = order.paymentMethod === "BANK_TRANSFER" && order.hasDigitalGiftCard && !anyGiftCardSent;
 
   const requiresTrackingNumber = draftOrderStatus === "SHIPPED";
+
+  const handleDownloadReceipt = () => {
+    generateReceiptPdf({
+      orderNumber: order.orderNumber,
+      total: order.total,
+      subtotal: order.subtotal,
+      changeDue: 0, // Admin doesn't track change due
+      paymentMethod: order.paymentMethod,
+      date: format(new Date(order.createdAt), "PPpp"),
+      items: order.items,
+      companyDetails: companyDetails,
+    }, "download");
+  };
 
   const handleSaveStatusChanges = () => {
     if (requiresTrackingNumber && !trackingNumber.trim()) {
@@ -263,7 +282,16 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
             </Button>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 space-y-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="h-11 w-full rounded-xl border-brand-border bg-white font-semibold text-[#1F1720] hover:bg-slate-50 hover:text-[#A7066A]" 
+              onClick={handleDownloadReceipt}
+            >
+              <Download className="mr-2 size-4" />
+              Download Receipt
+            </Button>
             <Button 
               type="button" 
               variant="outline" 

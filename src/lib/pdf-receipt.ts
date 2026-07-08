@@ -176,7 +176,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFont("helvetica", "italic");
     doc.text("Thank you for your purchase!", pageWidth / 2, currentY, alignCenter);
 
-    doc.save(`receipt-${data.orderNumber}.pdf`);
+    doc.save(`Receipt-${data.orderNumber}.pdf`);
 
   } else {
     // COLORFUL A4 INVOICE FORMAT
@@ -334,6 +334,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setTextColor(150, 150, 150);
     doc.text("Thank you for your purchase!", pageWidth / 2, 280, { align: "center" });
 
-    doc.save(`receipt-${data.orderNumber}.pdf`);
+    doc.save(`Receipt-${data.orderNumber}.pdf`);
   }
 }
