@@ -97,6 +97,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
 
             <DropdownMenuSeparator className="my-2" />
 
+            {/* 
             <DropdownMenuItem asChild className="min-h-11 rounded-xl px-3 py-2.5 text-sm">
               <Link href="/admin/profile/edit" className="flex w-full items-center gap-2">
                 <User className="size-4 text-slate-500" />
@@ -110,6 +111,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                 <span>Account Settings</span>
               </Link>
             </DropdownMenuItem>
+            */}
 
             <DropdownMenuItem
               className="min-h-11 rounded-xl px-3 py-2.5 text-sm text-red-600 focus:bg-red-50 focus:text-red-700"
