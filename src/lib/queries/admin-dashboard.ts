@@ -133,6 +133,12 @@ export async function getAdminDashboardStats() {
       name: true,
       price: true,
       productImages: true,
+      sku: true,
+      supplier: {
+        select: {
+          name: true,
+        },
+      },
     },
     take: 5,
   });

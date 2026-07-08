@@ -488,31 +488,40 @@ export default function AdminDashboardClient({ user, initialData, hasSalesSummar
                   <CardDescription>Items requiring immediate restock</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="divide-y divide-gray-50">
-                    {initialData.outOfStockProducts.length > 0 ? initialData.outOfStockProducts.map((product) => (
-                      <div key={product.id} className="py-3 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-rose-50/30 border border-rose-100 overflow-hidden relative">
-                            {Array.isArray(product.productImages) && (product.productImages as any)[0]?.url ? (
-                              <Image 
-                                src={(product.productImages as any)[0].url} 
-                                alt={product.name} 
-                                fill 
-                                className="object-cover opacity-60"
-                              />
-                            ) : (
-                              <PackageOpen className="w-5 h-5 m-2.5 text-rose-300" />
-                            )}
+                  <div className="w-full">
+                    <div className="grid grid-cols-12 gap-2 pb-2 text-[11px] font-semibold text-slate-500 border-b border-gray-100 px-1">
+                      <div className="col-span-6">Item Name</div>
+                      <div className="col-span-3">SKU Code</div>
+                      <div className="col-span-3">Supplier</div>
+                    </div>
+                    <div className="divide-y divide-gray-50">
+                      {initialData.outOfStockProducts.length > 0 ? initialData.outOfStockProducts.map((product: any) => (
+                        <div key={product.id} className="grid grid-cols-12 gap-2 py-3 px-1 items-center hover:bg-gray-50/50 transition-colors">
+                          <div className="col-span-6 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-rose-50/30 border border-rose-100 overflow-hidden relative shrink-0">
+                              {Array.isArray(product.productImages) && (product.productImages as any)[0]?.url ? (
+                                <Image 
+                                  src={(product.productImages as any)[0].url} 
+                                  alt={product.name} 
+                                  fill 
+                                  className="object-cover opacity-60"
+                                />
+                              ) : (
+                                <PackageOpen className="w-4 h-4 m-2 text-rose-300" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-[#1F1720] truncate">{product.name}</p>
+                              <Badge variant="outline" className="text-[9px] h-4.5 px-1.5 border-rose-200 text-rose-600 bg-rose-50 mt-0.5">OOS</Badge>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs font-semibold text-[#1F1720] line-clamp-1">{product.name}</p>
-                            <Badge variant="outline" className="text-[9px] h-4.5 px-1.5 border-rose-200 text-rose-600 bg-rose-50 mt-0.5">OOS</Badge>
-                          </div>
+                          <div className="col-span-3 text-xs text-slate-600 truncate">{product.sku || "-"}</div>
+                          <div className="col-span-3 text-xs text-slate-600 truncate">{product.supplier?.name || "-"}</div>
                         </div>
-                      </div>
-                    )) : (
-                      <div className="py-6 text-center text-xs text-muted-foreground">Everything is in stock!</div>
-                    )}
+                      )) : (
+                        <div className="py-6 text-center text-xs text-muted-foreground">Everything is in stock!</div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
