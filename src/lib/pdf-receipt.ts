@@ -299,11 +299,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "bold" },
       styles: { fontSize: 10, cellPadding: 4 },
       columnStyles: {
-        0: { cellWidth: 80 },
-        1: { cellWidth: 20, halign: "center" },
+        0: { cellWidth: 75 },
+        1: { cellWidth: 15, halign: "center" },
         2: { cellWidth: 30, halign: "right" },
-        3: { cellWidth: 20, halign: "center" },
-        4: { cellWidth: 30, halign: "right" },
+        3: { cellWidth: 25, halign: "center" },
+        4: { cellWidth: 35, halign: "right" },
       },
       margin: { left: 15, right: 15 },
     });
