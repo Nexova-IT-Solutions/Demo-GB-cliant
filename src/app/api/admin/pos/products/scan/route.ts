@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         name: true,
+        nameAr: true,
         sku: true,
         price: true,
         salePrice: true,
@@ -89,6 +90,7 @@ export async function GET(req: NextRequest) {
         product: {
           id: product.id,
           name: product.name,
+          nameAr: product.nameAr,
           sku: product.sku,
           price: product.price,
           salePrice: product.salePrice,
@@ -120,6 +122,7 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         name: true,
+        nameAr: true,
         sku: true,
         price: true,
         salePrice: true,
@@ -191,6 +194,7 @@ export async function GET(req: NextRequest) {
           product: {
             id: variantMatch.id,
             name: `${variantMatch.name} (${[variantSize, variantColor ? variantColor.split('|')[0] : ""].filter(Boolean).join(" / ")})`,
+            nameAr: variantMatch.nameAr,
             sku: variantSku,
             price: typeof resolvedVariant.price === "number" ? resolvedVariant.price : variantMatch.price,
             salePrice: isCustomPrice ? null : variantMatch.salePrice,

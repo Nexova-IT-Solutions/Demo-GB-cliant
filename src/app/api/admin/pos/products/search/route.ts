@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
         select: {
           id: true,
           name: true,
+          nameAr: true,
           sku: true,
           price: true,
           salePrice: true,
@@ -108,6 +109,7 @@ export async function GET(req: NextRequest) {
       return {
         id: p.id,
         name: p.name,
+        nameAr: p.nameAr,
         sku: p.sku,
         price: p.price,
         salePrice: p.salePrice,

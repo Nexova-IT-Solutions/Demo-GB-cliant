@@ -293,12 +293,12 @@ export function CheckoutModal() {
             </div>
             <div className="w-full max-w-xs space-y-2 bg-slate-50 rounded-xl p-4">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Total Paid</span>
+                <span className="text-slate-500 flex flex-col gap-0.5"><span>Total Paid</span><span className="text-[10px] dir-rtl">إجمالي المدفوع</span></span>
                 <span className="font-bold text-slate-800">{formatPrice(successOrder.total)}</span>
               </div>
               {successOrder.changeDue > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Change Due</span>
+                  <span className="text-slate-500 flex flex-col gap-0.5"><span>Change Due</span><span className="text-[10px] dir-rtl">الباقي</span></span>
                   <span className="font-bold text-emerald-600 text-lg">
                     {formatPrice(successOrder.changeDue)}
                   </span>
@@ -402,8 +402,9 @@ export function CheckoutModal() {
                         : payment.cashTendered < total ? "bg-red-50 border border-red-200"
                         : "bg-slate-50 border border-slate-200"
                     }`}>
-                      <p className="text-xs text-slate-500 mb-1">
-                        {payment.cashTendered >= total ? "Change Due" : "Amount Remaining"}
+                      <p className="text-xs text-slate-500 mb-1 flex justify-between">
+                        <span>{payment.cashTendered >= total ? "Change Due" : "Amount Remaining"}</span>
+                        <span className="dir-rtl">{payment.cashTendered >= total ? "الباقي" : "المبلغ المتبقي"}</span>
                       </p>
                       <p className={`text-3xl font-black ${
                         changeDue > 0 ? "text-emerald-600"

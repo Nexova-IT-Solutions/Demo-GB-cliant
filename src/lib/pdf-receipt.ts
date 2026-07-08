@@ -145,11 +145,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item / العنصر", "Qty", "Price", "Disc", "Total"]],
+      head: [["Item / العنصر", "Qty / الكمية", "Price / سعر الوحدة", "Disc / خصم", "Total / المجموع"]],
       body: tableData,
       theme: "plain",
       styles: { font: "Amiri", fontSize: 8, cellPadding: 1 },
-      headStyles: { fontStyle: "bold", font: "Amiri" },
+      headStyles: { fontStyle: "normal", font: "Amiri", halign: "center" },
       columnStyles: {
         0: { cellWidth: 26 }, // Item
         1: { cellWidth: 8, halign: "center" }, // Qty
@@ -168,21 +168,22 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     currentY += 4;
 
     // Totals
+    doc.setFont("Amiri", "normal");
     doc.setFontSize(9);
-    doc.text("Subtotal:", 5, currentY);
+    doc.text("Subtotal / المجموع الفرعي:", 5, currentY);
     doc.text(`OMR ${data.subtotal.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
     currentY += 5;
 
     doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("Total:", 5, currentY);
+    doc.setFont("Amiri", "normal");
+    doc.text("Total / المجموع:", 5, currentY);
     doc.text(`OMR ${data.total.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
     currentY += 5;
 
     if (data.changeDue > 0) {
       doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.text("Change Due:", 5, currentY);
+      doc.setFont("Amiri", "normal");
+      doc.text("Change Due / الباقي:", 5, currentY);
       doc.text(`OMR ${data.changeDue.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
       currentY += 5;
     }
@@ -324,10 +325,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item Description / وصف العنصر", "Qty", "Unit Price", "Discount", "Total"]],
+      head: [["Item Description / وصف العنصر", "Qty / الكمية", "Unit Price / سعر الوحدة", "Discount / خصم", "Total / المجموع"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "bold", font: "Amiri" },
+      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
       styles: { font: "Amiri", fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 75 },
@@ -347,25 +348,26 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.roundedRect(pageWidth - 85, currentY, 70, 40, 3, 3, "FD");
 
     let totalY = currentY + 10;
+    doc.setFont("Amiri", "normal");
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     
-    doc.text("Subtotal:", pageWidth - 80, totalY);
+    doc.text("Subtotal / المجموع الفرعي:", pageWidth - 80, totalY);
     doc.text(`OMR ${data.subtotal.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
-    doc.setFont("helvetica", "bold");
+    doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106);
-    doc.text("Total:", pageWidth - 80, totalY);
+    doc.text("Total / المجموع:", pageWidth - 80, totalY);
     doc.text(`OMR ${data.total.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
       totalY += 10;
-      doc.setFont("helvetica", "normal");
+      doc.setFont("Amiri", "normal");
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text("Change Due:", pageWidth - 80, totalY);
+      doc.text("Change Due / الباقي:", pageWidth - 80, totalY);
       doc.text(`OMR ${data.changeDue.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
