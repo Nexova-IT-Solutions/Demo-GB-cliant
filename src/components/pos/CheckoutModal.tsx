@@ -21,6 +21,8 @@ import useSWR from "swr";
 import { generateReceiptPdf } from "@/lib/pdf-receipt";
 import { format } from "date-fns";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 const QUICK_CASH_AMOUNTS = [500, 1000, 2000, 3000, 5000, 10000];
 
 export function CheckoutModal() {
@@ -46,10 +48,10 @@ export function CheckoutModal() {
   const getTotal = usePosCart((s) => s.getTotal);
   const fetchActiveShift = usePosCart((s) => s.fetchActiveShift);
 
-  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
   const isSplitEnabled = toggles?.operations_split_payment !== false;
-  const { data: companyDetails } = useSWR("/api/admin/company-details");
+  const { data: companyDetails } = useSWR("/api/admin/company-details", fetcher);
 
   const [isValidatingGiftCard, setIsValidatingGiftCard] = useState(false);
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);

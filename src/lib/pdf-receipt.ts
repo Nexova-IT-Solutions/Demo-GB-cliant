@@ -123,8 +123,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       return [
         itemName,
         item.quantity.toString(),
-        `$${item.price.toFixed(2)}`,
-        `$${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
+        `OMR ${item.price.toFixed(2)}`,
+        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
       ];
     });
 
@@ -154,20 +154,20 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     // Totals
     doc.setFontSize(9);
     doc.text("Subtotal:", 5, currentY);
-    doc.text(`$${data.subtotal.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
+    doc.text(`OMR ${data.subtotal.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
     currentY += 5;
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.text("Total:", 5, currentY);
-    doc.text(`$${data.total.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
+    doc.text(`OMR ${data.total.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
     currentY += 5;
 
     if (data.changeDue > 0) {
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       doc.text("Change Due:", 5, currentY);
-      doc.text(`$${data.changeDue.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
+      doc.text(`OMR ${data.changeDue.toFixed(2)}`, pageWidth - 5, currentY, { align: "right" });
       currentY += 5;
     }
 
@@ -245,7 +245,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(33, 33, 33);
-    doc.text("Order Number:", pageWidth - 60, rightY);
+    doc.text("Order Number:", pageWidth - 80, rightY);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text(data.orderNumber, pageWidth - 15, rightY, { align: "right" });
@@ -253,7 +253,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     rightY += 8;
     doc.setFont("helvetica", "bold");
     doc.setTextColor(33, 33, 33);
-    doc.text("Date:", pageWidth - 60, rightY);
+    doc.text("Date:", pageWidth - 80, rightY);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text(data.date, pageWidth - 15, rightY, { align: "right" });
@@ -261,7 +261,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     rightY += 8;
     doc.setFont("helvetica", "bold");
     doc.setTextColor(33, 33, 33);
-    doc.text("Payment Method:", pageWidth - 60, rightY);
+    doc.text("Payment Method:", pageWidth - 80, rightY);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text(data.paymentMethod.replace("POS_", ""), pageWidth - 15, rightY, { align: "right" });
@@ -277,8 +277,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       return [
         itemName,
         item.quantity.toString(),
-        `$${item.price.toFixed(2)}`,
-        `$${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
+        `OMR ${item.price.toFixed(2)}`,
+        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
       ];
     });
 
@@ -310,14 +310,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setTextColor(100, 100, 100);
     
     doc.text("Subtotal:", pageWidth - 80, totalY);
-    doc.text(`$${data.subtotal.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`OMR ${data.subtotal.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106);
     doc.text("Total:", pageWidth - 80, totalY);
-    doc.text(`$${data.total.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`OMR ${data.total.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
       totalY += 10;
@@ -325,7 +325,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text("Change Due:", pageWidth - 80, totalY);
-      doc.text(`$${data.changeDue.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
+      doc.text(`OMR ${data.changeDue.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
     // Footer
