@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import qz from "qz-tray";
+import { amiriBase64 } from "./fonts/Amiri-Regular";
 
 export interface ReceiptData {
   orderNumber: string;
@@ -11,6 +12,7 @@ export interface ReceiptData {
   date: string;
   items: {
     name: string;
+    nameAr?: string | null;
     sku?: string;
     quantity: number;
     price: number;
@@ -53,6 +55,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       unit: "mm",
       format: [80, 200], // 80mm roll width
     });
+    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
 
     let currentY = 10;
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -121,6 +125,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     // Items Table mapping
     const tableData = data.items.map((item) => {
       let itemName = item.name;
+      if (item.nameAr) {
+        itemName += `\n${item.nameAr}`;
+      }
       if (item.sku) {
         itemName += `\nSKU: ${item.sku}`;
       }
@@ -138,11 +145,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item", "Qty", "Price", "Disc", "Total"]],
+      head: [["Item / العنصر", "Qty", "Price", "Disc", "Total"]],
       body: tableData,
       theme: "plain",
-      styles: { fontSize: 8, cellPadding: 1 },
-      headStyles: { fontStyle: "bold" },
+      styles: { font: "Amiri", fontSize: 8, cellPadding: 1 },
+      headStyles: { fontStyle: "bold", font: "Amiri" },
       columnStyles: {
         0: { cellWidth: 26 }, // Item
         1: { cellWidth: 8, halign: "center" }, // Qty
@@ -208,6 +215,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       unit: "mm",
       format: "a4", // 210 x 297 mm
     });
+    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
 
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
@@ -295,6 +304,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     // Items Table mapping
     const tableData = data.items.map((item) => {
       let itemName = item.name;
+      if (item.nameAr) {
+        itemName += `\n${item.nameAr}`;
+      }
       if (item.sku) {
         itemName += `\nSKU: ${item.sku}`;
       }
@@ -312,11 +324,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
+      head: [["Item Description / وصف العنصر", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "bold" },
-      styles: { fontSize: 10, cellPadding: 4 },
+      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "bold", font: "Amiri" },
+      styles: { font: "Amiri", fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 75 },
         1: { cellWidth: 15, halign: "center" },

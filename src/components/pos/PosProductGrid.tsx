@@ -18,6 +18,7 @@ import { useCurrency } from "@/components/CurrencyProvider";
 interface ProductItem {
   id: string;
   name: string;
+  nameAr?: string | null;
   sku: string | null;
   price: number;
   salePrice: number | null;
@@ -178,6 +179,7 @@ export function PosProductGrid() {
       setVariantProduct({
         id: product.id,
         name: product.name,
+        nameAr: product.nameAr || null,
         price: product.price,
         salePrice: product.salePrice,
         stock: product.stock,
@@ -197,6 +199,7 @@ export function PosProductGrid() {
     addItem({
       id: product.id,
       name: product.name,
+      nameAr: product.nameAr || null,
       sku: product.sku,
       price: product.price,
       salePrice: product.salePrice,
@@ -221,6 +224,7 @@ export function PosProductGrid() {
     addItem({
       id: `${variantProduct.id}-${selection.variantId}`,
       name: `${variantProduct.name} (${variantLabel})`,
+      nameAr: variantProduct.nameAr || null,
       sku: selection.sku || null,
       price: selection.price ?? variantProduct.price,
       salePrice: isCustomPrice ? null : (variantProduct.salePrice ?? null),
@@ -393,6 +397,7 @@ export function PosProductGrid() {
                       <div className="p-2.5 flex-1 flex flex-col">
                         <p className="text-xs font-medium text-slate-800 line-clamp-2 leading-tight mb-1">
                           {product.name}
+                          {product.nameAr && <span className="block text-[#A7066A] mt-0.5 text-right font-semibold dir-rtl">{product.nameAr}</span>}
                         </p>
                         {product.sku && (
                           <p className="text-[10px] text-slate-400 mb-1.5">

@@ -27,6 +27,7 @@ interface PosCartState {
   addItem: (product: {
     id: string;
     name: string;
+    nameAr?: string | null;
     sku: string | null;
     price: number;
     salePrice: number | null;
@@ -132,6 +133,7 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
           id: `${product.id}-${Date.now()}`, // unique cart entry id
           productId: product.id,
           name: product.name,
+          nameAr: product.nameAr || null,
           sku: product.sku,
           price: product.price,
           salePrice: product.salePrice,
@@ -197,6 +199,7 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
         id: product.id,
         productId: product.id,
         name: product.name,
+        nameAr: product.nameAr || null,
         sku: product.sku,
         price: product.price,
         salePrice: product.salePrice,
@@ -327,6 +330,7 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
         get().addItem({
           id: cartItemId,
           name: p.name,
+          nameAr: p.nameAr,
           sku: p.sku,
           price: p.price,
           salePrice: p.salePrice,

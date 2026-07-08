@@ -10,6 +10,7 @@ const REQUIRED_FIELD_MESSAGE = "This field is required.";
 
 const productCreateSchema = z.object({
   name: z.string().trim().min(1, REQUIRED_FIELD_MESSAGE),
+  nameAr: z.string().optional().nullable(),
   sku: z.string()
     .max(20, 'SKU cannot exceed 20 characters')
     .regex(/^[A-Z0-9-]*$/, 'SKU must be uppercase letters, numbers, and hyphens only')
@@ -193,6 +194,7 @@ export async function POST(req: Request) {
 
     const {
       name,
+      nameAr,
       sku,
       description,
       shortDescription,
@@ -276,6 +278,7 @@ export async function POST(req: Request) {
         const productRecord = await tx.product.create({
           data: {
             name,
+            nameAr: nameAr ?? null,
             sku: sku ? sku.trim().toUpperCase() : null,
             description,
             shortDescription: shortDescription ?? null,

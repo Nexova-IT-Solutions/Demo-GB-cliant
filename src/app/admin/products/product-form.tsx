@@ -42,6 +42,7 @@ const REQUIRED_FIELD_MESSAGE = "This field is required.";
 
 const productFormSchema = z.object({
   name: z.string().trim().min(1, REQUIRED_FIELD_MESSAGE),
+  nameAr: z.string().optional().or(z.literal('')),
   sku: z.string()
     .max(20, 'SKU cannot exceed 20 characters')
     .regex(/^[A-Z0-9-]*$/, 'SKU must be uppercase letters, numbers, and hyphens only')
@@ -181,6 +182,7 @@ type ProductInput = {
   id: string;
   sku?: string | null;
   name: string;
+  nameAr?: string | null;
   description: string | null;
   shortDescription?: string | null;
   price: number;
@@ -313,6 +315,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: product?.name || "",
+      nameAr: product?.nameAr || "",
       sku: product?.sku || "",
       categoryId: product?.categoryId || "",
       price: product?.price != null ? String(product.price) : "",
@@ -357,6 +360,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
 
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
+  const [nameAr, setNameAr] = useState("");
   const [sku, setSku] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
@@ -411,6 +415,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     // Explicitly reset the form with casted boolean values
     form.reset({
       name: product.name || "",
+      nameAr: product.nameAr || "",
       sku: product.sku || "",
       categoryId: product.categoryId || "",
       price: product.price != null ? String(product.price) : "",
@@ -432,6 +437,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
 
     // Sync remaining non-form local states
     setName(product.name);
+    setNameAr(product.nameAr || "");
     setSku(product.sku || "");
     setShortDescription(product.shortDescription ?? "");
     setDescription(product.description ?? "");
@@ -966,6 +972,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
+          nameAr: nameAr || null,
           sku,
           shortDescription: shortDescription || null,
           description,
@@ -1143,10 +1150,16 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
             </p>
           )}
 
-          <div className="space-y-2">
-            <Label required className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Product Name</Label>
-            <Input required value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Signature Golden Gift Box" className="h-12 border-brand-border" />
-            {fieldErrors.name ? <p className="text-sm text-destructive">{fieldErrors.name}</p> : null}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label required className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Product Name</Label>
+              <Input required value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Signature Golden Gift Box" className="h-12 border-brand-border" />
+              {fieldErrors.name ? <p className="text-sm text-destructive">{fieldErrors.name}</p> : null}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Arabic Name (Optional)</Label>
+              <Input value={nameAr} onChange={(event) => setNameAr(event.target.value)} placeholder="e.g. علبة هدايا ذهبية مميزة" className="h-12 border-brand-border text-right" dir="auto" />
+            </div>
           </div>
 
           {/* SKU & Barcode */}

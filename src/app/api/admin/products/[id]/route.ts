@@ -8,6 +8,7 @@ import { locales } from "@/i18n/config";
 
 const productUpdateSchema = z.object({
   name: z.string().trim().min(1).optional(),
+  nameAr: z.string().optional().nullable(),
   sku: z.string()
     .max(20, 'SKU cannot exceed 20 characters')
     .regex(/^[A-Z0-9-]*$/, 'SKU must be uppercase letters, numbers, and hyphens only')
@@ -103,6 +104,7 @@ export async function GET(_req: Request, props: RouteProps) {
       select: {
         id: true,
         name: true,
+        nameAr: true,
         description: true,
         shortDescription: true,
         price: true,
@@ -287,6 +289,7 @@ export async function PATCH(req: Request, props: RouteProps) {
         where: { id },
         data: {
           name: data.name,
+          ...(data.nameAr !== undefined ? { nameAr: data.nameAr } : {}),
           ...(data.sku !== undefined ? { sku: data.sku ? data.sku.trim().toUpperCase() : null } : {}),
           description: data.description,
           ...(data.shortDescription !== undefined ? { shortDescription: data.shortDescription } : {}),

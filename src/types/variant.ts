@@ -22,6 +22,7 @@ export interface ProductVariantData {
 export interface VariantProductPayload {
   id: string;
   name: string;
+  nameAr?: string | null;
   price: number;
   salePrice?: number | null;
   stock: number;

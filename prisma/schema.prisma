@@ -191,6 +191,7 @@ model Supplier {
 model Product {
   id                    String          @id @default(cuid())
   name                  String
+  nameAr                String?
   description           String?
   shortDescription      String?         @db.VarChar(250)
   price                 Float
@@ -560,6 +561,7 @@ model OrderItem {
   orderId       String
   productId     String
   productName   String
+  productNameAr String?
   productImage  String?
   quantity      Int
   unitPrice     Float

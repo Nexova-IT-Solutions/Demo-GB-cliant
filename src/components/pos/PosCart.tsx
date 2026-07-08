@@ -114,7 +114,7 @@ export function PosCart() {
             <div className="bg-white/20 p-1.5 rounded-lg">
               <Receipt className="h-4 w-4 text-white" />
             </div>
-            <h2 className="text-white font-semibold text-sm">Current Sale</h2>
+            <h2 className="text-white font-semibold text-sm">Current Sale / المبيعات الحالية</h2>
           </div>
           {items.length > 0 && (
             <Badge className="bg-white/20 text-white border-white/30 text-xs">
@@ -151,7 +151,10 @@ export function PosCart() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-medium text-slate-800 truncate leading-tight">{item.name}</p>
+                          <div className="flex flex-col">
+                            <p className="text-xs font-medium text-slate-800 truncate leading-tight">{item.name}</p>
+                            {item.nameAr && <p className="text-xs font-semibold text-[#A7066A] truncate leading-tight dir-rtl">{item.nameAr}</p>}
+                          </div>
                           {item.isGiftCard && (
                             <Badge className="bg-amber-500 text-white text-[9px] px-1 py-0 h-4">
                               Gift Card
@@ -258,8 +261,11 @@ export function PosCart() {
       {/* Totals & Actions */}
       <div className="p-4 border-t border-slate-200 bg-slate-50/80 space-y-3">
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-slate-500">
-            <span>Subtotal ({itemCount} items)</span>
+          <div className="flex justify-between text-xs text-slate-500 items-end">
+            <span className="flex flex-col">
+              <span>Subtotal ({itemCount} items)</span>
+              <span className="text-[10px] dir-rtl">المجموع الفرعي</span>
+            </span>
             <span>{formatPrice(subtotal)}</span>
           </div>
           {appliedVoucher && (
@@ -269,8 +275,11 @@ export function PosCart() {
             </div>
           )}
           <Separator className="bg-slate-200" />
-          <div className="flex justify-between">
-            <span className="text-sm font-bold text-slate-800">Total</span>
+          <div className="flex justify-between items-end">
+            <span className="flex flex-col">
+              <span className="text-sm font-bold text-slate-800">Total</span>
+              <span className="text-xs font-bold text-slate-600 dir-rtl">المجموع</span>
+            </span>
             <span className="text-lg font-black text-[#A7066A]">{formatPrice(effectiveTotal)}</span>
           </div>
         </div>

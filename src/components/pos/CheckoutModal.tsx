@@ -172,6 +172,7 @@ export function CheckoutModal() {
           id: item.id,
           productId: item.productId,
           productName: item.name,
+          productNameAr: item.nameAr || null,
           quantity: item.quantity,
           unitPrice: item.price,
           salePrice: item.effectivePrice !== item.price ? item.effectivePrice : null,
@@ -220,7 +221,7 @@ export function CheckoutModal() {
         subtotal,
         changeDue,
         paymentMethod: payment.method === "POS_CARD" && cardType ? cardType : payment.method,
-        items: items.map(i => ({ name: i.name, sku: i.sku, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
+        items: items.map(i => ({ name: i.name, nameAr: i.nameAr || null, sku: i.sku, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
         activatedCodes: data.order.activatedCodes ?? [],
       });
       setLastOrderNumber(data.order.orderNumber);
@@ -623,7 +624,7 @@ export function CheckoutModal() {
               {/* Order Summary */}
               <div className="space-y-1.5 bg-slate-50 rounded-xl p-4">
                 <div className="flex justify-between text-xs text-slate-500">
-                  <span>Subtotal</span><span>{formatPrice(subtotal)}</span>
+                  <span className="flex gap-2"><span>Subtotal</span><span className="text-[10px] dir-rtl">المجموع الفرعي</span></span><span>{formatPrice(subtotal)}</span>
                 </div>
                 {payment.giftCardDeduction > 0 && (
                   <div className="flex justify-between text-xs text-emerald-600">

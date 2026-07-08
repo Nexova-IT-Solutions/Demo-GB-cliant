@@ -4,6 +4,7 @@ export interface PosCartItem {
   id: string;
   productId: string;
   name: string;
+  nameAr?: string | null;
   sku: string | null;
   price: number;
   salePrice: number | null;
@@ -130,6 +131,7 @@ export interface PosCheckoutPayload {
 export interface ScannedProduct {
   id: string;
   name: string;
+  nameAr?: string | null;
   sku: string | null;
   price: number;
   salePrice: number | null;
