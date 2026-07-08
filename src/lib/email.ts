@@ -1,11 +1,11 @@
 import nodemailer from "nodemailer";
 
-const smtpHost = process.env.SMTP_HOST || "mail.nexstoreapps.com";
-const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpHost = process.env.SMTP_HOST || "smtp.mailersend.net";
+const smtpPort = Number(process.env.SMTP_PORT || 2525);
 const smtpSecure = (process.env.SMTP_SECURE || "false") === "true";
-const smtpUser = process.env.SMTP_USER || "soharpetcenter@nexstoreapps.com";
-const smtpPass = process.env.SMTP_PASS || "M-?Wf#wB6lZF(.3G";
-const fromEmail = process.env.MAIL_FROM || smtpUser || "soharpetcenter@nexstoreapps.com";
+const smtpUser = process.env.SMTP_USER || "MS_kJeLLq@nexovaitsolutions.com";
+const smtpPass = process.env.SMTP_PASS || "mssp.D0FlRCt.0r83ql31ezmgzw1j.3Pm1uTK";
+const fromEmail = process.env.MAIL_FROM || "no-reply@nexovaitsolutions.com";
 const fromName = "SPC System";
 
 function ensureMailerConfig() {
