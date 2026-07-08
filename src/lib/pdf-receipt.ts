@@ -67,10 +67,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     // Company Name
     const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(companyName, pageWidth / 2, currentY, alignCenter);
-    currentY += 6;
+    const splitCompanyName = doc.splitTextToSize(companyName, pageWidth - 10);
+    doc.text(splitCompanyName, pageWidth / 2, currentY, alignCenter);
+    currentY += splitCompanyName.length * 5 + 1;
 
     // Company Details
     doc.setFontSize(9);
