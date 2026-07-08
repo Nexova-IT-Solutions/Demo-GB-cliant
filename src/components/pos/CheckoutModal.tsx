@@ -246,13 +246,21 @@ export function CheckoutModal() {
       date: format(new Date(), "PPpp"),
       items: successOrder.items,
       companyDetails: companyDetails,
-    });
+    }, "download");
   };
 
   const handlePrintReceipt = () => {
     if (!successOrder) return;
-    handleDownloadReceipt(); // Fallback to download for now if no printer logic exists.
-    // Or window.print() if there's a printable receipt view.
+    generateReceiptPdf({
+      orderNumber: successOrder.orderNumber,
+      total: successOrder.total,
+      subtotal: successOrder.subtotal,
+      changeDue: successOrder.changeDue,
+      paymentMethod: successOrder.paymentMethod,
+      date: format(new Date(), "PPpp"),
+      items: successOrder.items,
+      companyDetails: companyDetails,
+    }, "print");
   };
 
   const paymentMethods: { method: PosPaymentMethod; label: string; icon: any }[] = [
