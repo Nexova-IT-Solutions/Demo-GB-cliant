@@ -84,7 +84,7 @@ export default function CompanyDetailsPage() {
       }
       const foundPrinters = await qz.printers.find();
       setPrinters(foundPrinters);
-      toast.success("Found printers on local network");
+      toast.success("Connected to QZ Tray & found printers");
     } catch (err) {
       console.error(err);
       toast.error("Could not connect to QZ Tray. Make sure it is installed and running.");
@@ -92,6 +92,17 @@ export default function CompanyDetailsPage() {
       setIsConnectingQz(false);
     }
   };
+
+  useEffect(() => {
+    // Attempt to auto-connect to QZ Tray silently in the background
+    qz.websocket.connect({ retries: 0 }).then(() => {
+      return qz.printers.find();
+    }).then((foundPrinters) => {
+      setPrinters(foundPrinters);
+    }).catch((e) => {
+      console.log("Silent QZ connection failed (it might not be running yet)");
+    });
+  }, []);
 
   const onSubmit = async (values: CompanyDetailsValues) => {
     setIsSaving(true);
@@ -246,7 +257,7 @@ export default function CompanyDetailsPage() {
                             ))}
                             {/* If the current saved printer isn't in the list, still show it as an option */}
                             {field.value && !printers.includes(field.value) && (
-                              <option value={field.value}>{field.value} (Offline/Saved)</option>
+                              <option value={field.value}>{field.value} (Saved)</option>
                             )}
                           </select>
                         </FormControl>
