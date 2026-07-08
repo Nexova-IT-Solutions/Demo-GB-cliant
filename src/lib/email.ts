@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
 
 const smtpHost = process.env.SMTP_HOST || "mail.nexstoreapps.com";
-const smtpPort = Number(process.env.SMTP_PORT || 465);
-const smtpSecure = (process.env.SMTP_SECURE || "true") === "true";
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpSecure = (process.env.SMTP_SECURE || "false") === "true";
 const smtpUser = process.env.SMTP_USER || "soharpetcenter@nexstoreapps.com";
 const smtpPass = process.env.SMTP_PASS || "M-?Wf#wB6lZF(.3G";
 const fromEmail = process.env.MAIL_FROM || smtpUser || "soharpetcenter@nexstoreapps.com";
