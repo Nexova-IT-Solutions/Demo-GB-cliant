@@ -68,12 +68,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
     
     rawLines.push(
-      '--------------------------------\n',
+      '-'.repeat(48) + '\n',
       '\x1B\x61\x00', // Left align
       `Order: ${data.orderNumber}\n`,
       `Date: ${data.date}\n`,
       `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
-      '--------------------------------\n'
+      '-'.repeat(48) + '\n'
     );
     
     // Items
@@ -82,14 +82,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
       const qtyPrice = `${item.quantity} x OMR ${item.price.toFixed(2)}`;
       const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
-      // Pad to roughly 32 chars
-      let padding = 32 - qtyPrice.length - total.length;
+      // Pad to roughly 48 chars
+      let padding = 48 - qtyPrice.length - total.length;
       if (padding < 1) padding = 1;
       rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
     });
     
     rawLines.push(
-      '--------------------------------\n',
+      '-'.repeat(48) + '\n',
       '\x1B\x61\x02', // Right align
       `Subtotal: OMR ${data.subtotal.toFixed(2)}\n`,
       `Total: OMR ${data.total.toFixed(2)}\n`
