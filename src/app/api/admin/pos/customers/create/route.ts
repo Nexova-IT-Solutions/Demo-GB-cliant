@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
     const { name, phone } = body;
 
     // ─── Validation ──────────────────────────────────────────
-    if (!name || typeof name !== "string" || name.trim().length < 1) {
+    if (name && typeof name !== "string") {
       return NextResponse.json(
-        { success: false, message: "Customer name is required" },
+        { success: false, message: "Invalid customer name format" },
         { status: 400 }
       );
     }
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const trimmedPhone = phone.trim();
-    const trimmedName = name.trim();
+    const trimmedName = name ? name.trim() : "";
 
     // Check if a user with this phone already exists
     const existing = await db.user.findFirst({

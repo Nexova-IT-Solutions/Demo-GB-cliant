@@ -88,7 +88,7 @@ async function resolvePrivileges({
 
 const createUserSchema = z
   .object({
-    name: z.string().trim().min(1, "Need enter full name"),
+    name: z.string().trim().optional(),
     email: z.string().trim().min(1, "Email is required").email("Please enter a valid email address"),
     password: z.string().trim().min(1, "Password is required").min(6, "Password must be at least 6 characters"),
     image: z.string().url().optional().nullable(),
@@ -123,6 +123,16 @@ const createUserSchema = z
         path: ["birthday"],
         message: "Birthday cannot be in the future",
       });
+    }
+
+    if (isStaff) {
+      if (!data.name || data.name.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["name"],
+          message: "Need enter full name",
+        });
+      }
     }
 
     if (data.hireDate && new Date(data.hireDate) > new Date()) {

@@ -119,7 +119,7 @@ export function CustomerSearch() {
     setShowDropdown(false);
     setShowCreateForm(false);
     setPhoneQuery("");
-    toast.success(`Customer: ${c.name}`, { duration: 1500 });
+    toast.success(`Customer: ${c.name || "Unknown Customer"}`, { duration: 1500 });
   };
 
   // Create new customer
@@ -127,10 +127,6 @@ export function CustomerSearch() {
     const trimmedName = newName.trim();
     const trimmedPhone = phoneQuery.trim();
 
-    if (!trimmedName) {
-      toast.error("Enter a customer name");
-      return;
-    }
     if (trimmedPhone.length < 5) {
       toast.error("Phone number is too short");
       return;
@@ -164,8 +160,8 @@ export function CustomerSearch() {
       setNewName("");
       toast.success(
         data.isExisting
-          ? `Found existing: ${c.name}`
-          : `Created: ${c.name}`
+          ? `Found existing: ${c.name || "Unknown Customer"}`
+          : `Created: ${c.name || "Unknown Customer"}`
       );
     } catch (error) {
       console.error("[CustomerCreate] Error:", error);
@@ -184,7 +180,7 @@ export function CustomerSearch() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-emerald-900 truncate leading-tight">
-            {customer.name}
+            {customer.name || "Unknown Customer"}
           </p>
           <p className="text-[10px] text-emerald-600 truncate leading-tight">
             {customer.phone || customer.email || "No contact info"}
@@ -258,7 +254,7 @@ export function CustomerSearch() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-slate-800 truncate">
-                      {c.name}
+                      {c.name || "Unknown Customer"}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <Phone className="h-2.5 w-2.5 text-slate-400" />
@@ -329,7 +325,7 @@ export function CustomerSearch() {
                 </Button>
                 <Button
                   onClick={handleCreateCustomer}
-                  disabled={isCreating || !newName.trim()}
+                  disabled={isCreating}
                   className="flex-1 h-8 text-xs bg-[#A7066A] hover:bg-[#8A0558] text-white"
                 >
                   {isCreating ? (

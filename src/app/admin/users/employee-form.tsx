@@ -129,7 +129,7 @@ const hireDateValidationSchema = z.union([
 function buildEmployeeFormSchema(isCreateMode: boolean, isSocialUser: boolean, hidePasswordFields: boolean) {
   return z
     .object({
-      name: z.string().trim().min(1, "Need enter full name"),
+      name: z.string().trim().optional(),
       email: isCreateMode
         ? z.string().trim().min(1, "Email is required").email("Please enter a valid email address")
         : z.union([z.literal(""), z.string().trim().email("Please enter a valid email address")]),
@@ -199,6 +199,16 @@ function buildEmployeeFormSchema(isCreateMode: boolean, isSocialUser: boolean, h
           path: ["hireDate"],
           message: "Hire date cannot be in the future",
         });
+      }
+
+      if (isStaff) {
+        if (!data.name || data.name.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["name"],
+            message: "Need enter full name",
+          });
+        }
       }
 
       if (isStaff) {

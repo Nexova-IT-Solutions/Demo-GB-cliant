@@ -88,7 +88,7 @@ function hasEnabledPermission(
 
 const updateUserSchema = z
   .object({
-    name: z.string().trim().min(1, "Need enter full name"),
+    name: z.string().trim().optional(),
     email: z.union([z.literal(""), z.string().trim().email("Please enter a valid email address")]).optional().nullable(),
     image: z.string().url().optional().nullable(),
     role: z.string().trim().min(1, "User type is required"),
@@ -135,6 +135,16 @@ const updateUserSchema = z
         path: ["hireDate"],
         message: "Hire date cannot be in the future",
       });
+    }
+
+    if (isStaff) {
+      if (!data.name || data.name.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["name"],
+          message: "Need enter full name",
+        });
+      }
     }
 
     if (isStaff) {
