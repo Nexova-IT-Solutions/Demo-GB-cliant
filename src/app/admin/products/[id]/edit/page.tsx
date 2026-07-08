@@ -42,6 +42,7 @@ export default async function AdminProductEditPage({ params }: PageProps) {
             id: true,
             sku: true,
             name: true,
+            nameAr: true,
             description: true,
             shortDescription: true,
             price: true,
