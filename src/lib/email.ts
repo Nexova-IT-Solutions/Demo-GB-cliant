@@ -1,16 +1,10 @@
-import nodemailer from "nodemailer";
-
-const smtpHost = process.env.SMTP_HOST || "smtp.mailersend.net";
-const smtpPort = Number(process.env.SMTP_PORT || 2525);
-const smtpSecure = (process.env.SMTP_SECURE || "false") === "true";
-const smtpUser = process.env.SMTP_USER || "MS_kJeLLq@nexovaitsolutions.com";
-const smtpPass = process.env.SMTP_PASS || "mssp.D0FlRCt.0r83ql31ezmgzw1j.3Pm1uTK";
-const fromEmail = process.env.MAIL_FROM || "no-reply@nexovaitsolutions.com";
+const mailersendToken = process.env.MAILERSEND_TOKEN || "mlsn.194bc6d9ec9ac7189982605b502b056f334745d7eb3388368a7a15b911a33161";
+const fromEmail = process.env.MAIL_FROM || "MS_kJeLLq@nexovaitsolutions.com";
 const fromName = "SPC System";
 
 function ensureMailerConfig() {
-  if (!smtpUser || !smtpPass) {
-    throw new Error("SMTP_USER and SMTP_PASS are required for email sending");
+  if (!mailersendToken) {
+    throw new Error("MAILERSEND_TOKEN is required for email sending");
   }
 }
 
@@ -41,26 +35,31 @@ function buildResetTemplate(resetUrl: string) {
 export async function sendPasswordResetEmail(params: { to: string; resetUrl: string }) {
   ensureMailerConfig();
 
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpSecure,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-    tls: {
-      rejectUnauthorized: false,
+  const response = await fetch("https://api.mailersend.com/v1/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+      "Authorization": `Bearer ${mailersendToken}`
     },
-    auth: {
-      user: smtpUser,
-      pass: smtpPass,
-    },
+    body: JSON.stringify({
+      from: {
+        email: fromEmail,
+        name: fromName
+      },
+      to: [
+        {
+          email: params.to
+        }
+      ],
+      subject: "Reset your SPC password",
+      html: buildResetTemplate(params.resetUrl)
+    })
   });
 
-  await transporter.sendMail({
-    from: `"${fromName}" <${fromEmail}>`,
-    to: params.to,
-    subject: "Reset your SPC password",
-    html: buildResetTemplate(params.resetUrl),
-  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("MailerSend API error:", errorText);
+    throw new Error(`Failed to send email: ${response.status} ${response.statusText}`);
+  }
 }
