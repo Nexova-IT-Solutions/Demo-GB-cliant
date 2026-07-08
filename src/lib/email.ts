@@ -45,6 +45,12 @@ export async function sendPasswordResetEmail(params: { to: string; resetUrl: str
     host: smtpHost,
     port: smtpPort,
     secure: smtpSecure,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    tls: {
+      rejectUnauthorized: false,
+    },
     auth: {
       user: smtpUser,
       pass: smtpPass,
