@@ -104,6 +104,35 @@ export default function CompanyDetailsPage() {
     });
   }, []);
 
+  const handleTestPrint = async () => {
+    const selectedPrinter = form.getValues("posPrinterName");
+    if (!selectedPrinter) {
+      toast.error("Please select a printer first.");
+      return;
+    }
+    try {
+      if (!qz.websocket.isActive()) {
+        await qz.websocket.connect({ retries: 0 });
+      }
+      const config = qz.configs.create(selectedPrinter);
+      // Basic raw text print for testing connectivity, followed by some newlines to push paper out
+      const data = [
+        "\n",
+        "TEST PRINT SUCCESSFUL\n",
+        "--------------------------\n",
+        "If you can read this, your\n",
+        "printer is connected and\n",
+        "ready to use with the POS.\n",
+        "\n\n\n\n\n\n"
+      ];
+      await qz.print(config, data);
+      toast.success("Test print sent to printer!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send test print. Is the printer online?");
+    }
+  };
+
   const onSubmit = async (values: CompanyDetailsValues) => {
     setIsSaving(true);
     try {
@@ -266,15 +295,23 @@ export default function CompanyDetailsPage() {
                     )}
                   />
                 </div>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={fetchPrinters} 
-                  disabled={isConnectingQz}
-                  className="mb-[2px]"
-                >
-                  {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
-                </Button>
+                <div className="flex gap-2 mb-[2px]">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={fetchPrinters} 
+                    disabled={isConnectingQz}
+                  >
+                    {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="secondary" 
+                    onClick={handleTestPrint} 
+                  >
+                    Test Printer
+                  </Button>
+                </div>
               </div>
               <p className="text-xs text-slate-500 mt-2">
                 Select the LAN/Local printer to use for direct receipt printing in the POS. 
