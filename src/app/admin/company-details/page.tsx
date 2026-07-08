@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Save, Building2 } from "lucide-react";
+import { Loader2, Save, Building2, Printer } from "lucide-react";
+import qz from "qz-tray";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,6 +25,7 @@ const companyDetailsSchema = z.object({
   website: z.string().optional().or(z.literal("")),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   crNumber: z.string().optional().or(z.literal("")),
+  posPrinterName: z.string().optional().or(z.literal("")),
 });
 
 type CompanyDetailsValues = z.infer<typeof companyDetailsSchema>;
@@ -41,6 +43,7 @@ export default function CompanyDetailsPage() {
       website: "",
       email: "",
       crNumber: "",
+      posPrinterName: "",
     },
   });
 
@@ -58,6 +61,7 @@ export default function CompanyDetailsPage() {
           website: data.website || "",
           email: data.email || "",
           crNumber: data.crNumber || "",
+          posPrinterName: data.posPrinterName || "",
         });
       } catch (err) {
         toast.error("Failed to load company details");
@@ -68,6 +72,26 @@ export default function CompanyDetailsPage() {
 
     fetchDetails();
   }, [form]);
+
+  const [printers, setPrinters] = useState<string[]>([]);
+  const [isConnectingQz, setIsConnectingQz] = useState(false);
+
+  const fetchPrinters = async () => {
+    setIsConnectingQz(true);
+    try {
+      if (!qz.websocket.isActive()) {
+        await qz.websocket.connect({ retries: 0 });
+      }
+      const foundPrinters = await qz.printers.find();
+      setPrinters(foundPrinters);
+      toast.success("Found printers on local network");
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not connect to QZ Tray. Make sure it is installed and running.");
+    } finally {
+      setIsConnectingQz(false);
+    }
+  };
 
   const onSubmit = async (values: CompanyDetailsValues) => {
     setIsSaving(true);
@@ -197,6 +221,55 @@ export default function CompanyDetailsPage() {
                 </FormItem>
               )}
             />
+
+            <div className="pt-6 border-t border-slate-100">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <Printer className="w-5 h-5 text-[#A7066A]" />
+                POS Receipt Printer
+              </h2>
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="posPrinterName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Printer (Requires QZ Tray)</FormLabel>
+                        <FormControl>
+                          <select
+                            className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:border-transparent"
+                            {...field}
+                          >
+                            <option value="">-- No Printer Configured --</option>
+                            {printers.map((p) => (
+                              <option key={p} value={p}>{p}</option>
+                            ))}
+                            {/* If the current saved printer isn't in the list, still show it as an option */}
+                            {field.value && !printers.includes(field.value) && (
+                              <option value={field.value}>{field.value} (Offline/Saved)</option>
+                            )}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={fetchPrinters} 
+                  disabled={isConnectingQz}
+                  className="mb-[2px]"
+                >
+                  {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
+                </Button>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Select the LAN/Local printer to use for direct receipt printing in the POS. 
+                Requires <a href="https://qz.io/" target="_blank" rel="noopener noreferrer" className="text-[#A7066A] hover:underline">QZ Tray</a> to be installed and running on the POS terminal computer.
+              </p>
+            </div>
 
             <div className="flex justify-end pt-4 border-t border-slate-100">
               <Button

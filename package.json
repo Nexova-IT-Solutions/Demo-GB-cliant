@@ -80,6 +80,7 @@
     "nodemailer": "^7.0.13",
     "nuqs": "^2.8.9",
     "prisma": "^6.11.1",
+    "qz-tray": "^2.2.6",
     "react": "^19.0.0",
     "react-barcode": "^1.6.1",
     "react-day-picker": "^9.8.0",

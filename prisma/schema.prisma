@@ -878,12 +878,13 @@ model FeatureToggle {
 
 
 model CompanyDetails {
-  id           String   @id @default("1")
-  companyName  String?
-  mobileNumber String?
-  address      String?
-  website      String?
-  email        String?
-  crNumber     String?
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default("1")
+  companyName    String?
+  mobileNumber   String?
+  address        String?
+  website        String?
+  email          String?
+  crNumber       String?
+  posPrinterName String?
+  updatedAt      DateTime @updatedAt
 }

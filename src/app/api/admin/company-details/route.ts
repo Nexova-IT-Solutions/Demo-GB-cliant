@@ -11,6 +11,7 @@ const companyDetailsSchema = z.object({
   website: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   crNumber: z.string().optional(),
+  posPrinterName: z.string().optional(),
 });
 
 export async function GET() {
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
         website: data.website,
         email: data.email,
         crNumber: data.crNumber,
+        posPrinterName: data.posPrinterName,
       },
       create: {
         id: "1",
@@ -79,6 +81,7 @@ export async function POST(req: Request) {
         website: data.website,
         email: data.email,
         crNumber: data.crNumber,
+        posPrinterName: data.posPrinterName,
       },
     });
 

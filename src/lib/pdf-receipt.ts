@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import qz from "qz-tray";
 
 export interface ReceiptData {
   orderNumber: string;
@@ -10,6 +11,7 @@ export interface ReceiptData {
   date: string;
   items: {
     name: string;
+    sku?: string;
     quantity: number;
     price: number;
     discountPercent?: number;
@@ -21,6 +23,7 @@ export interface ReceiptData {
     website?: string | null;
     email?: string | null;
     crNumber?: string | null;
+    posPrinterName?: string | null;
   } | null;
 }
 
@@ -180,6 +183,21 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.text("Thank you for your purchase!", pageWidth / 2, currentY, alignCenter);
+
+    if (data.companyDetails?.posPrinterName) {
+      try {
+        if (!qz.websocket.isActive()) {
+          await qz.websocket.connect({ retries: 0 });
+        }
+        const config = qz.configs.create(data.companyDetails.posPrinterName);
+        const base64Str = doc.output("datauristring").split(",")[1];
+        const printData = [{ type: 'pixel', format: 'pdf', flavor: 'base64', data: base64Str }];
+        await qz.print(config, printData);
+        return; // successfully printed via QZ, bypass normal save
+      } catch (e) {
+        console.error("QZ print failed, falling back to download", e);
+      }
+    }
 
     doc.save(`Receipt-${data.orderNumber}.pdf`);
 
