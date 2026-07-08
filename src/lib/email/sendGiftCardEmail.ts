@@ -1,11 +1,12 @@
 import nodemailer from "nodemailer";
 
-const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+const smtpHost = process.env.SMTP_HOST || "mail.nexstoreapps.com";
 const smtpPort = Number(process.env.SMTP_PORT || 465);
 const smtpSecure = (process.env.SMTP_SECURE || "true") === "true";
-const smtpUser = process.env.SMTP_USER;
-const smtpPass = process.env.SMTP_PASS;
-const fromEmail = process.env.MAIL_FROM || smtpUser || "no-reply@soharpets.com";
+const smtpUser = process.env.SMTP_USER || "shs@nexstoreapps.com";
+const smtpPass = process.env.SMTP_PASS || "M-?Wf#wB6lZF(.3G";
+const fromEmail = process.env.MAIL_FROM || smtpUser || "shs@nexstoreapps.com";
+const fromName = "SHSApperal";
 
 /**
  * Sends a gift card email using Nodemailer (SMTP).
@@ -93,7 +94,7 @@ export async function sendGiftCardEmail(giftCard: any) {
     });
 
     const info = await transporter.sendMail({
-      from: `SPC <${fromEmail}>`,
+      from: `"${fromName}" <${fromEmail}>`,
       to: recipientEmail,
       subject: `You received a LKR ${initialValue.toLocaleString()} Gift Card!`,
       html: html,

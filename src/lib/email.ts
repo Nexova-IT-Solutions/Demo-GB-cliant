@@ -1,11 +1,12 @@
 import nodemailer from "nodemailer";
 
-const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+const smtpHost = process.env.SMTP_HOST || "mail.nexstoreapps.com";
 const smtpPort = Number(process.env.SMTP_PORT || 465);
 const smtpSecure = (process.env.SMTP_SECURE || "true") === "true";
-const smtpUser = process.env.SMTP_USER;
-const smtpPass = process.env.SMTP_PASS;
-const fromEmail = process.env.MAIL_FROM || smtpUser || "no-reply@soharpets.com";
+const smtpUser = process.env.SMTP_USER || "shs@nexstoreapps.com";
+const smtpPass = process.env.SMTP_PASS || "M-?Wf#wB6lZF(.3G";
+const fromEmail = process.env.MAIL_FROM || smtpUser || "shs@nexstoreapps.com";
+const fromName = "SHSApperal";
 
 function ensureMailerConfig() {
   if (!smtpUser || !smtpPass) {
@@ -51,7 +52,7 @@ export async function sendPasswordResetEmail(params: { to: string; resetUrl: str
   });
 
   await transporter.sendMail({
-    from: `SPC <${fromEmail}>`,
+    from: `"${fromName}" <${fromEmail}>`,
     to: params.to,
     subject: "Reset your SPC password",
     html: buildResetTemplate(params.resetUrl),
