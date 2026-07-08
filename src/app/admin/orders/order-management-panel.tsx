@@ -299,7 +299,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
               onClick={() => window.print()}
             >
               <Printer className="mr-2 size-4" />
-              Print Invoice
+              Print Receipt
             </Button>
           </div>
 
