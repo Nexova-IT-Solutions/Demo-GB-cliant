@@ -198,7 +198,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         if (!qz.websocket.isActive()) {
           await qz.websocket.connect({ retries: 0 });
         }
-        const config = qz.configs.create(data.companyDetails.posPrinterName);
+        const config = qz.configs.create(data.companyDetails.posPrinterName, {
+          rasterize: true, // Fix for thermal printers getting stuck in queue
+          margins: 0,
+          scaleContent: false
+        });
         const base64Str = doc.output("datauristring").split(",")[1];
         const printData = [{ type: 'pixel', format: 'pdf', flavor: 'base64', data: base64Str }];
         await qz.print(config, printData);
