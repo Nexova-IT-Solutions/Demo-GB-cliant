@@ -151,8 +151,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       styles: { font: "Amiri", fontSize: 8, cellPadding: 1 },
       headStyles: { fontStyle: "normal", font: "Amiri", halign: "center" },
       columnStyles: {
-        0: { cellWidth: 26 }, // Item
-        1: { cellWidth: 8, halign: "center" }, // Qty
+        0: { cellWidth: 22 }, // Item
+        1: { cellWidth: 12, halign: "center" }, // Qty
         2: { cellWidth: 12, halign: "right" }, // Price
         3: { cellWidth: 10, halign: "center" }, // Disc
         4: { cellWidth: 14, halign: "right" }, // Total
@@ -331,11 +331,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
       styles: { font: "Amiri", fontSize: 10, cellPadding: 4 },
       columnStyles: {
-        0: { cellWidth: 75 },
-        1: { cellWidth: 15, halign: "center" },
-        2: { cellWidth: 30, halign: "right" },
-        3: { cellWidth: 25, halign: "center" },
-        4: { cellWidth: 35, halign: "right" },
+        0: { cellWidth: 70 },
+        1: { cellWidth: 24, halign: "center" },
+        2: { cellWidth: 28, halign: "right" },
+        3: { cellWidth: 26, halign: "center" },
+        4: { cellWidth: 32, halign: "right" },
       },
       margin: { left: 15, right: 15 },
     });
