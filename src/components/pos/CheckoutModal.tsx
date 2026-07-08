@@ -11,13 +11,15 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   Banknote, CreditCard, Gift, Split, Loader2, CheckCircle2,
-  Calculator, Receipt, ArrowRight, Plus, Trash2, Sparkles, ScanLine,
+  Calculator, Receipt, ArrowRight, Plus, Trash2, Sparkles, ScanLine, Printer, Download,
 } from "lucide-react";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { usePosCart } from "@/store/use-pos-cart";
 import type { SplitPaymentEntry, PosPaymentMethod, GiftCardActivation } from "@/types/pos";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { generateReceiptPdf } from "@/lib/pdf-receipt";
+import { format } from "date-fns";
 
 const QUICK_CASH_AMOUNTS = [500, 1000, 2000, 3000, 5000, 10000];
 
@@ -47,6 +49,7 @@ export function CheckoutModal() {
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
   const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
   const isSplitEnabled = toggles?.operations_split_payment !== false;
+  const { data: companyDetails } = useSWR("/api/admin/company-details");
 
   const [isValidatingGiftCard, setIsValidatingGiftCard] = useState(false);
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);
@@ -54,7 +57,9 @@ export function CheckoutModal() {
   const [giftCardIsPhysical, setGiftCardIsPhysical] = useState(false);
   const [splitEntries, setSplitEntries] = useState<SplitPaymentEntry[]>([]);
   const [successOrder, setSuccessOrder] = useState<{
-    orderNumber: string; total: number; changeDue: number;
+    orderNumber: string; total: number; subtotal: number; changeDue: number;
+    paymentMethod: string;
+    items: { name: string; quantity: number; price: number; discountPercent?: number }[];
     activatedCodes?: string[];
   } | null>(null);
   const [cardType, setCardType] = useState<"CREDIT_CARD" | "DEBIT_CARD" | null>(null);
@@ -210,7 +215,10 @@ export function CheckoutModal() {
       setSuccessOrder({
         orderNumber: data.order.orderNumber,
         total: data.order.total,
+        subtotal,
         changeDue,
+        paymentMethod: payment.method === "POS_CARD" && cardType ? cardType : payment.method,
+        items: items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
         activatedCodes: data.order.activatedCodes ?? [],
       });
       setLastOrderNumber(data.order.orderNumber);
@@ -225,6 +233,27 @@ export function CheckoutModal() {
   };
 
   const handleNewSale = () => { clearCart(); setSuccessOrder(null); closeCheckout(); };
+
+  const handleDownloadReceipt = () => {
+    if (!successOrder) return;
+    
+    generateReceiptPdf({
+      orderNumber: successOrder.orderNumber,
+      total: successOrder.total,
+      subtotal: successOrder.subtotal,
+      changeDue: successOrder.changeDue,
+      paymentMethod: successOrder.paymentMethod,
+      date: format(new Date(), "PPpp"),
+      items: successOrder.items,
+      companyDetails: companyDetails,
+    });
+  };
+
+  const handlePrintReceipt = () => {
+    if (!successOrder) return;
+    handleDownloadReceipt(); // Fallback to download for now if no printer logic exists.
+    // Or window.print() if there's a printable receipt view.
+  };
 
   const paymentMethods: { method: PosPaymentMethod; label: string; icon: any }[] = [
     { method: "POS_CASH", label: "Cash", icon: Banknote },
@@ -277,6 +306,17 @@ export function CheckoutModal() {
                 </div>
               )}
             </div>
+            <div className="flex w-full max-w-xs gap-3">
+              <Button onClick={handleDownloadReceipt}
+                className="flex-1 h-12 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold shadow-sm border border-slate-200">
+                <Download className="h-4 w-4 mr-2" /> Download
+              </Button>
+              <Button onClick={handlePrintReceipt}
+                className="flex-1 h-12 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold shadow-sm border border-slate-200">
+                <Printer className="h-4 w-4 mr-2" /> Print
+              </Button>
+            </div>
+            
             <Button onClick={handleNewSale}
               className="w-full max-w-xs h-12 bg-[#A7066A] hover:bg-[#8A0558] text-white text-sm font-semibold shadow-lg">
               <Receipt className="h-4 w-4 mr-2" /> New Sale

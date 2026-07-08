@@ -710,6 +710,12 @@ export function AppSidebar() {
             url: "/admin/feature-toggles",
             icon: Settings,
             requiredPermission: "",
+          },
+          {
+            title: "Company Details",
+            url: "/admin/company-details",
+            icon: Building2,
+            requiredPermission: "",
           }
         ])}
       </div>
