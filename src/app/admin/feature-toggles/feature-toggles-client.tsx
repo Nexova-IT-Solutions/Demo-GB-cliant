@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle, Coins, Split, BarChart3 } from "lucide-react";
+import { LayoutGrid, Image, Gift, Heart, Percent, CreditCard, Box, Star, ArrowRightLeft, Building2, Truck, Save, Loader2, RefreshCw, Globe, MessageCircle, Coins, Split, BarChart3, Banknote, Package, PackageX, ShoppingCart, ClipboardCheck, PieChart, Users } from "lucide-react";
 
 interface FeatureTogglesClientProps {
   initialToggles: Record<string, boolean>;
@@ -129,6 +129,18 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
     { key: "operations_shipping", label: "Shipping", icon: Truck, desc: "Configure carrier fees & delivery coverage" },
     { key: "operations_split_payment", label: "Split Payment", icon: Split, desc: "Enable split billing/payment options in POS Checkout" },
     { key: "operations_reports", label: "Reports", icon: BarChart3, desc: "Enable or disable all reports in the system" },
+  ];
+
+  const reportsFeatures = [
+    { key: "reports_sales_summary", label: "Sales Summary", icon: BarChart3, desc: "Overview of total sales and performance" },
+    { key: "reports_cash_close", label: "Cash Close (EOD)", icon: Banknote, desc: "End of day cash and shift reports" },
+    { key: "reports_stock_drilldown", label: "Stock Drill-down", icon: Package, desc: "Detailed inventory levels by item" },
+    { key: "reports_out_of_stock", label: "Out of Stock Items", icon: PackageX, desc: "Track depleted inventory" },
+    { key: "reports_item_movement", label: "Item Movement", icon: ShoppingCart, desc: "Analyze product sales velocity" },
+    { key: "reports_stock_audit", label: "Stock Audit", icon: ClipboardCheck, desc: "Audit logs for inventory changes" },
+    { key: "reports_supplier_products", label: "Supplier Products", icon: Truck, desc: "Items supplied per vendor" },
+    { key: "reports_category_sales", label: "Category Sales", icon: PieChart, desc: "Sales distribution by category" },
+    { key: "reports_customer_insights", label: "Customer Insights", icon: Users, desc: "Analytics on customer purchasing behavior" },
   ];
 
   return (
@@ -345,6 +357,63 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
                   </div>
                 );
               })}
+            </CardContent>
+          </div>
+        </Card>
+
+        <Card className="rounded-3xl border-brand-border bg-white shadow-sm overflow-hidden lg:col-span-2">
+          <div className="bg-gradient-to-br from-white to-blue-50/30 h-full">
+            <CardHeader className="pb-4 border-b border-brand-border bg-white/50 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-blue-50 text-blue-700">
+                    <BarChart3 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold text-[#1F1720]">Reports & Analytics</CardTitle>
+                    <CardDescription className="text-xs">Manage individual reports access</CardDescription>
+                  </div>
+                </div>
+                <Switch
+                  checked={!!localToggles.operations_reports}
+                  onCheckedChange={(checked) => handleToggleChange("operations_reports", checked)}
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {reportsFeatures.map((feat) => {
+                  const Icon = feat.icon;
+                  const parentEnabled = !!localToggles.operations_reports;
+                  return (
+                    <div
+                      key={feat.key}
+                      className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 ${
+                        !parentEnabled
+                          ? "bg-slate-50 opacity-40 border-slate-200"
+                          : localToggles[feat.key] !== false
+                          ? "bg-blue-50/30 border-blue-100"
+                          : "bg-white border-brand-border"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-xl ${localToggles[feat.key] !== false && parentEnabled ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-500"}`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-[#1F1720]">{feat.label}</p>
+                          <p className="text-xs text-[#6B5A64]">{feat.desc}</p>
+                        </div>
+                      </div>
+                      <Switch
+                        disabled={!parentEnabled}
+                        checked={parentEnabled && localToggles[feat.key] !== false}
+                        onCheckedChange={(checked) => handleToggleChange(feat.key, checked)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </div>
         </Card>

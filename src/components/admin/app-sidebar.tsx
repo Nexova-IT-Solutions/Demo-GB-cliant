@@ -339,6 +339,29 @@ export function AppSidebar() {
     });
   }, [toggles, operationsEnabled]);
 
+  // Filter report items individually based on toggles
+  const filteredReportItems = React.useMemo(() => {
+    if (!reportsEnabled) return [];
+    return reportItems.map(group => {
+      if (!group.children) return group;
+      
+      const filteredChildren = group.children.filter(item => {
+        if (item.url === "/admin/reports/sales-summary") return toggles?.reports_sales_summary !== false;
+        if (item.url === "/admin/reports/cash-close") return toggles?.reports_cash_close !== false;
+        if (item.url === "/admin/reports/inventory/drilldown") return toggles?.reports_stock_drilldown !== false;
+        if (item.url === "/admin/reports/out-of-stock") return toggles?.reports_out_of_stock !== false;
+        if (item.url === "/admin/reports/inventory/movement") return toggles?.reports_item_movement !== false;
+        if (item.url === "/admin/reports/inventory/audit") return toggles?.reports_stock_audit !== false;
+        if (item.url === "/admin/reports/suppliers") return toggles?.reports_supplier_products !== false;
+        if (item.url === "/admin/reports/category-sales") return toggles?.reports_category_sales !== false;
+        if (item.url === "/admin/reports/customers") return toggles?.reports_customer_insights !== false;
+        return true;
+      });
+      
+      return { ...group, children: filteredChildren };
+    }).filter(group => group.children && group.children.length > 0);
+  }, [toggles, reportsEnabled]);
+
   // Track expanded state for nested menus
   const [openMenus, setOpenMenus] = React.useState<Record<string, boolean>>({})
 
@@ -699,7 +722,7 @@ export function AppSidebar() {
         {renderNavGroup("Sales & POS", salesPosItems)}
         {renderNavGroup("Storefront", filteredStorefrontItems)}
         {renderNavGroup("Operations", filteredOperationsItems)}
-        {reportsEnabled && renderNavGroup("Reports & Analytics", reportItems)}
+        {reportsEnabled && renderNavGroup("Reports & Analytics", filteredReportItems)}
 
         {(isSuperAdmin || isDevAdmin) && renderNavGroup("Administration", [systemItems[0]])}
 
