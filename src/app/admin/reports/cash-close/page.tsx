@@ -36,6 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCurrency } from "@/components/CurrencyProvider";
 import {
   Dialog,
   DialogContent,
@@ -149,8 +150,6 @@ const PAYMENT_ICONS: Record<string, React.ReactNode> = {
   "split":       <ArrowRightLeft className="h-4 w-4" />,
 };
 
-const formatPrice = (price: number) =>
-  `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
 
 const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-US", {
@@ -167,6 +166,8 @@ const formatDate = (iso: string) =>
   });
 
 function VarianceBadge({ value }: { value: number | null }) {
+  const { formatPrice } = useCurrency();
+
   if (value === null || value === undefined) {
     return (
       <span className="text-xs text-slate-450 italic">—</span>
@@ -200,6 +201,7 @@ function VarianceBadge({ value }: { value: number | null }) {
 }
 
 export default function CashCloseReportPage() {
+  const { formatPrice, symbol } = useCurrency();
   const [data, setData] = useState<CashCloseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -760,7 +762,7 @@ export default function CashCloseReportPage() {
 
                             return (
                               <TableRow key={`det-${val}`} className="hover:bg-slate-50/40">
-                                <TableCell className="font-bold text-slate-700 py-2 pl-4 text-xs">Rs. {val}</TableCell>
+                                <TableCell className="font-bold text-slate-700 py-2 pl-4 text-xs">{formatPrice(val)}</TableCell>
                                 <TableCell className="text-center font-mono py-2 text-xs text-slate-500">{openQty} Qty</TableCell>
                                 <TableCell className="text-center font-mono py-2 text-xs font-bold text-slate-800">{closeQty} Qty</TableCell>
                                 <TableCell className="text-right font-mono py-2 text-xs font-bold text-slate-700 pr-4">

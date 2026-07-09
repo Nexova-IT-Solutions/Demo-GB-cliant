@@ -20,6 +20,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,7 +61,6 @@ type StockStatus    = "all" | "in_stock" | "out_of_stock" | "low_stock";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
-const fmt     = (n: number) => `Rs. ${n.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Never supplied";
 
@@ -74,7 +74,7 @@ function StockBadge({ stock }: { stock: number }) {
 
 // ─── Expandable Row ───────────────────────────────────────────────────────────
 
-function ProductExpandableRow({ p, columns }: { p: ProductRow; columns: "fast" | "slow" }) {
+function ProductExpandableRow({ p, columns, fmt }: { p: ProductRow; columns: "fast" | "slow"; fmt: (val: number) => string }) {
   const [open, setOpen] = useState(false);
   const hasVariants = p.variants.length > 1 || (p.variants.length === 1 && p.variants[0].variantLabel !== "Standard");
 
@@ -154,6 +154,7 @@ function ProductExpandableRow({ p, columns }: { p: ProductRow; columns: "fast" |
 // ─── Inner Page (needs useSearchParams so wrapped in Suspense) ────────────────
 
 function MovementReportInner() {
+  const { formatPrice: fmt } = useCurrency();
   const router     = useRouter();
   const pathname   = usePathname();
   const searchParams = useSearchParams();
@@ -238,8 +239,8 @@ function MovementReportInner() {
           { header: "Supplier",              key: "supplierName",     type: "string" },
           { header: "Units Sold",            key: "totalSold",        type: "number",   alignment: "center" },
           { header: "Current Stock",         key: "stock",            type: "number",   alignment: "center" },
-          { header: "Total Revenue (LKR)",   key: "revenue",          type: "currency", alignment: "right"  },
-          { header: "Discounted Value (LKR)",key: "discountedValue",  type: "currency", alignment: "right"  },
+          { header: "Total Revenue",         key: "revenue",          type: "currency", alignment: "right"  },
+          { header: "Discounted Value",      key: "discountedValue",  type: "currency", alignment: "right"  },
           { header: "On Promo?",             key: "hasDiscountLabel", type: "string",   alignment: "center" },
         ],
         data: (data.fastMoving || []).map(p => ({ ...p, supplierName: p.supplierName ?? "—", hasDiscountLabel: p.hasDiscount ? "Yes" : "No" })),
@@ -253,7 +254,7 @@ function MovementReportInner() {
           { header: "SKU",             key: "sku",                type: "string" },
           { header: "Supplier",        key: "supplierName",       type: "string" },
           { header: "Current Stock",   key: "stock",              type: "number",   alignment: "center" },
-          { header: "Unit Price (LKR)",key: "price",              type: "currency", alignment: "right"  },
+          { header: "Unit Price",      key: "price",              type: "currency", alignment: "right"  },
           { header: "Last Restocked",  key: "lastRestockedLabel", type: "string",   alignment: "center" },
         ],
         data: (data.nonMoving || []).map(p => ({ ...p, supplierName: p.supplierName ?? "—", lastRestockedLabel: fmtDate(p.lastSuppliedAt ?? null) })),
@@ -420,7 +421,7 @@ function MovementReportInner() {
                     <Table>
                       <TableHeader><FastHeaders /></TableHeader>
                       <TableBody>
-                        {data.fastMoving.map(p => <ProductExpandableRow key={p.productId} p={p} columns="fast" />)}
+                        {data.fastMoving.map(p => <ProductExpandableRow key={p.productId} p={p} columns="fast" fmt={fmt} />)}
                       </TableBody>
                     </Table>
                   </div>
@@ -448,7 +449,7 @@ function MovementReportInner() {
                     <Table>
                       <TableHeader><SlowHeaders /></TableHeader>
                       <TableBody>
-                        {data.nonMoving.map(p => <ProductExpandableRow key={p.productId} p={p} columns="slow" />)}
+                        {data.nonMoving.map(p => <ProductExpandableRow key={p.productId} p={p} columns="slow" fmt={fmt} />)}
                       </TableBody>
                     </Table>
                   </div>

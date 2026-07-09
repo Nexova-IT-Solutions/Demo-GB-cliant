@@ -13,6 +13,7 @@ import {
   Phone,
   FileSpreadsheet,
 } from "lucide-react";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { ExcelExportUtility } from "@/utils/excel-export";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,8 +39,6 @@ interface CustomerRecord {
   lastPurchaseDate: string | null;
 }
 
-const formatPrice = (price: number) =>
-  `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
 
 const formatDate = (iso: string | null) => {
   if (!iso) return "No purchases";
@@ -51,6 +50,7 @@ const formatDate = (iso: string | null) => {
 };
 
 export default function CustomerInsightsPage() {
+  const { formatPrice } = useCurrency();
   const [customers, setCustomers] = useState<CustomerRecord[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);

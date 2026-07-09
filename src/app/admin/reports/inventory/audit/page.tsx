@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface AuditRecord {
   id: string;
@@ -38,6 +39,7 @@ interface AuditRecord {
 }
 
 export default function StockAuditReportPage() {
+  const { formatPrice } = useCurrency();
   const [products, setProducts] = useState<AuditRecord[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<AuditRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -350,10 +352,10 @@ export default function StockAuditReportPage() {
                             {p.supplierName}
                           </TableCell>
                           <TableCell className="text-xs text-right font-medium text-slate-700 font-mono print:text-black">
-                            {p.costPrice !== undefined && p.costPrice !== null ? `Rs. ${p.costPrice.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}
+                            {p.costPrice !== undefined && p.costPrice !== null ? formatPrice(p.costPrice) : "—"}
                           </TableCell>
                           <TableCell className="text-xs text-right font-medium text-slate-700 font-mono print:text-black">
-                            {p.price !== undefined && p.price !== null ? `Rs. ${p.price.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}
+                            {p.price !== undefined && p.price !== null ? formatPrice(p.price) : "—"}
                           </TableCell>
                           <TableCell className="text-xs text-right font-black text-slate-800 print:text-black">
                             {p.stock}

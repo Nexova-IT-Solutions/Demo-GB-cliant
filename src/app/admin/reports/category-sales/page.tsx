@@ -18,6 +18,8 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { ExcelExportUtility } from "@/utils/excel-export";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,10 +49,9 @@ interface CategorySalesItem {
   products: ProductSales[];
 }
 
-const formatPrice = (price: number) =>
-  `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
 
 export default function CategorySalesPage() {
+  const { formatPrice } = useCurrency();
   const { data: session, status } = useSession();
   const router = useRouter();
 

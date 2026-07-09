@@ -78,8 +78,7 @@ interface SalesSummaryData {
   storefrontEnabled: boolean;
 }
 
-const formatPrice = (price: number) =>
-  `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
+import { useCurrency } from "@/components/CurrencyProvider";
 
 const formatMethod = (method: string) => {
   const map: Record<string, string> = {
@@ -98,6 +97,7 @@ const formatMethod = (method: string) => {
 
 export default function SalesSummaryPage() {
   const { data: session, status } = useSession();
+  const { formatPrice, symbol } = useCurrency();
   const router = useRouter();
 
   const [data, setData] = useState<SalesSummaryData | null>(null);
@@ -520,15 +520,16 @@ export default function SalesSummaryPage() {
                           return new Date(val + "T00:00:00").toLocaleDateString("en-US", { day: "numeric" });
                         }}
                       />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fontSize: 10, fill: '#64748b' }} 
-                        tickFormatter={(val) => `Rs. ${val.toLocaleString()}`}
+                      <YAxis
+                        yAxisId="left"
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(val) => useCurrency(val)}
+                        tick={{ fill: "#94a3b8", fontSize: 12 }}
                       />
                       <Tooltip 
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
-                        formatter={(value: number) => [formatPrice(value), '']}
+                        formatter={(value: number) => [useCurrency(value), '']}
                         labelFormatter={(label) => new Date(label + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       />
                       <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />

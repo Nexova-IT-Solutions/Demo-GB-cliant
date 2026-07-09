@@ -25,6 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ExcelExportUtility } from "@/utils/excel-export";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface TreeRow {
   id: string;
@@ -47,6 +48,7 @@ interface TreeRow {
 }
 
 export default function StockDrilldownPage() {
+  const { formatPrice } = useCurrency();
   const [rootCategories, setRootCategories] = useState<any[]>([]);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [childDataCache, setChildDataCache] = useState<Record<string, any[]>>({});
@@ -195,10 +197,7 @@ export default function StockDrilldownPage() {
   });
 
   const formatCurrency = (amount: number) => {
-    return `Rs. ${amount.toLocaleString("en-LK", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return formatPrice(amount);
   };
 
   return (

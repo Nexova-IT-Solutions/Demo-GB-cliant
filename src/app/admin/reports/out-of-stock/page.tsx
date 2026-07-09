@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCurrency } from "@/components/CurrencyProvider";
 import Link from "next/link";
 
 interface OutOfStockProduct {
@@ -39,10 +40,9 @@ interface OutOfStockProduct {
   supplierPhone: string | null;
 }
 
-const formatPrice = (price: number) =>
-  `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
 
 export default function OutOfStockReportPage() {
+  const { formatPrice } = useCurrency();
   const [products, setProducts] = useState<OutOfStockProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<OutOfStockProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);

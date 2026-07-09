@@ -15,6 +15,7 @@ import {
   TrendingUp,
   FileSpreadsheet,
 } from "lucide-react";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { ExcelExportUtility } from "@/utils/excel-export";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,12 +41,11 @@ interface SupplierReportItem {
   totalStockValue: number;
 }
 
-const formatPrice = (price: number) =>
-  `Rs. ${price.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`;
 
 export default function SupplierProductsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { formatPrice } = useCurrency();
 
   const [suppliers, setSuppliers] = useState<SupplierReportItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
