@@ -125,6 +125,14 @@ function canvasToEscposHex(canvas: HTMLCanvasElement): string {
   return hex.toUpperCase();
 }
 
+function getQZPrinterConfig(printerName: string): string | { host: string; port: number } {
+  if (printerName.startsWith("tcp://")) {
+    const parts = printerName.replace("tcp://", "").split(":");
+    return { host: parts[0], port: parts.length > 1 ? parseInt(parts[1], 10) : 9100 };
+  }
+  return printerName;
+}
+
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
   const logoBase64 = await getResizedLogoBase64("/logo/logo.png", 200); // 200px width fits perfectly on 80mm
 
@@ -242,7 +250,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             logging: false
           });
           const hexImage = canvasToEscposHex(canvas);
-          const config = qz.configs.create(data.companyDetails.posPrinterName, { margins: 0 });
+          const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
+          const config = qz.configs.create(qzTarget, { margins: 0 });
           await qz.print(config, [
             {
               type: 'raw',
@@ -350,7 +359,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           if (!qz.websocket.isActive()) {
             await qz.websocket.connect({ retries: 0 });
           }
-          const config = qz.configs.create(data.companyDetails.posPrinterName, { encoding: 'windows-1256' });
+          const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
+          const config = qz.configs.create(qzTarget, { encoding: 'windows-1256' });
           await qz.print(config, rawLines);
           return;
         } catch (e) {
