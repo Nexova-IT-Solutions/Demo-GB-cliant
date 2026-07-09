@@ -106,7 +106,7 @@ export function ReturnRequestModal({
     setIsSubmitting(true);
 
     if (!supabase) {
-      toast.error(t("errors.submissionFailed"));
+      toast.error("Failed to submit request. Supabase is not initialized.");
       setIsSubmitting(false);
       return;
     }
