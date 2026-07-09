@@ -524,12 +524,12 @@ export default function SalesSummaryPage() {
                         yAxisId="left"
                         axisLine={false}
                         tickLine={false}
-                        tickFormatter={(val) => useCurrency(val)}
+                        tickFormatter={(val) => formatPrice(val)}
                         tick={{ fill: "#94a3b8", fontSize: 12 }}
                       />
                       <Tooltip 
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
-                        formatter={(value: number) => [useCurrency(value), '']}
+                        formatter={(value: number) => [formatPrice(value), '']}
                         labelFormatter={(label) => new Date(label + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       />
                       <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
