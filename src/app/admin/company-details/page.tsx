@@ -17,6 +17,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const TIMEZONES = [
+  { value: "Asia/Muscat", label: "Oman (Muscat) - UTC+4" },
+  { value: "Asia/Dubai", label: "UAE (Dubai) - UTC+4" },
+  { value: "Asia/Colombo", label: "Sri Lanka (Colombo) - UTC+5:30" },
+  { value: "Europe/London", label: "UK (London) - GMT/BST" },
+  { value: "America/New_York", label: "USA (New York) - EST/EDT" },
+  { value: "UTC", label: "UTC" },
+];
 
 const companyDetailsSchema = z.object({
   companyName: z.string().min(1, "Company name is required").optional().or(z.literal("")),
@@ -26,6 +36,7 @@ const companyDetailsSchema = z.object({
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   crNumber: z.string().optional().or(z.literal("")),
   posPrinterName: z.string().optional().or(z.literal("")),
+  timezone: z.string().optional().default("Asia/Muscat"),
 });
 
 type CompanyDetailsValues = z.infer<typeof companyDetailsSchema>;
@@ -44,6 +55,7 @@ export default function CompanyDetailsPage() {
       email: "",
       crNumber: "",
       posPrinterName: "",
+      timezone: "Asia/Muscat",
     },
   });
 
@@ -62,8 +74,9 @@ export default function CompanyDetailsPage() {
           email: data.email || "",
           crNumber: data.crNumber || "",
           posPrinterName: data.posPrinterName || "",
+          timezone: data.timezone || "Asia/Muscat",
         });
-      } catch (err) {
+      } catch (error) {
         toast.error("Failed to load company details");
       } finally {
         setIsLoading(false);
@@ -272,6 +285,31 @@ export default function CompanyDetailsPage() {
                     <FormControl>
                       <Input placeholder="Enter CR or Tax Number" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="timezone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Application Timezone</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || "Asia/Muscat"}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a timezone" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TIMEZONES.map((tz) => (
+                          <SelectItem key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

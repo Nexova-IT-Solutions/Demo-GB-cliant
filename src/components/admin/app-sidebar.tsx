@@ -185,7 +185,7 @@ const reportItems: NavItem[] = [
         title: "Schedule Reports",
         url: "/admin/reports/schedule",
         icon: BarChart3,
-        requiredPermission: "reports.sales_summary",
+        requiredPermission: "SYSTEM_DEV_ONLY",
       },
       {
         title: "Accounts Receivable",

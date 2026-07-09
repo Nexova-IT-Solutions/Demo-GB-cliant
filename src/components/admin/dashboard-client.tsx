@@ -32,7 +32,9 @@ import {
   Shield,
   Activity
 } from "lucide-react";
-import { format, startOfMonth, subDays } from "date-fns";
+import { startOfMonth, subDays } from "date-fns";
+import { formatAppDateSync as format } from "@/lib/date-utils";
+import { useTimezone } from "@/components/TimezoneProvider";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 
 interface DashboardClientProps {
@@ -68,9 +70,10 @@ export default function AdminDashboardClient({ user, initialData, hasSalesSummar
   const showShipping = toggles?.operations_section !== false && toggles?.operations_shipping !== false;
   const showReviews = toggles?.operations_section !== false && toggles?.operations_reviews !== false;
   // 1. Date Range States
+  const tz = useTimezone();
   const now = new Date();
-  const [startDate, setStartDate] = useState<string>(format(startOfMonth(now), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState<string>(format(now, "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState<string>(format(startOfMonth(now), "yyyy-MM-dd", tz));
+  const [endDate, setEndDate] = useState<string>(format(now, "yyyy-MM-dd", tz));
   const [mounted, setMounted] = useState(false);
   
   // 2. Sales Summary State

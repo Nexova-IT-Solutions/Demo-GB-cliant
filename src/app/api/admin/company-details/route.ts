@@ -9,9 +9,10 @@ const companyDetailsSchema = z.object({
   mobileNumber: z.string().optional(),
   address: z.string().optional(),
   website: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  crNumber: z.string().optional(),
-  posPrinterName: z.string().optional(),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  crNumber: z.string().optional().or(z.literal("")),
+  posPrinterName: z.string().optional().or(z.literal("")),
+  timezone: z.string().optional().default("Asia/Muscat"),
 });
 
 export async function GET() {
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
         email: data.email,
         crNumber: data.crNumber,
         posPrinterName: data.posPrinterName,
+        timezone: data.timezone,
       },
       create: {
         id: "1",
@@ -82,6 +84,7 @@ export async function POST(req: Request) {
         email: data.email,
         crNumber: data.crNumber,
         posPrinterName: data.posPrinterName,
+        timezone: data.timezone,
       },
     });
 

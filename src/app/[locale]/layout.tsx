@@ -46,6 +46,7 @@ import TopLoaderProvider from "@/components/TopLoaderProvider";
 
 import { getCurrencyServer } from "@/lib/currency";
 import { getInitialFeatureToggles } from "@/lib/queries/feature-toggles";
+import { getAppTimezone } from "@/lib/date-utils";
 
 export default async function RootLayout({
   children,
@@ -64,6 +65,7 @@ export default async function RootLayout({
   const specialTouchProducts = await getCachedSpecialTouch();
   const initialCurrency = await getCurrencyServer();
   const initialToggles = await getInitialFeatureToggles();
+  const initialTimezone = await getAppTimezone();
   return (
     <html lang={locale} className="h-full overflow-x-hidden" suppressHydrationWarning>
       <body
@@ -72,7 +74,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>
-            <Providers initialCurrency={initialCurrency} initialToggles={initialToggles}>
+            <Providers initialCurrency={initialCurrency} initialToggles={initialToggles} initialTimezone={initialTimezone}>
               <TopLoaderProvider />
               <CartHydration specialTouchProducts={specialTouchProducts} />
               <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">

@@ -24,6 +24,8 @@ export default async function ReturnsReportPage() {
     }
   });
 
+  const currency = await getCurrencyServer();
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -45,7 +47,7 @@ export default async function ReturnsReportPage() {
           <div className="flex flex-col">
             <span className="text-xs font-semibold text-slate-500 uppercase">Refunded Value</span>
             <span className="text-lg font-bold text-[#A7066A]">
-              {await formatPriceServer(returns.reduce((sum, r) => sum + r.refundAmount, 0))}
+              {formatPriceServer(returns.reduce((sum, r) => sum + r.refundAmount, 0), currency)}
             </span>
           </div>
         </div>
@@ -99,7 +101,7 @@ export default async function ReturnsReportPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-semibold text-slate-900">
-                      OMR {ret.refundAmount.toFixed(2)}
+                      {formatPriceServer(ret.refundAmount, currency)}
                     </TableCell>
                     <TableCell>
                       {ret.restocked ? (

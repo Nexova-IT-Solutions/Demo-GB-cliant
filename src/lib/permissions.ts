@@ -76,10 +76,15 @@ export function hasPermission(session: any, requiredPermission?: string): boolea
   const user = session.user || session;
   if (!user) return false;
 
-  // 1. SUPER_ADMIN and DEV_ADMIN unconditional access
+  // 1. System Dev Only special flag (Overrides unconditional access)
+  if (requiredPermission === "SYSTEM_DEV_ONLY") {
+    return user.role === "DEV_ADMIN";
+  }
+
+  // 2. SUPER_ADMIN and DEV_ADMIN unconditional access
   if (user.role === "SUPER_ADMIN" || user.role === "DEV_ADMIN") return true;
 
-  // 2. If no permission is required, default to true
+  // 3. If no permission is required, default to true
   if (!requiredPermission) return true;
 
   // 3. Check customPermissions map directly (supporting flat string keys & dot notation)

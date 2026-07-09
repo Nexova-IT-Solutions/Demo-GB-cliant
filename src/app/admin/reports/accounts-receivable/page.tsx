@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
 import { redirect } from "next/navigation";
-import { formatPriceServer as formatPrice } from "@/lib/currency";
+import { formatPriceServer as formatPrice, getCurrencyServer } from "@/lib/currency";
 import Link from "next/link";
 import { FileText, User, Phone, Mail, ArrowRight } from "lucide-react";
 
@@ -42,6 +42,7 @@ export default async function AccountsReceivablePage() {
     },
   });
 
+  const currency = await getCurrencyServer();
   const totalOutstanding = customersWithDebt.reduce((sum, customer) => sum + customer.outstandingBalance, 0);
 
   return (
@@ -63,7 +64,7 @@ export default async function AccountsReceivablePage() {
             </div>
             <h3 className="font-semibold text-sm">Total Outstanding</h3>
           </div>
-          <p className="text-3xl font-black text-slate-900">{formatPrice(totalOutstanding)}</p>
+          <p className="text-3xl font-black text-slate-900">{formatPrice(totalOutstanding, currency)}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-3 text-emerald-600 mb-2">
@@ -127,7 +128,7 @@ export default async function AccountsReceivablePage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        {formatPrice(customer.outstandingBalance)}
+                        {formatPrice(customer.outstandingBalance, currency)}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">

@@ -38,6 +38,7 @@ export const metadata: Metadata = {
 
 import { getCurrencyServer } from "@/lib/currency";
 import { getInitialFeatureToggles } from "@/lib/queries/feature-toggles";
+import { getAppTimezone } from "@/lib/date-utils";
 
 export default async function AdminLayout({
   children,
@@ -50,10 +51,10 @@ export default async function AdminLayout({
     redirect("/");
   }
 
-  // Load English translations for the admin panel by default
   const messages = await getMessages({ locale: 'en' });
   const initialCurrency = await getCurrencyServer();
   const initialToggles = await getInitialFeatureToggles();
+  const initialTimezone = await getAppTimezone();
 
   return (
     <html lang="en" className="h-full overflow-hidden" suppressHydrationWarning>
@@ -63,7 +64,7 @@ export default async function AdminLayout({
       >
         <NextIntlClientProvider messages={messages} locale="en">
           <NuqsAdapter>
-            <Providers initialCurrency={initialCurrency} initialToggles={initialToggles}>
+            <Providers initialCurrency={initialCurrency} initialToggles={initialToggles} initialTimezone={initialTimezone}>
               <TopLoaderProvider />
               <SidebarProvider>
                 <AdminLayoutShell sidebar={<AppSidebar />}>

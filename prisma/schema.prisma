@@ -934,6 +934,7 @@ model CompanyDetails {
   email          String?
   crNumber       String?
   posPrinterName String?
+  timezone       String   @default("Asia/Muscat")
   updatedAt      DateTime @updatedAt
 }
 

@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { SWRConfig } from "swr";
 import { CurrencyProvider } from "./CurrencyProvider";
+import { TimezoneProvider } from "./TimezoneProvider";
 
 export function Providers({
   children,
@@ -12,6 +13,7 @@ export function Providers({
   children: React.ReactNode;
   initialCurrency?: string;
   initialToggles?: Record<string, boolean>;
+  initialTimezone?: string;
 }) {
   return (
     <SessionProvider>
@@ -23,7 +25,9 @@ export function Providers({
         }}
       >
         <CurrencyProvider initialCurrency={initialCurrency}>
-          {children}
+          <TimezoneProvider initialTimezone={initialTimezone}>
+            {children}
+          </TimezoneProvider>
         </CurrencyProvider>
       </SWRConfig>
     </SessionProvider>
