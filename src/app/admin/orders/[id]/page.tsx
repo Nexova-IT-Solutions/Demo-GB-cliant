@@ -21,7 +21,7 @@ import { hasPermission } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
-import { formatPriceServer } from "@/lib/currency";
+import { formatPriceServer, getCurrencyServer } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { OrderManagementPanel } from "../order-management-panel";
@@ -48,8 +48,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
     }
   }
 
-  const settings = await db.companyDetails.findFirst();
-  const currency = settings?.currency || "LKR";
+  const currency = await getCurrencyServer();
   const formatCurr = (amount: number | string) => formatPriceServer(amount, currency);
 
   const orderData = await db.order.findUnique({
