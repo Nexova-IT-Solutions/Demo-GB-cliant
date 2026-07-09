@@ -133,6 +133,9 @@ function getQZPrinterConfig(printerName: string): string | { host: string; port:
   return printerName;
 }
 
+// Global print queue to prevent "Connection refused" on TCP printers
+let printQueue = Promise.resolve();
+
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
   const logoBase64 = await getResizedLogoBase64("/logo/logo.png", 200); // 200px width fits perfectly on 80mm
 
@@ -252,14 +255,24 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           const hexImage = canvasToEscposHex(canvas);
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
           const config = qz.configs.create(qzTarget, { margins: 0 });
-          await qz.print(config, [
-            {
-              type: 'raw',
-              format: 'command',
-              flavor: 'hex',
-              data: '1B40' + '1B6101' + hexImage + '1D564100'
-            }
-          ]);
+          
+          // Enqueue the print job with a 500ms delay to allow the printer TCP socket to close safely
+          printQueue = printQueue.then(async () => {
+            await qz.print(config, [
+              {
+                type: 'raw',
+                format: 'command',
+                flavor: 'hex',
+                data: '1B40' + '1B6101' + hexImage + '1D564100'
+              }
+            ]);
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }).catch(e => {
+            console.error("QZ image print failed in queue", e);
+          });
+          
+          await printQueue;
+
         } catch (e) {
           console.error("QZ image print failed", e);
         } finally {
@@ -361,7 +374,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           }
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
           const config = qz.configs.create(qzTarget, { encoding: 'windows-1256' });
-          await qz.print(config, rawLines);
+          
+          printQueue = printQueue.then(async () => {
+            await qz.print(config, rawLines);
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }).catch(e => {
+            console.error("QZ raw print failed in queue", e);
+          });
+          
+          await printQueue;
+          
           return;
         } catch (e) {
           console.error("QZ raw print failed", e);
