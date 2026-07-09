@@ -121,6 +121,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     return;
   } else {
     // COLORFUL A4 INVOICE FORMAT
+    const arNum = (n: number | string) => {
+      const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+      return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+    };
+
     const doc = new jsPDF({
       unit: "mm",
       format: "a4", // 210 x 297 mm
@@ -225,10 +230,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       return [
         itemName,
-        item.quantity.toString(),
-        `OMR ${item.price.toFixed(2)}`,
+        `${item.quantity} / ${arNum(item.quantity)}`,
+        `OMR ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`,
         discountText,
-        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`,
+        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`,
       ];
     });
 
@@ -262,14 +267,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setTextColor(100, 100, 100);
     
     doc.text("Subtotal / المجموع الفرعي:", pageWidth - 80, totalY);
-    doc.text(`OMR ${data.subtotal.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106);
     doc.text("Total / المجموع:", pageWidth - 80, totalY);
-    doc.text(`OMR ${data.total.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
       totalY += 10;
@@ -277,7 +282,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text("Change Due / الباقي:", pageWidth - 80, totalY);
-      doc.text(`OMR ${data.changeDue.toFixed(2)}`, pageWidth - 20, totalY, { align: "right" });
+      doc.text(`OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
     }
 
     // Footer
