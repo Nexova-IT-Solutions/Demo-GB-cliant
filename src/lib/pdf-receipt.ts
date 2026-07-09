@@ -70,6 +70,61 @@ async function getResizedLogoBase64(imageUrl: string, targetWidth: number): Prom
   }
 }
 
+function canvasToEscposHex(canvas: HTMLCanvasElement): string {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+  const width = canvas.width;
+  const height = canvas.height;
+  const imgData = ctx.getImageData(0, 0, width, height);
+  const data = imgData.data;
+
+  // ESCPOS Image Header: 1D 76 30 00 xL xH yL yH
+  const widthBytes = Math.ceil(width / 8);
+  const xL = widthBytes & 0xFF;
+  const xH = (widthBytes >> 8) & 0xFF;
+  const yL = height & 0xFF;
+  const yH = (height >> 8) & 0xFF;
+
+  let hex = '1D763000';
+  hex += xL.toString(16).padStart(2, '0');
+  hex += xH.toString(16).padStart(2, '0');
+  hex += yL.toString(16).padStart(2, '0');
+  hex += yH.toString(16).padStart(2, '0');
+
+  // Convert pixels to monochrome bytes
+  const bytes = new Uint8Array(widthBytes * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
+      
+      // Calculate luminance
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+      // White threshold logic: if pixel is dark and opaque, it is printed (black bit=1)
+      const isBlack = (a > 128 && luminance < 160);
+
+      if (isBlack) {
+        const byteIndex = (y * widthBytes) + Math.floor(x / 8);
+        const bitOffset = 7 - (x % 8);
+        bytes[byteIndex] |= (1 << bitOffset);
+      }
+    }
+  }
+
+  // Convert Uint8Array to hex string efficiently
+  const hexArr = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    hexArr[i] = bytes[i].toString(16).padStart(2, '0');
+  }
+  
+  hex += hexArr.join('');
+
+  return hex.toUpperCase();
+}
+
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
   const logoBase64 = await getResizedLogoBase64("/logo/logo.png", 200); // 200px width fits perfectly on 80mm
 
@@ -186,21 +241,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             useCORS: true,
             logging: false
           });
-          const base64Image = canvas.toDataURL("image/png").split(',')[1];
+          const hexImage = canvasToEscposHex(canvas);
           const config = qz.configs.create(data.companyDetails.posPrinterName, { margins: 0 });
           await qz.print(config, [
             {
               type: 'raw',
-              format: 'image',
-              flavor: 'base64',
-              data: base64Image,
-              options: { language: "ESCPOS", dotDensity: "double" }
-            },
-            {
-              type: 'raw',
               format: 'command',
               flavor: 'hex',
-              data: '1D564100'
+              data: '1B40' + '1B6101' + hexImage + '1D564100'
             }
           ]);
         } catch (e) {
