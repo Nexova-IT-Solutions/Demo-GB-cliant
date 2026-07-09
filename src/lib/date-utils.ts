@@ -22,8 +22,12 @@ export async function getAppTimezone(): Promise<string> {
     lastFetchTime = now;
     return cachedTimezone;
   } catch (error) {
-    return "Asia/Muscat";
   }
+}
+
+export function clearTimezoneCache() {
+  cachedTimezone = null;
+  lastFetchTime = 0;
 }
 
 /**

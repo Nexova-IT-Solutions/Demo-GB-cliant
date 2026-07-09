@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -42,6 +43,7 @@ const companyDetailsSchema = z.object({
 type CompanyDetailsValues = z.infer<typeof companyDetailsSchema>;
 
 export default function CompanyDetailsPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -229,6 +231,7 @@ export default function CompanyDetailsPage() {
 
       if (!res.ok) throw new Error("Failed to save details");
       toast.success("Company details saved successfully!");
+      router.refresh();
     } catch (err) {
       toast.error("Failed to save company details");
     } finally {

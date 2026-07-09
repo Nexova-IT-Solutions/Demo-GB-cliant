@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { clearTimezoneCache } from "@/lib/date-utils";
 
 const companyDetailsSchema = z.object({
   companyName: z.string().optional(),
@@ -87,6 +88,8 @@ export async function POST(req: Request) {
         timezone: data.timezone,
       },
     });
+
+    clearTimezoneCache();
 
     return NextResponse.json(details, { status: 200 });
   } catch (error) {
