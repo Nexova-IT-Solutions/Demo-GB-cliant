@@ -166,12 +166,21 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         
         const config = qz.configs.create(data.companyDetails.posPrinterName, { margins: 0 });
         
-        await qz.print(config, [{
-          type: 'pixel',
-          format: 'image', // pure raster image, zero QZ conversion overhead
-          flavor: 'base64',
-          data: base64Image
-        }]);
+        await qz.print(config, [
+          {
+            type: 'raw',
+            format: 'image',
+            flavor: 'base64',
+            data: base64Image,
+            options: { language: "ESCPOS", dotDensity: "double" }
+          },
+          {
+            type: 'raw',
+            format: 'command',
+            flavor: 'hex',
+            data: '1D564100' // ESCPOS paper cut command
+          }
+        ]);
       } catch (e) {
         console.error("QZ image print failed", e);
       } finally {
