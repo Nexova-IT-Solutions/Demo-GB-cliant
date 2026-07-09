@@ -55,123 +55,195 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
   };
 
   if (format === "print") {
-    // 80mm THERMAL PRINTER RASTER FORMAT (HTML for speed)
-    let itemsHtml = "";
+    // 80mm THERMAL PRINTER RASTER FORMAT (PDF)
+    const pageWidth = 72; // 80mm paper has roughly 72mm printable area
+    let currentY = 5;
+    
+    // 1. Calculate exact height required
+    const dummy = new jsPDF({ unit: "mm", format: [pageWidth, 500] });
+    dummy.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+    dummy.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+    dummy.setFont("Amiri", "normal");
+    
+    if (logoBase64) currentY += 25;
+    dummy.setFontSize(14);
+    currentY += 6;
+    dummy.setFontSize(9);
+    
+    if (data.companyDetails?.address) {
+      currentY += dummy.splitTextToSize(data.companyDetails.address, pageWidth - 4).length * 4;
+    }
+    if (data.companyDetails?.mobileNumber) currentY += 4;
+    if (data.companyDetails?.email) currentY += 4;
+    if (data.companyDetails?.website) currentY += 4;
+    if (data.companyDetails?.crNumber) currentY += 4;
+    
+    currentY += 6; 
+    currentY += 12; 
+    currentY += 6; 
+    
+    data.items.forEach(item => {
+      let itemName = item.name;
+      if (item.nameAr) itemName += ` - ${item.nameAr}`;
+      currentY += dummy.splitTextToSize(itemName, pageWidth - 4).length * 4;
+      if (item.sku) currentY += 4;
+      currentY += 5;
+    });
+    
+    currentY += 6; 
+    currentY += 5; 
+    currentY += 5; 
+    if (data.changeDue > 0) currentY += 5;
+    currentY += 10;
+    
+    const finalHeight = currentY + 10;
+
+    // 2. Generate the actual PDF
+    const doc = new jsPDF({
+      unit: "mm",
+      format: [pageWidth, finalHeight]
+    });
+    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+    doc.setFont("Amiri", "normal");
+
+    let y = 5;
+
+    // Logo
+    if (logoBase64) {
+      doc.addImage(logoBase64, "PNG", (pageWidth - 24) / 2, y, 24, 24);
+      y += 26;
+    }
+
+    // Company Name
+    doc.setFontSize(12);
+    const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
+    doc.text(companyName, pageWidth / 2, y, { align: "center" });
+    y += 5;
+
+    // Company Details
+    doc.setFontSize(9);
+    if (data.companyDetails?.address) {
+      const splitAddress = doc.splitTextToSize(data.companyDetails.address, pageWidth - 4);
+      doc.text(splitAddress, pageWidth / 2, y, { align: "center" });
+      y += splitAddress.length * 4;
+    }
+    if (data.companyDetails?.mobileNumber) {
+      doc.text(`Tel: ${data.companyDetails.mobileNumber}`, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+    if (data.companyDetails?.email) {
+      doc.text(data.companyDetails.email, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+    if (data.companyDetails?.website) {
+      doc.text(data.companyDetails.website, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+    if (data.companyDetails?.crNumber) {
+      doc.text(`CR: ${data.companyDetails.crNumber}`, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+
+    // Divider
+    y += 2;
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(2, y, pageWidth - 2, y);
+    doc.setLineDashPattern([], 0);
+    y += 4;
+
+    // Order Info
+    doc.text(`Order: ${data.orderNumber}`, 2, y);
+    y += 4;
+    doc.text(`Date: ${data.date}`, 2, y);
+    y += 4;
+    doc.text(`Payment: ${data.paymentMethod.replace("POS_", "")}`, 2, y);
+    y += 4;
+
+    // Divider
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(2, y, pageWidth - 2, y);
+    doc.setLineDashPattern([], 0);
+    y += 4;
+
+    // Items
     data.items.forEach(item => {
       let itemName = item.name;
       if (item.nameAr) itemName += ` - ${item.nameAr}`;
       
+      const splitName = doc.splitTextToSize(itemName, pageWidth - 4);
+      doc.text(splitName, 2, y);
+      y += splitName.length * 4;
+      
+      if (item.sku) {
+        doc.text(`SKU: ${item.sku}`, 2, y);
+        y += 4;
+      }
+      
       let qtyPrice = `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+      
+      // If there is a discount, note it in the line
       if (item.discountPercent && item.discountPercent > 0) {
         qtyPrice += ` (Disc / خصم ${item.discountPercent}%)`;
       }
       
       const total = `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
       
-      itemsHtml += `
-        <div style="margin-bottom: 4px;">
-          <div>${itemName}</div>
-          ${item.sku ? `<div style="font-size: 10px; color: #555;">SKU: ${item.sku}</div>` : ''}
-          <div class="flex" style="font-size: 11px;">
-            <div style="flex: 1;">${qtyPrice}</div>
-            <div class="bold text-right" style="white-space: nowrap;">${total}</div>
-          </div>
-        </div>
-      `;
+      const splitQtyPrice = doc.splitTextToSize(qtyPrice, pageWidth - 20);
+      doc.text(splitQtyPrice, 2, y);
+      doc.text(total, pageWidth - 2, y, { align: "right" });
+      y += splitQtyPrice.length * 5;
     });
 
-    const htmlData = `
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            body { 
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-              width: 72mm; /* Standard 80mm printable area */
-              margin: 0; 
-              padding: 0; 
-              font-size: 12px; 
-              color: #000; 
-              line-height: 1.3;
-            }
-            .text-center { text-align: center; }
-            .text-right { text-align: right; }
-            .flex { display: flex; justify-content: space-between; align-items: end; }
-            .divider { border-bottom: 1px dashed #000; margin: 6px 0; }
-            .bold { font-weight: bold; }
-            .mb-1 { margin-bottom: 4px; }
-            .mb-2 { margin-bottom: 8px; }
-          </style>
-        </head>
-        <body>
-          ${logoBase64 ? `<div class="text-center mb-2"><img src="${logoBase64}" style="max-height: 60px; max-width: 60px;" /></div>` : ''}
-          <div class="text-center bold mb-1" style="font-size: 16px;">${data.companyDetails?.companyName || "STORE RECEIPT"}</div>
-          
-          <div class="text-center mb-2" style="font-size: 11px;">
-            ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
-            ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
-            ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
-            ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
-            ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
-          </div>
-          
-          <div class="divider"></div>
-          
-          <div style="font-size: 11px;" class="mb-2">
-            <div>Order: ${data.orderNumber}</div>
-            <div>Date: ${data.date}</div>
-            <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
-          </div>
-          
-          <div class="divider"></div>
-          
-          <div class="mb-2">
-            ${itemsHtml}
-          </div>
-          
-          <div class="divider"></div>
-          
-          <div class="flex mb-1">
-            <span>Subtotal / المجموع الفرعي:</span>
-            <span class="bold">OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}</span>
-          </div>
-          
-          <div class="flex mb-1" style="font-size: 14px;">
-            <span class="bold">Total / المجموع:</span>
-            <span class="bold">OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}</span>
-          </div>
-          
-          ${data.changeDue > 0 ? `
-            <div class="flex mb-1">
-              <span>Change Due / الباقي:</span>
-              <span class="bold">OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}</span>
-            </div>
-          ` : ''}
-          
-          <div class="text-center mt-4 mb-1">Thank you for your purchase!</div>
-          
-          <div class="text-center mt-2" style="font-size: 9px; color: #555;">Powered by Nexova</div>
-        </body>
-      </html>
-    `;
+    // Divider
+    y -= 1;
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(2, y, pageWidth - 2, y);
+    doc.setLineDashPattern([], 0);
+    y += 5;
+
+    // Totals
+    doc.text(`Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+    y += 5;
+    doc.setFontSize(10);
+    doc.text(`Total / المجموع: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+    y += 5;
+    doc.setFontSize(9);
+    
+    if (data.changeDue > 0) {
+      doc.text(`Change Due / الباقي: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+      y += 5;
+    }
+
+    y += 5;
+    doc.text("Thank you for your purchase!", pageWidth / 2, y, { align: "center" });
+    y += 6;
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Powered by Nexova", pageWidth / 2, y, { align: "center" });
+    doc.setTextColor(0, 0, 0);
 
     if (data.companyDetails?.posPrinterName) {
       try {
         if (!qz.websocket.isActive()) {
           await qz.websocket.connect({ retries: 0 });
         }
+        // Margins must be zero for thermal receipt printers
+        const config = qz.configs.create(data.companyDetails.posPrinterName, {
+          margins: 0,
+        });
         
-        const config = qz.configs.create(data.companyDetails.posPrinterName, { margins: 0 });
+        const base64Pdf = doc.output('datauristring').split(',')[1];
         
         await qz.print(config, [{
           type: 'pixel',
-          format: 'html',
-          flavor: 'plain',
-          data: htmlData
+          format: 'pdf',
+          flavor: 'base64',
+          data: base64Pdf
         }]);
         return;
       } catch (e) {
-        console.error("QZ HTML print failed", e);
+        console.error("QZ raster print failed", e);
       }
     }
     return;
