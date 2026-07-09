@@ -21,6 +21,16 @@ import {
   Minus,
   FileSpreadsheet,
 } from "lucide-react";
+import {
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { ExcelExportUtility } from "@/utils/excel-export";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -65,6 +75,7 @@ interface SalesSummaryData {
     web: { total: number; orders: number };
     pos: { total: number; orders: number };
   };
+  storefrontEnabled: boolean;
 }
 
 const formatPrice = (price: number) =>
@@ -93,11 +104,11 @@ export default function SalesSummaryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Default to current month
+  // Default to today
   const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  const [startDate, setStartDate] = useState(firstDay.toISOString().split("T")[0]);
-  const [endDate, setEndDate] = useState(now.toISOString().split("T")[0]);
+  const todayStr = now.toISOString().split("T")[0];
+  const [startDate, setStartDate] = useState(todayStr);
+  const [endDate, setEndDate] = useState(todayStr);
 
   const handleExportExcel = async () => {
     if (!data) return;
@@ -357,80 +368,12 @@ export default function SalesSummaryPage() {
             </Card>
           </div>
 
-          {/* Sales by Source (Web vs POS) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Card className="border-0 shadow-md lg:col-span-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                  <Store className="h-4 w-4 text-[#A7066A]" />
-                  Sales by Channel
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Web */}
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Globe className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="font-medium text-slate-700">Online / Web</span>
-                      <span className="font-bold text-slate-900">
-                        {formatPrice(data?.salesBySource?.web?.total ?? 0)}
-                      </span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            (data?.summary?.totalSales ?? 0) > 0
-                              ? ((data?.salesBySource?.web?.total ?? 0) / data.summary.totalSales) * 100
-                              : 0
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {data?.salesBySource?.web?.orders ?? 0} orders
-                    </p>
-                  </div>
-                </div>
-
-                {/* POS */}
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-[#A7066A]/10 rounded-lg">
-                    <Store className="h-4 w-4 text-[#A7066A]" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="font-medium text-slate-700">In-Store / POS</span>
-                      <span className="font-bold text-slate-900">
-                        {formatPrice(data?.salesBySource?.pos?.total ?? 0)}
-                      </span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#A7066A] rounded-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            (data?.summary?.totalSales ?? 0) > 0
-                              ? ((data?.salesBySource?.pos?.total ?? 0) / data.summary.totalSales) * 100
-                              : 0
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {data?.salesBySource?.pos?.orders ?? 0} orders
-                    </p>
-                  </div>
-                </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Payment Method Breakdown */}
-            <Card className="border-0 shadow-md lg:col-span-2">
+          {/* Payment Method Breakdown */}
+          <Card className={`border-0 shadow-md ${data.storefrontEnabled ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-[#A7066A]" />
@@ -478,7 +421,7 @@ export default function SalesSummaryPage() {
             </Card>
           </div>
 
-          {/* Daily Sales Trend — Pure Tailwind Bar Chart */}
+          {/* Daily Sales Trend — Recharts Multi-Series */}
           <Card className="border-0 shadow-md">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
@@ -492,46 +435,39 @@ export default function SalesSummaryPage() {
                   No sales data for this period
                 </p>
               ) : data.dailySales.length <= 31 ? (
-                /* Bar Chart for ≤31 days */
-                <div className="space-y-4">
-                  <div className="flex items-end gap-[3px] h-48 pt-4">
-                    {data.dailySales.map((day) => {
-                      const heightPct = maxRevenue > 0 ? (day.revenue / maxRevenue) * 100 : 0;
-                      const dayLabel = new Date(day.date + "T00:00:00").toLocaleDateString("en-US", {
-                        day: "numeric",
-                      });
-                      return (
-                        <div
-                          key={day.date}
-                          className="flex-1 h-full flex flex-col justify-end items-center group relative"
-                          title={`${day.date}\nRevenue: ${formatPrice(day.revenue)}\nOrders: ${day.orders}\nProfit: ${formatPrice(day.profit)}`}
-                        >
-                          {/* Tooltip on hover */}
-                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                            <p className="font-bold">{formatPrice(day.revenue)}</p>
-                            <p className="text-slate-300">{day.orders} orders</p>
-                          </div>
-                          
-                          {/* Bar Container with resolved height */}
-                          <div className="h-[80%] w-full flex items-end">
-                            <div
-                              className="w-full bg-gradient-to-t from-[#A7066A] to-[#D4349E] rounded-t-sm hover:from-[#C4107E] hover:to-[#E755B5] transition-all duration-200 cursor-pointer min-h-[2px]"
-                              style={{ height: `${Math.max(heightPct, 1)}%` }}
-                            />
-                          </div>
-                          <span className="text-[9px] text-slate-400 mt-1.5 leading-none shrink-0">
-                            {dayLabel}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {/* Y-axis labels */}
-                  <div className="flex justify-between text-[10px] text-slate-400 px-1">
-                    <span>{formatPrice(0)}</span>
-                    <span>{formatPrice(maxRevenue / 2)}</span>
-                    <span>{formatPrice(maxRevenue)}</span>
-                  </div>
+                <div className="h-72 w-full mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsBarChart
+                      data={data.dailySales}
+                      margin={{ top: 10, right: 10, left: 20, bottom: 25 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#64748b' }}
+                        tickFormatter={(val) => {
+                          return new Date(val + "T00:00:00").toLocaleDateString("en-US", { day: "numeric" });
+                        }}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#64748b' }} 
+                        tickFormatter={(val) => `Rs. ${val.toLocaleString()}`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
+                        formatter={(value: number) => [formatPrice(value), '']}
+                        labelFormatter={(label) => new Date(label + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                      <Bar name="Total Sales" dataKey="revenue" fill="#A7066A" radius={[2, 2, 0, 0]} />
+                      <Bar name="Cost of Sales" dataKey="cost" fill="#d97706" radius={[2, 2, 0, 0]} />
+                      <Bar name="Net Profit" dataKey="profit" fill="#0369a1" radius={[2, 2, 0, 0]} />
+                    </RechartsBarChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
                 /* Table fallback for large date ranges */

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
+import { getFeatureToggles } from "@/lib/queries/feature-toggles";
 
 /**
  * GET /api/admin/reports/sales-summary?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
@@ -175,8 +176,12 @@ export async function GET(req: NextRequest) {
         count: data.count,
       }));
 
+    const toggles = await getFeatureToggles();
+    const storefrontEnabled = toggles?.storefront_website_enabled !== false;
+
     return NextResponse.json({
       success: true,
+      storefrontEnabled,
       summary: {
         totalSales,
         totalCostOfSales,
