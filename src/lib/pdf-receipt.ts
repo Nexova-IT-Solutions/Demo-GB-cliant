@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import qz from "qz-tray";
+import html2canvas from "html2canvas";
 import { amiriBase64 } from "./fonts/Amiri-Regular";
 
 export interface ReceiptData {
@@ -55,193 +56,131 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
   };
 
   if (format === "print") {
-    // 80mm THERMAL PRINTER RASTER FORMAT (PDF)
-    const pageWidth = 72; // 80mm paper has roughly 72mm printable area
-    let currentY = 5;
-    
-    // 1. Calculate approximate height required mathematically (no dummy jsPDF)
-    // This fixes a massive UI lag issue caused by parsing the 300KB TTF font twice
-    if (logoBase64) currentY += 25;
-    currentY += 6;
-    
-    if (data.companyDetails?.address) {
-      currentY += Math.max(1, Math.ceil(data.companyDetails.address.length / 40)) * 4;
-    }
-    if (data.companyDetails?.mobileNumber) currentY += 4;
-    if (data.companyDetails?.email) currentY += 4;
-    if (data.companyDetails?.website) currentY += 4;
-    if (data.companyDetails?.crNumber) currentY += 4;
-    
-    currentY += 6; 
-    currentY += 12; 
-    currentY += 6; 
-    
+    // 80mm THERMAL PRINTER RASTER FORMAT (html2canvas to PNG)
+    let itemsHtml = "";
     data.items.forEach(item => {
       let itemName = item.name;
       if (item.nameAr) itemName += ` - ${item.nameAr}`;
-      currentY += Math.max(1, Math.ceil(itemName.length / 40)) * 4;
-      if (item.sku) currentY += 4;
-      
-      let qtyPriceLength = 40; // baseline length
-      if (item.discountPercent && item.discountPercent > 0) qtyPriceLength += 20;
-      currentY += Math.max(1, Math.ceil(qtyPriceLength / 35)) * 5;
-    });
-    
-    currentY += 6; 
-    currentY += 5; 
-    currentY += 5; 
-    if (data.changeDue > 0) currentY += 5;
-    currentY += 10;
-    
-    const finalHeight = currentY + 30; // Added 30mm buffer to absorb estimation errors
-
-    // 2. Generate the actual PDF
-    const doc = new jsPDF({
-      unit: "mm",
-      format: [pageWidth, finalHeight]
-    });
-    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
-    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
-    doc.setFont("Amiri", "normal");
-
-    let y = 5;
-
-    // Logo
-    if (logoBase64) {
-      doc.addImage(logoBase64, "PNG", (pageWidth - 24) / 2, y, 24, 24);
-      y += 26;
-    }
-
-    // Company Name
-    doc.setFontSize(12);
-    const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
-    doc.text(companyName, pageWidth / 2, y, { align: "center" });
-    y += 5;
-
-    // Company Details
-    doc.setFontSize(9);
-    if (data.companyDetails?.address) {
-      const splitAddress = doc.splitTextToSize(data.companyDetails.address, pageWidth - 4);
-      doc.text(splitAddress, pageWidth / 2, y, { align: "center" });
-      y += splitAddress.length * 4;
-    }
-    if (data.companyDetails?.mobileNumber) {
-      doc.text(`Tel: ${data.companyDetails.mobileNumber}`, pageWidth / 2, y, { align: "center" });
-      y += 4;
-    }
-    if (data.companyDetails?.email) {
-      doc.text(data.companyDetails.email, pageWidth / 2, y, { align: "center" });
-      y += 4;
-    }
-    if (data.companyDetails?.website) {
-      doc.text(data.companyDetails.website, pageWidth / 2, y, { align: "center" });
-      y += 4;
-    }
-    if (data.companyDetails?.crNumber) {
-      doc.text(`CR: ${data.companyDetails.crNumber}`, pageWidth / 2, y, { align: "center" });
-      y += 4;
-    }
-
-    // Divider
-    y += 2;
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(2, y, pageWidth - 2, y);
-    doc.setLineDashPattern([], 0);
-    y += 4;
-
-    // Order Info
-    doc.text(`Order: ${data.orderNumber}`, 2, y);
-    y += 4;
-    doc.text(`Date: ${data.date}`, 2, y);
-    y += 4;
-    doc.text(`Payment: ${data.paymentMethod.replace("POS_", "")}`, 2, y);
-    y += 4;
-
-    // Divider
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(2, y, pageWidth - 2, y);
-    doc.setLineDashPattern([], 0);
-    y += 4;
-
-    // Items
-    data.items.forEach(item => {
-      let itemName = item.name;
-      if (item.nameAr) itemName += ` - ${item.nameAr}`;
-      
-      const splitName = doc.splitTextToSize(itemName, pageWidth - 4);
-      doc.text(splitName, 2, y);
-      y += splitName.length * 4;
-      
-      if (item.sku) {
-        doc.text(`SKU: ${item.sku}`, 2, y);
-        y += 4;
-      }
       
       let qtyPrice = `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
-      
-      // If there is a discount, note it in the line
       if (item.discountPercent && item.discountPercent > 0) {
         qtyPrice += ` (Disc / خصم ${item.discountPercent}%)`;
       }
       
       const total = `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
       
-      const splitQtyPrice = doc.splitTextToSize(qtyPrice, pageWidth - 20);
-      doc.text(splitQtyPrice, 2, y);
-      doc.text(total, pageWidth - 2, y, { align: "right" });
-      y += splitQtyPrice.length * 5;
+      itemsHtml += `
+        <div style="margin-bottom: 4px;">
+          <div>${itemName}</div>
+          ${item.sku ? `<div style="font-size: 10px; color: #555;">SKU: ${item.sku}</div>` : ''}
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 11px;">
+            <div style="flex: 1;">${qtyPrice}</div>
+            <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
+          </div>
+        </div>
+      `;
     });
 
-    // Divider
-    y -= 1;
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(2, y, pageWidth - 2, y);
-    doc.setLineDashPattern([], 0);
-    y += 5;
+    const container = document.createElement("div");
+    Object.assign(container.style, {
+      position: "fixed",
+      left: "-9999px",
+      top: "0",
+      width: "280px", // 72mm printable area roughly maps to 280px
+      backgroundColor: "white",
+      color: "black",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      fontSize: "12px",
+      lineHeight: "1.3",
+      padding: "0"
+    });
 
-    // Totals
-    doc.text(`Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
-    y += 5;
-    doc.setFontSize(10);
-    doc.text(`Total / المجموع: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
-    y += 5;
-    doc.setFontSize(9);
-    
-    if (data.changeDue > 0) {
-      doc.text(`Change Due / الباقي: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
-      y += 5;
-    }
+    container.innerHTML = `
+      ${logoBase64 ? `<div style="text-align: center; margin-bottom: 8px;"><img src="${logoBase64}" style="max-height: 60px; max-width: 60px;" /></div>` : ''}
+      <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 4px;">${data.companyDetails?.companyName || "STORE RECEIPT"}</div>
+      
+      <div style="text-align: center; font-size: 11px; margin-bottom: 8px;">
+        ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
+        ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
+        ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
+        ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
+        ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
+      </div>
+      
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      
+      <div style="font-size: 11px; margin-bottom: 8px;">
+        <div>Order: ${data.orderNumber}</div>
+        <div>Date: ${data.date}</div>
+        <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
+      </div>
+      
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      
+      <div style="margin-bottom: 8px;">
+        ${itemsHtml}
+      </div>
+      
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span>Subtotal / المجموع الفرعي:</span>
+        <span style="font-weight: bold;">OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}</span>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
+        <span style="font-weight: bold;">Total / المجموع:</span>
+        <span style="font-weight: bold;">OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}</span>
+      </div>
+      
+      ${data.changeDue > 0 ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Change Due / الباقي:</span>
+          <span style="font-weight: bold;">OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}</span>
+        </div>
+      ` : ''}
+      
+      <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
+      
+      <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #555;">Powered by Nexova</div>
+    `;
 
-    y += 5;
-    doc.text("Thank you for your purchase!", pageWidth / 2, y, { align: "center" });
-    y += 6;
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text("Powered by Nexova", pageWidth / 2, y, { align: "center" });
-    doc.setTextColor(0, 0, 0);
+    document.body.appendChild(container);
 
     if (data.companyDetails?.posPrinterName) {
       try {
         if (!qz.websocket.isActive()) {
           await qz.websocket.connect({ retries: 0 });
         }
-        // Margins must be zero for thermal receipt printers
-        const config = qz.configs.create(data.companyDetails.posPrinterName, {
-          margins: 0,
+        
+        // Let DOM render settle
+        await new Promise(r => setTimeout(r, 50));
+        
+        const canvas = await html2canvas(container, {
+          scale: 2, // 2x resolution for clear thermal printing
+          useCORS: true,
+          logging: false
         });
         
-        const base64Pdf = doc.output('datauristring').split(',')[1];
+        const base64Image = canvas.toDataURL("image/png").split(',')[1];
+        
+        const config = qz.configs.create(data.companyDetails.posPrinterName, { margins: 0 });
         
         await qz.print(config, [{
           type: 'pixel',
-          format: 'pdf',
+          format: 'image', // pure raster image, zero QZ conversion overhead
           flavor: 'base64',
-          data: base64Pdf
+          data: base64Image
         }]);
-        return;
       } catch (e) {
-        console.error("QZ raster print failed", e);
+        console.error("QZ image print failed", e);
+      } finally {
+        if (document.body.contains(container)) {
+          document.body.removeChild(container);
+        }
       }
+    } else {
+      document.body.removeChild(container);
     }
     return;
   } else {
