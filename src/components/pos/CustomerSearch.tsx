@@ -131,7 +131,7 @@ export function CustomerSearch() {
     const trimmedName = newName.trim();
     const trimmedPhone = phoneQuery.trim();
 
-    if (trimmedPhone.length < 5) {
+    if (trimmedPhone.length < 3) {
       toast.error("Phone number is too short");
       return;
     }

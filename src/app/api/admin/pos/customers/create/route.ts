@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!phone || typeof phone !== "string" || phone.trim().length < 5) {
+    if (!phone || typeof phone !== "string" || phone.trim().length < 3) {
       return NextResponse.json(
-        { success: false, message: "A valid phone number is required (min 5 characters)" },
+        { success: false, message: "A valid phone number is required (min 3 characters)" },
         { status: 400 }
       );
     }
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
           name: existing.name || trimmedName,
           phone: existing.phoneNumber,
           email: existing.email || null,
+          outstandingBalance: (existing as any).outstandingBalance || 0,
         },
       });
     }
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
         name: newCustomer.name || trimmedName,
         phone: newCustomer.phoneNumber,
         email: newCustomer.email || null,
+        outstandingBalance: 0,
       },
     });
   } catch (error: any) {
