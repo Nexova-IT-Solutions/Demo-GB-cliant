@@ -216,16 +216,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       );
       
       if (logoBase64) {
-        const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
-        rawLines.push({
-          type: 'raw', 
-          format: 'image', 
-          flavor: 'base64', 
-          data: base64Data, 
-          options: { language: 'ESCPOS', dotDensity: 'double' }
-        });
-        // Add a line feed after the image
-        rawLines.push('\n');
+        // Instead of processing the image on-the-fly (which takes 10-20 seconds),
+        // we trigger the printer's internal NV Logo #1.
+        // The user must upload the logo to the printer using the NV Download tool.
+        // FS p n m (n=1 for logo 1, m=0 for normal mode)
+        rawLines.push('\x1C\x70\x01\x00', '\n');
       }
 
       rawLines.push(
