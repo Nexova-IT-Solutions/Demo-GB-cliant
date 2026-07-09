@@ -81,7 +81,7 @@ export function DigitalAssetCard({ giftCard, isGiftedView }: DigitalAssetCardPro
               </Badge>
               {isGiftedView && (giftCard.recipientName || giftCard.recipientEmail) && (
                 <Badge className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-tight shadow-none border-none bg-[#FCEAF4] text-[#A7066A]">
-                  {t("card.sentTo", { name: giftCard.recipientName || giftCard.recipientEmail })}
+                  {t("card.sentTo", { name: giftCard.recipientName || giftCard.recipientEmail || "" })}
                 </Badge>
               )}
             </div>

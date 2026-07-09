@@ -90,7 +90,7 @@ export function AddressList({ initialAddresses, defaultType = "DELIVERY", locale
                 ...editingAddress,
                 addressLine2: editingAddress.addressLine2 ?? undefined
               } : undefined}
-                defaultType={defaultType}
+                defaultType={defaultType === "STAFF_PERMANENT" ? "DELIVERY" : defaultType}
                 locale={locale}
                 isFirstAddress={initialAddresses.length === 0}
                 onSuccess={handleSuccess}

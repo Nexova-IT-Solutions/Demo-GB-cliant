@@ -105,6 +105,12 @@ export function ReturnRequestModal({
   const onSubmit = async (values: z.infer<typeof returnRequestSchema>) => {
     setIsSubmitting(true);
 
+    if (!supabase) {
+      toast.error(t("errors.submissionFailed"));
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Upload every selected file and collect their storage paths.
       // We strictly block until Supabase confirms the upload and returns

@@ -98,7 +98,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "swiss"],
     inStock: true,
     capacityUnits: 1,
-    category: "chocolate",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-chocolate-2",
@@ -113,7 +115,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "ferrero"],
     inStock: true,
     capacityUnits: 2,
-    category: "chocolate",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-chocolate-3",
@@ -128,7 +132,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "godiva", "belgian"],
     inStock: true,
     capacityUnits: 2,
-    category: "chocolate",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-chocolate-4",
@@ -143,7 +149,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "kitkat"],
     inStock: true,
     capacityUnits: 1,
-    category: "chocolate",
+    
+    occasions: [],
+    recipients: [],
   },
 
   // Small Gifts
@@ -160,7 +168,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["perfume", "fragrance"],
     inStock: true,
     capacityUnits: 2,
-    category: "gift",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-gift-2",
@@ -175,7 +185,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["keychain", "accessory"],
     inStock: true,
     capacityUnits: 1,
-    category: "gift",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-gift-3",
@@ -190,7 +202,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["frame", "photo"],
     inStock: true,
     capacityUnits: 2,
-    category: "gift",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-gift-4",
@@ -205,7 +219,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["sachet", "lavender"],
     inStock: true,
     capacityUnits: 1,
-    category: "gift",
+    
+    occasions: [],
+    recipients: [],
   },
 
   // Flowers
@@ -222,7 +238,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["rose", "flower"],
     inStock: true,
     capacityUnits: 2,
-    category: "flower",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-flower-2",
@@ -237,7 +255,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["carnation", "flower"],
     inStock: true,
     capacityUnits: 2,
-    category: "flower",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-flower-3",
@@ -252,7 +272,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["orchid", "plant"],
     inStock: true,
     capacityUnits: 3,
-    category: "flower",
+    
+    occasions: [],
+    recipients: [],
   },
 
   // Teddies
@@ -269,7 +291,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["teddy", "cute"],
     inStock: true,
     capacityUnits: 2,
-    category: "teddy",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-teddy-2",
@@ -284,7 +308,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["teddy", "heart"],
     inStock: true,
     capacityUnits: 2,
-    category: "teddy",
+    
+    occasions: [],
+    recipients: [],
   },
 
   // Cards
@@ -301,7 +327,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["card", "birthday"],
     inStock: true,
     capacityUnits: 1,
-    category: "card",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-card-2",
@@ -316,7 +344,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["card", "love"],
     inStock: true,
     capacityUnits: 1,
-    category: "card",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-card-3",
@@ -331,7 +361,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["card", "thank you"],
     inStock: true,
     capacityUnits: 1,
-    category: "card",
+    
+    occasions: [],
+    recipients: [],
   },
 
   // Add-ons
@@ -348,7 +380,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["party", "popper"],
     inStock: true,
     capacityUnits: 1,
-    category: "addon",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-addon-2",
@@ -363,7 +397,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["candles", "birthday"],
     inStock: true,
     capacityUnits: 1,
-    category: "addon",
+    
+    occasions: [],
+    recipients: [],
   },
   {
     id: "builder-addon-3",
@@ -378,7 +414,9 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["confetti", "party"],
     inStock: true,
     capacityUnits: 1,
-    category: "addon",
+    
+    occasions: [],
+    recipients: [],
   },
 ];
 
