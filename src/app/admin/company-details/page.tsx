@@ -392,19 +392,23 @@ export default function CompanyDetailsPage() {
                       <FormItem>
                         <FormLabel>Select Printer (Requires QZ Tray)</FormLabel>
                         <FormControl>
-                          <select
-                            className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:border-transparent"
-                            {...field}
-                          >
-                            <option value="">-- No Printer Configured --</option>
-                            {printers.map((p) => (
-                              <option key={p} value={p}>{p}</option>
-                            ))}
-                            {/* If the current saved printer isn't in the list, still show it as an option */}
-                            {field.value && !printers.includes(field.value) && (
-                              <option value={field.value}>{field.value} (Saved)</option>
-                            )}
-                          </select>
+                          <div className="w-full">
+                            <input
+                              type="text"
+                              list="printer-list"
+                              placeholder="Select or type (e.g. tcp://192.168.1.100)"
+                              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:border-transparent"
+                              {...field}
+                            />
+                            <datalist id="printer-list">
+                              {printers.map((p) => (
+                                <option key={p} value={p} />
+                              ))}
+                              {field.value && !printers.includes(field.value) && (
+                                <option value={field.value} />
+                              )}
+                            </datalist>
+                          </div>
                         </FormControl>
                         {printers.length === 0 && (
                           <p className="text-xs text-slate-500 mt-2">
