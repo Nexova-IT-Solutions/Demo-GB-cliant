@@ -120,7 +120,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="text-align: center; margin-bottom: 8px;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 60px;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-bottom: 8px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 60px; object-fit: contain;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
@@ -158,7 +158,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           </div>
         ` : ''}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
-        <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #555;">Powered by Nexova</div>
+        <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #555; padding-bottom: 20px;">Powered by Nexova</div>
       `;
 
       document.body.appendChild(container);
