@@ -211,6 +211,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       // Init and Center align MUST happen before image is sent
       rawLines.push(
         '\x1B\x40', // Init printer
+        '\x1B\x74\x21', // Select character code table 33 (WPC1256 for Arabic)
         '\x1B\x61\x01', // Center align
       );
       
@@ -251,7 +252,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       
       // Items
       data.items.forEach(item => {
-        rawLines.push(`${item.name}\n`);
+        let nameLine = item.name;
+        if (item.nameAr) nameLine += ` - ${item.nameAr}`;
+        rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
         const qtyPrice = `${item.quantity} x OMR ${item.price.toFixed(2)}`;
         const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
@@ -285,7 +288,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           if (!qz.websocket.isActive()) {
             await qz.websocket.connect({ retries: 0 });
           }
-          const config = qz.configs.create(data.companyDetails.posPrinterName);
+          const config = qz.configs.create(data.companyDetails.posPrinterName, { encoding: 'windows-1256' });
           await qz.print(config, rawLines);
           return;
         } catch (e) {
