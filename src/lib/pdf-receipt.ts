@@ -55,85 +55,183 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
   };
 
   if (format === "print") {
-    // THERMAL PRINTER RAW TEXT FORMAT
-    const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
+    // 80mm THERMAL PRINTER RASTER FORMAT (PDF)
+    const pageWidth = 72; // 80mm paper has roughly 72mm printable area
+    let currentY = 5;
     
-    const rawLines: any[] = [];
+    // 1. Calculate exact height required
+    const dummy = new jsPDF({ unit: "mm", format: [pageWidth, 500] });
+    dummy.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+    dummy.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+    dummy.setFont("Amiri", "normal");
     
-    if (logoBase64) {
-      const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
-      rawLines.push({
-        type: 'raw', 
-        format: 'image', 
-        flavor: 'base64', 
-        data: base64Data, 
-        options: { language: 'ESCPOS', dotDensity: 'double' }
-      });
+    if (logoBase64) currentY += 25;
+    dummy.setFontSize(14);
+    currentY += 6;
+    dummy.setFontSize(9);
+    
+    if (data.companyDetails?.address) {
+      currentY += dummy.splitTextToSize(data.companyDetails.address, pageWidth - 4).length * 4;
     }
-
-    rawLines.push(
-      '\x1B\x40', // Init printer
-      '\x1B\x61\x01', // Center align
-      '\x1B\x45\x01', // Bold on
-      `${companyName}\n`,
-      '\x1B\x45\x00', // Bold off
-    );
-
-    if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
-    if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
-    if (data.companyDetails?.email) rawLines.push(`${data.companyDetails.email}\n`);
-    if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
-    if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
+    if (data.companyDetails?.mobileNumber) currentY += 4;
+    if (data.companyDetails?.email) currentY += 4;
+    if (data.companyDetails?.website) currentY += 4;
+    if (data.companyDetails?.crNumber) currentY += 4;
     
-    rawLines.push(
-      '-'.repeat(48) + '\n',
-      '\x1B\x61\x00', // Left align
-      `Order: ${data.orderNumber}\n`,
-      `Date: ${data.date}\n`,
-      `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
-      '-'.repeat(48) + '\n'
-    );
+    currentY += 6; 
+    currentY += 12; 
+    currentY += 6; 
     
-    // Items
     data.items.forEach(item => {
-      rawLines.push(`${item.name}\n`);
-      if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-      const qtyPrice = `${item.quantity} / ${arNum(item.quantity)} x OMR ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
-      const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
-      // Pad to roughly 48 chars
-      let padding = 48 - qtyPrice.length - total.length;
-      if (padding < 1) padding = 1;
-      rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
+      let itemName = item.name;
+      if (item.nameAr) itemName += ` - ${item.nameAr}`;
+      currentY += dummy.splitTextToSize(itemName, pageWidth - 4).length * 4;
+      if (item.sku) currentY += 4;
+      currentY += 5;
     });
     
-    rawLines.push(
-      '-'.repeat(48) + '\n',
-      '\x1B\x61\x02', // Right align
-      `Subtotal: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}\n`,
-      `Total: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}\n`
-    );
+    currentY += 6; 
+    currentY += 5; 
+    currentY += 5; 
+    if (data.changeDue > 0) currentY += 5;
+    currentY += 10;
+    
+    const finalHeight = currentY + 10;
+
+    // 2. Generate the actual PDF
+    const doc = new jsPDF({
+      unit: "mm",
+      format: [pageWidth, finalHeight]
+    });
+    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+    doc.setFont("Amiri", "normal");
+
+    let y = 5;
+
+    // Logo
+    if (logoBase64) {
+      doc.addImage(logoBase64, "PNG", (pageWidth - 24) / 2, y, 24, 24);
+      y += 26;
+    }
+
+    // Company Name
+    doc.setFontSize(12);
+    const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
+    doc.text(companyName, pageWidth / 2, y, { align: "center" });
+    y += 5;
+
+    // Company Details
+    doc.setFontSize(9);
+    if (data.companyDetails?.address) {
+      const splitAddress = doc.splitTextToSize(data.companyDetails.address, pageWidth - 4);
+      doc.text(splitAddress, pageWidth / 2, y, { align: "center" });
+      y += splitAddress.length * 4;
+    }
+    if (data.companyDetails?.mobileNumber) {
+      doc.text(`Tel: ${data.companyDetails.mobileNumber}`, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+    if (data.companyDetails?.email) {
+      doc.text(data.companyDetails.email, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+    if (data.companyDetails?.website) {
+      doc.text(data.companyDetails.website, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+    if (data.companyDetails?.crNumber) {
+      doc.text(`CR: ${data.companyDetails.crNumber}`, pageWidth / 2, y, { align: "center" });
+      y += 4;
+    }
+
+    // Divider
+    y += 2;
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(2, y, pageWidth - 2, y);
+    doc.setLineDashPattern([], 0);
+    y += 4;
+
+    // Order Info
+    doc.text(`Order: ${data.orderNumber}`, 2, y);
+    y += 4;
+    doc.text(`Date: ${data.date}`, 2, y);
+    y += 4;
+    doc.text(`Payment: ${data.paymentMethod.replace("POS_", "")}`, 2, y);
+    y += 4;
+
+    // Divider
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(2, y, pageWidth - 2, y);
+    doc.setLineDashPattern([], 0);
+    y += 4;
+
+    // Items
+    data.items.forEach(item => {
+      let itemName = item.name;
+      if (item.nameAr) itemName += ` - ${item.nameAr}`;
+      
+      const splitName = doc.splitTextToSize(itemName, pageWidth - 4);
+      doc.text(splitName, 2, y);
+      y += splitName.length * 4;
+      
+      if (item.sku) {
+        doc.text(`SKU: ${item.sku}`, 2, y);
+        y += 4;
+      }
+      
+      const qtyPrice = `${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+      const total = `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
+      
+      doc.text(qtyPrice, 2, y);
+      doc.text(total, pageWidth - 2, y, { align: "right" });
+      y += 5;
+    });
+
+    // Divider
+    y -= 1;
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(2, y, pageWidth - 2, y);
+    doc.setLineDashPattern([], 0);
+    y += 5;
+
+    // Totals
+    doc.text(`Subtotal: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+    y += 5;
+    doc.setFontSize(10);
+    doc.text(`Total: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+    y += 5;
+    doc.setFontSize(9);
     
     if (data.changeDue > 0) {
-      rawLines.push(`Change Due: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}\n`);
+      doc.text(`Change Due: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+      y += 5;
     }
-    
-    rawLines.push(
-      '\x1B\x61\x01', // Center align
-      '\nThank you for your purchase!\n',
-      '\n\n\n\n\n\n', // Feed paper
-      '\x1D\x56\x41\x10' // Full cut
-    );
+
+    y += 5;
+    doc.text("Thank you for your purchase!", pageWidth / 2, y, { align: "center" });
 
     if (data.companyDetails?.posPrinterName) {
       try {
         if (!qz.websocket.isActive()) {
           await qz.websocket.connect({ retries: 0 });
         }
-        const config = qz.configs.create(data.companyDetails.posPrinterName);
-        await qz.print(config, rawLines);
+        // Margins must be zero for thermal receipt printers
+        const config = qz.configs.create(data.companyDetails.posPrinterName, {
+          margins: 0,
+        });
+        
+        const base64Pdf = doc.output('datauristring').split(',')[1];
+        
+        await qz.print(config, [{
+          type: 'pixel',
+          format: 'pdf',
+          flavor: 'base64',
+          data: base64Pdf
+        }]);
         return;
       } catch (e) {
-        console.error("QZ raw print failed", e);
+        console.error("QZ raster print failed", e);
       }
     }
     return;
