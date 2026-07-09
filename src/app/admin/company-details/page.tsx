@@ -182,12 +182,19 @@ export default function CompanyDetailsPage() {
       
       const data = [
         { 
-          type: 'pixel', 
+          type: 'raw', 
           format: 'html', 
           flavor: 'plain', 
           data: htmlContent, 
-          options: { pageWidth: 3.15 } // 80mm roughly 
-        }
+          options: { 
+            language: 'ESCPOS',
+            dotDensity: 'double',
+            pageWidth: 3.15
+          }
+        },
+        // Feed some lines and cut
+        '\n\n\n\n\n\n',
+        '\x1D\x56\x41\x10'
       ];
       
       await qz.print(config, data);
