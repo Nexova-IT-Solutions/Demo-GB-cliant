@@ -2,6 +2,7 @@ import ExcelJS from "exceljs";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
+import { db } from "@/lib/db";
 
 export interface SalesReportData {
   summary: {
