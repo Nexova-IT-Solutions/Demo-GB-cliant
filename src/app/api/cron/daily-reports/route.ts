@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateDailySalesExcel, generateDailySalesPDF, SalesReportData } from "@/lib/server-report-generator";
 import { startOfDay, endOfDay } from "date-fns";
+import { getAppTimezone } from "@/lib/date-utils";
+import { formatInTimeZone } from "date-fns-tz";
 
 const mailersendToken = process.env.MAILERSEND_TOKEN || "mlsn.194bc6d9ec9ac7189982605b502b056f334745d7eb3388368a7a15b911a33161";
 const fromEmail = process.env.MAIL_FROM || "MS_kJeLLq@nexovaitsolutions.com";
@@ -23,10 +25,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: "Scheduled report is disabled or not configured." });
     }
 
-    // Check time if required. For simplicity, assuming the external cron hits this exactly at the scheduled time.
-    // E.g., if schedule.scheduleTime is "21:00", the external cron should trigger this at 21:00.
-    
     const now = new Date();
+    const appTimezone = await getAppTimezone();
+    const currentTimeStr = formatInTimeZone(now, appTimezone, "HH:mm");
+
+    if (currentTimeStr !== schedule.scheduleTime) {
+      return NextResponse.json({ 
+        success: false, 
+        message: `Scheduled time is ${schedule.scheduleTime}, but current time in ${appTimezone} is ${currentTimeStr}. Skipping.` 
+      });
+    }
+
     const startDate = startOfDay(now);
     const endDate = endOfDay(now);
 
