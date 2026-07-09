@@ -367,13 +367,82 @@ export default function SalesSummaryPage() {
               </CardContent>
             </Card>
           </div>
+          {/* Sales by Source (Web vs POS) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {data.storefrontEnabled && (
+              <Card className="border-0 shadow-md lg:col-span-1">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                    <Store className="h-4 w-4 text-[#A7066A]" />
+                    Sales by Channel
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Web */}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Globe className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-medium text-slate-700">Online / Web</span>
+                        <span className="font-bold text-slate-900">
+                          {formatPrice(data?.salesBySource?.web?.total ?? 0)}
+                        </span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (data?.summary?.totalSales ?? 0) > 0
+                                ? ((data?.salesBySource?.web?.total ?? 0) / data.summary.totalSales) * 100
+                                : 0
+                            }%`,
+                          }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {data?.salesBySource?.web?.orders ?? 0} orders
+                      </p>
+                    </div>
+                  </div>
 
-              </CardContent>
-            </Card>
-          )}
+                  {/* POS */}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-[#A7066A]/10 rounded-lg">
+                      <Store className="h-4 w-4 text-[#A7066A]" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-medium text-slate-700">In-Store / POS</span>
+                        <span className="font-bold text-slate-900">
+                          {formatPrice(data?.salesBySource?.pos?.total ?? 0)}
+                        </span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#A7066A] rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (data?.summary?.totalSales ?? 0) > 0
+                                ? ((data?.salesBySource?.pos?.total ?? 0) / data.summary.totalSales) * 100
+                                : 0
+                            }%`,
+                          }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {data?.salesBySource?.pos?.orders ?? 0} orders
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Payment Method Breakdown */}
-          <Card className={`border-0 shadow-md ${data.storefrontEnabled ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+            {/* Payment Method Breakdown */}
+            <Card className={`border-0 shadow-md ${data.storefrontEnabled ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-[#A7066A]" />
