@@ -311,6 +311,7 @@ export function AppSidebar() {
   // Check if sections are enabled
   const storefrontEnabled = toggles?.storefront_section !== false;
   const operationsEnabled = toggles?.operations_section !== false;
+  const reportsEnabled = toggles?.operations_reports !== false;
 
   // Filter storefront items based on toggles
   const filteredStorefrontItems = React.useMemo(() => {
@@ -698,7 +699,7 @@ export function AppSidebar() {
         {renderNavGroup("Sales & POS", salesPosItems)}
         {renderNavGroup("Storefront", filteredStorefrontItems)}
         {renderNavGroup("Operations", filteredOperationsItems)}
-        {renderNavGroup("Reports & Analytics", reportItems)}
+        {reportsEnabled && renderNavGroup("Reports & Analytics", reportItems)}
 
         {(isSuperAdmin || isDevAdmin) && renderNavGroup("Administration", [systemItems[0]])}
 
