@@ -97,6 +97,11 @@ export function PosCart() {
   };
 
   // ─── Remove voucher ────────────────────────────────────────
+  const arNum = (n: number | string) => {
+    const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+    return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+  };
+
   const handleRemoveVoucher = () => {
     setAppliedVoucher(null);
     setVoucherInput("");
@@ -184,10 +189,11 @@ export function PosCart() {
                           </Badge>
                         )}
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs font-bold text-slate-800">{formatPrice(item.subtotal)}</p>
+                      <div className="text-right flex flex-col items-end">
+                        <span className="text-xs font-bold text-slate-800">{formatPrice(item.subtotal)}</span>
+                        <span className="text-xs font-bold text-[#A7066A]">{arNum(formatPrice(item.subtotal))}</span>
                         {item.effectivePrice !== item.price && (
-                          <p className="text-[10px] text-slate-400 line-through">{formatPrice(item.price * item.quantity)}</p>
+                          <span className="text-[10px] text-slate-400 line-through mt-0.5">{formatPrice(item.price * item.quantity)}</span>
                         )}
                       </div>
                     </div>
@@ -266,7 +272,10 @@ export function PosCart() {
               <span>Subtotal ({itemCount} items)</span>
               <span className="text-[10px] dir-rtl">المجموع الفرعي</span>
             </span>
-            <span>{formatPrice(subtotal)}</span>
+            <span className="flex flex-col items-end">
+              <span>{formatPrice(subtotal)}</span>
+              <span className="text-[10px]">{arNum(formatPrice(subtotal))}</span>
+            </span>
           </div>
           {appliedVoucher && (
             <div className="flex justify-between text-xs text-emerald-600 font-medium">
@@ -280,7 +289,10 @@ export function PosCart() {
               <span className="text-sm font-bold text-slate-800">Total</span>
               <span className="text-xs font-bold text-slate-600 dir-rtl">المجموع</span>
             </span>
-            <span className="text-lg font-black text-[#A7066A]">{formatPrice(effectiveTotal)}</span>
+            <span className="flex flex-col items-end">
+              <span className="text-lg font-black text-[#A7066A] leading-tight">{formatPrice(effectiveTotal)}</span>
+              <span className="text-sm font-bold text-[#A7066A]">{arNum(formatPrice(effectiveTotal))}</span>
+            </span>
           </div>
         </div>
 
