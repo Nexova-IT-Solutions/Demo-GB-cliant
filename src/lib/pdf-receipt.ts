@@ -259,21 +259,21 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     // Totals Area (Right aligned box)
     doc.setDrawColor(220, 220, 220);
     doc.setFillColor(250, 250, 250);
-    doc.roundedRect(pageWidth - 85, currentY, 70, 40, 3, 3, "FD");
+    doc.roundedRect(pageWidth - 115, currentY, 100, 40, 3, 3, "FD");
 
     let totalY = currentY + 10;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     
-    doc.text("Subtotal / المجموع الفرعي:", pageWidth - 80, totalY);
+    doc.text("Subtotal / المجموع الفرعي:", pageWidth - 110, totalY);
     doc.text(`OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106);
-    doc.text("Total / المجموع:", pageWidth - 80, totalY);
+    doc.text("Total / المجموع:", pageWidth - 110, totalY);
     doc.text(`OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
@@ -281,7 +281,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFont("Amiri", "normal");
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text("Change Due / الباقي:", pageWidth - 80, totalY);
+      doc.text("Change Due / الباقي:", pageWidth - 110, totalY);
       doc.text(`OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
     }
 
