@@ -187,6 +187,12 @@ const reportItems: NavItem[] = [
         icon: BarChart3,
         requiredPermission: "reports.sales_summary",
       },
+      {
+        title: "Accounts Receivable",
+        url: "/admin/reports/accounts-receivable",
+        icon: Banknote,
+        requiredPermission: "reports.sales_summary",
+      },
     ],
   },
   {

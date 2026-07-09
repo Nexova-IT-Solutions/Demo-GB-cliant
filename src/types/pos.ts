@@ -29,6 +29,7 @@ export interface PosCustomer {
   name: string;
   email: string | null;
   phone: string | null;
+  outstandingBalance?: number;
 }
 
 export interface PosShiftData {

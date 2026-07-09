@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { usePosCart } from "@/store/use-pos-cart";
 import { toast } from "sonner";
+import { SettleDebtModal } from "./SettleDebtModal";
 
 interface SearchResult {
   id: string;
@@ -37,6 +38,9 @@ export function CustomerSearch() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+
+  // Settlement modal state
+  const [showSettleModal, setShowSettleModal] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -152,6 +156,7 @@ export function CustomerSearch() {
         name: c.name,
         email: c.email || null,
         phone: c.phone || trimmedPhone,
+        outstandingBalance: c.outstandingBalance,
       });
 
       setShowDropdown(false);
@@ -179,13 +184,26 @@ export function CustomerSearch() {
           <User className="h-3.5 w-3.5 text-emerald-700" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-emerald-900 truncate leading-tight">
+          <p className="text-xs font-semibold text-emerald-900 truncate leading-tight flex items-center gap-2">
             {customer.name || "Unknown Customer"}
+            {(customer.outstandingBalance || 0) > 0 && (
+              <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm whitespace-nowrap">
+                Owes OMR {customer.outstandingBalance?.toFixed(2)}
+              </span>
+            )}
           </p>
           <p className="text-[10px] text-emerald-600 truncate leading-tight">
             {customer.phone || customer.email || "No contact info"}
           </p>
         </div>
+        {(customer.outstandingBalance || 0) > 0 && (
+          <button
+            onClick={() => setShowSettleModal(true)}
+            className="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-semibold rounded-sm transition-colors shadow-sm whitespace-nowrap mr-1"
+          >
+            Settle Debt
+          </button>
+        )}
         <button
           onClick={() => clearCustomer()}
           className="p-1 rounded-md hover:bg-emerald-200/60 text-emerald-500 hover:text-emerald-800 transition-colors shrink-0"
@@ -193,6 +211,17 @@ export function CustomerSearch() {
         >
           <X className="h-3.5 w-3.5" />
         </button>
+
+        {showSettleModal && (
+          <SettleDebtModal
+            isOpen={showSettleModal}
+            onClose={() => setShowSettleModal(false)}
+            customer={customer}
+            onSettled={(newBalance) => {
+              setCustomer({ ...customer, outstandingBalance: newBalance });
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -253,8 +282,13 @@ export function CustomerSearch() {
                     <User className="h-3.5 w-3.5 text-slate-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-800 truncate">
+                    <p className="text-xs font-medium text-slate-800 truncate flex items-center gap-2">
                       {c.name || "Unknown Customer"}
+                      {(c as any).outstandingBalance > 0 && (
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm">
+                          Owes OMR {(c as any).outstandingBalance.toFixed(2)}
+                        </span>
+                      )}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <Phone className="h-2.5 w-2.5 text-slate-400" />

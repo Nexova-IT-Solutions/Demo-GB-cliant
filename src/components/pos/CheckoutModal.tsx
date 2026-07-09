@@ -461,12 +461,19 @@ export function CheckoutModal() {
                     <p className="text-2xl font-black text-white">{formatPrice(total)}</p>
                     <p className="text-xs text-white/50 mt-1">Add to customer's credit tab</p>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Credit Note / Reference (optional)</Label>
-                    <Input value={payment.cardReference}
-                      onChange={(e) => setCardReference(e.target.value)}
-                      placeholder="e.g., agreed terms or reference" className="h-10 text-sm" />
-                  </div>
+                  
+                  {!customer ? (
+                    <div className="bg-red-50 text-red-700 p-3 rounded-lg text-xs font-semibold border border-red-200">
+                      Error: A registered customer must be selected to use Store Credit. Please go back and select a customer.
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-slate-600">Credit Note / Reference (optional)</Label>
+                      <Input value={payment.cardReference}
+                        onChange={(e) => setCardReference(e.target.value)}
+                        placeholder="e.g., agreed terms or reference" className="h-10 text-sm" />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -645,7 +652,8 @@ export function CheckoutModal() {
                   isProcessing || items.length === 0 ||
                   (payment.method === "POS_CASH" && payment.cashTendered < total) ||
                   (payment.method === "POS_SPLIT" && Math.abs(splitRemaining) > 0.01) ||
-                  (payment.method === "POS_GIFT_CARD" && giftCardBalance === null)
+                  (payment.method === "POS_GIFT_CARD" && giftCardBalance === null) ||
+                  (payment.method === "POS_CREDIT" && !customer)
                 }
                 className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold shadow-xl transition-all">
                 {isProcessing ? (

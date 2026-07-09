@@ -72,6 +72,7 @@ model User {
   maxDiscount       Float               @default(0)
   commissionRate    Float               @default(0)
   commissionMethod  String?
+  outstandingBalance Float              @default(0)
   accounts          Account[]
   addresses         Address[]
   orders            Order[]
@@ -83,6 +84,28 @@ model User {
   posShifts         PosShift[]
   returnRequests    ReturnRequest[]
   statusHistories   OrderStatusHistory[]
+  ledgerEntries     CustomerLedger[]
+}
+
+enum LedgerTransactionType {
+  DEBIT
+  CREDIT
+}
+
+model CustomerLedger {
+  id            String                @id @default(cuid())
+  userId        String
+  amount        Float
+  type          LedgerTransactionType
+  description   String
+  orderId       String?
+  paymentMethod String?
+  createdAt     DateTime              @default(now())
+
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model VerificationToken {

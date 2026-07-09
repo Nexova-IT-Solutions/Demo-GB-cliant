@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
         name: true,
         phoneNumber: true,
         email: true,
+        outstandingBalance: true,
       },
       take: 5,
       orderBy: { name: "asc" },
@@ -64,6 +65,7 @@ export async function GET(req: NextRequest) {
         name: c.name || "Unnamed Customer",
         phone: c.phoneNumber || null,
         email: c.email || null,
+        outstandingBalance: c.outstandingBalance || 0,
       })),
     });
   } catch (error) {

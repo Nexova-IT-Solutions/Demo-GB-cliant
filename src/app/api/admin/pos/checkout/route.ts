@@ -153,6 +153,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (paymentMethod === "POS_CREDIT") {
+      if (!customerId) {
+        return NextResponse.json(
+          { success: false, message: "A registered customer must be selected to use Store Credit." },
+          { status: 400 }
+        );
+      }
+    }
+
     // ─── Verify Shift is Open ─────────────────────────────────────────
     const shift = await db.posShift.findFirst({
       where: { id: shiftId, status: "OPEN" },
@@ -745,6 +754,27 @@ export async function POST(req: NextRequest) {
 
           activatedCodes.push(targetCard.code);
         }
+      }
+
+      if (paymentMethod === "POS_CREDIT") {
+        if (!customerId) throw new Error("Customer ID is missing for POS_CREDIT");
+        // Create debit ledger entry
+        await tx.customerLedger.create({
+          data: {
+            userId: customerId,
+            amount: total,
+            type: "DEBIT",
+            description: `Store credit purchase for order ${order.orderNumber}`,
+            orderId: order.id,
+            paymentMethod: "POS_CREDIT",
+          }
+        });
+
+        // Update user balance
+        await tx.user.update({
+          where: { id: customerId },
+          data: { outstandingBalance: { increment: total } }
+        });
       }
 
       const finalOrder = await tx.order.findUnique({
