@@ -762,7 +762,7 @@ export function AppSidebar() {
           },
           {
             title: "Data Wipe",
-            url: "/devadmin/data-wipe",
+            url: "/admin/devadmin/data-wipe",
             icon: Database,
             requiredPermission: "",
           }
