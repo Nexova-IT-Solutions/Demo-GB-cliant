@@ -143,30 +143,51 @@ export default function CompanyDetailsPage() {
       if (!qz.websocket.isActive()) {
         await qz.websocket.connect({ retries: 0 });
       }
-      const config = qz.configs.create(selectedPrinter);
+      const config = qz.configs.create(selectedPrinter, { margins: 0 });
       
-      const testContent = "1234567890\n١٢٣٤٥٦٧٨٩٠\nOMR 1.50 / ١.٥٠\nOMR 65.00 / ٦٥.٠٠\n\n";
+      const htmlContent = `
+        <html>
+          <head>
+            <style>
+              body { 
+                margin: 0; 
+                padding: 10px; 
+                font-family: sans-serif; 
+                color: #000;
+                background: #fff;
+              }
+              h2 { text-align: center; margin-bottom: 20px; font-size: 24px; }
+              .text-lg { font-size: 18px; line-height: 1.5; }
+              .divider { border-top: 1px dashed #000; margin: 15px 0; }
+            </style>
+          </head>
+          <body>
+            <h2>HTML Raster Test</h2>
+            <div class="text-lg">
+              1234567890<br/>
+              ١٢٣٤٥٦٧٨٩٠
+            </div>
+            <div class="divider"></div>
+            <div class="text-lg">
+              OMR 1.50 / ١.٥٠<br/>
+              OMR 65.00 / ٦٥.٠٠
+            </div>
+            <div class="divider"></div>
+            <div class="text-lg" style="text-align: center;">
+              Thank you!
+            </div>
+          </body>
+        </html>
+      `;
       
       const data = [
-        // Initialize printer
-        { type: 'raw', format: 'command', flavor: 'hex', data: '1B40' },
-        
-        // --- PC720 ---
-        { type: 'raw', format: 'command', flavor: 'hex', data: '1B7420' }, // ESC t 32
-        { type: 'raw', data: "--- PC720 (ESC t 32) ---\n" },
-        { type: 'raw', data: testContent, options: { encoding: 'Cp720' } },
-        
-        // --- PC864 ---
-        { type: 'raw', format: 'command', flavor: 'hex', data: '1B7416' }, // ESC t 22
-        { type: 'raw', data: "--- PC864 (ESC t 22) ---\n" },
-        { type: 'raw', data: testContent, options: { encoding: 'Cp864' } },
-
-        // --- Windows-1256 ---
-        { type: 'raw', format: 'command', flavor: 'hex', data: '1B7425' }, // ESC t 37
-        { type: 'raw', data: "--- Windows-1256 (ESC t 37) ---\n" },
-        { type: 'raw', data: testContent, options: { encoding: 'windows-1256' } },
-        
-        "\n\n\n\n\n\n"
+        { 
+          type: 'pixel', 
+          format: 'html', 
+          flavor: 'plain', 
+          data: htmlContent, 
+          options: { pageWidth: 3.15 } // 80mm roughly 
+        }
       ];
       
       await qz.print(config, data);
