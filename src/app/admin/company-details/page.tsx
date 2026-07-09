@@ -430,7 +430,9 @@ export default function CompanyDetailsPage() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="raw">Raw ESC/POS (Fastest, text only)</SelectItem>
+                            <SelectItem value="raw_english">Full English (Raw ESC/POS, No Arabic)</SelectItem>
                             <SelectItem value="raster">Raster / Image (Supports Arabic, slower)</SelectItem>
+                            <SelectItem value="raster_english">Full English (Raster / Image, No Arabic)</SelectItem>
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-slate-500 mt-2">
