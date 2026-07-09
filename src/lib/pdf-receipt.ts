@@ -59,19 +59,13 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     const pageWidth = 72; // 80mm paper has roughly 72mm printable area
     let currentY = 5;
     
-    // 1. Calculate exact height required
-    const dummy = new jsPDF({ unit: "mm", format: [pageWidth, 500] });
-    dummy.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
-    dummy.addFont("Amiri-Regular.ttf", "Amiri", "normal");
-    dummy.setFont("Amiri", "normal");
-    
+    // 1. Calculate approximate height required mathematically (no dummy jsPDF)
+    // This fixes a massive UI lag issue caused by parsing the 300KB TTF font twice
     if (logoBase64) currentY += 25;
-    dummy.setFontSize(14);
     currentY += 6;
-    dummy.setFontSize(9);
     
     if (data.companyDetails?.address) {
-      currentY += dummy.splitTextToSize(data.companyDetails.address, pageWidth - 4).length * 4;
+      currentY += Math.max(1, Math.ceil(data.companyDetails.address.length / 40)) * 4;
     }
     if (data.companyDetails?.mobileNumber) currentY += 4;
     if (data.companyDetails?.email) currentY += 4;
@@ -85,9 +79,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     data.items.forEach(item => {
       let itemName = item.name;
       if (item.nameAr) itemName += ` - ${item.nameAr}`;
-      currentY += dummy.splitTextToSize(itemName, pageWidth - 4).length * 4;
+      currentY += Math.max(1, Math.ceil(itemName.length / 40)) * 4;
       if (item.sku) currentY += 4;
-      currentY += 5;
+      
+      let qtyPriceLength = 40; // baseline length
+      if (item.discountPercent && item.discountPercent > 0) qtyPriceLength += 20;
+      currentY += Math.max(1, Math.ceil(qtyPriceLength / 35)) * 5;
     });
     
     currentY += 6; 
@@ -96,7 +93,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     if (data.changeDue > 0) currentY += 5;
     currentY += 10;
     
-    const finalHeight = currentY + 10;
+    const finalHeight = currentY + 30; // Added 30mm buffer to absorb estimation errors
 
     // 2. Generate the actual PDF
     const doc = new jsPDF({
