@@ -29,16 +29,38 @@ export interface ReceiptData {
   } | null;
 }
 
-// Helper to convert image URL to base64
-async function getBase64ImageFromUrl(imageUrl: string): Promise<string | null> {
+// Helper to fetch and resize logo to prevent massive printing
+async function getResizedLogoBase64(imageUrl: string, targetWidth: number): Promise<string | null> {
   try {
     const res = await fetch(imageUrl);
     const blob = await res.blob();
-    return await new Promise((resolve, reject) => {
+    const origBase64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
+    });
+    
+    return await new Promise<string>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = targetWidth / img.width;
+        const targetHeight = img.height * scale;
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(origBase64); return; }
+        
+        // Fill white background for transparency
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+        
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(origBase64);
+      img.src = origBase64;
     });
   } catch (error) {
     console.error("Error loading logo:", error);
@@ -47,7 +69,7 @@ async function getBase64ImageFromUrl(imageUrl: string): Promise<string | null> {
 }
 
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
-  const logoBase64 = await getBase64ImageFromUrl("/logo/logo.png");
+  const logoBase64 = await getResizedLogoBase64("/logo/logo.png", 200); // 200px width fits perfectly on 80mm
 
   if (format === "print") {
     // THERMAL PRINTER RAW TEXT FORMAT
@@ -55,9 +77,27 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     
     const rawLines: any[] = [];
 
+    // Init and Center align MUST happen before image is sent
     rawLines.push(
       '\x1B\x40', // Init printer
       '\x1B\x61\x01', // Center align
+    );
+    
+    if (logoBase64) {
+      const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+      rawLines.push({
+        type: 'raw', 
+        format: 'image', 
+        flavor: 'base64', 
+        data: base64Data, 
+        options: { language: 'ESCPOS', dotDensity: 'double' }
+      });
+      // Add a line feed after the image
+      rawLines.push('\n');
+    }
+
+    rawLines.push(
+      '\x1B\x61\x01', // Ensure center align again just in case
       '\x1B\x45\x01', // Bold on
       `${companyName}\n`,
       '\x1B\x45\x00', // Bold off
@@ -104,6 +144,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     rawLines.push(
       '\x1B\x61\x01', // Center align
       '\nThank you for your purchase!\n',
+      '\nPowered by Nexova\n',
       '\n\n\n\n\n\n', // Feed paper
       '\x1D\x56\x41\x10' // Full cut
     );
