@@ -947,3 +947,11 @@ model ScheduledReport {
   scheduleTime String   // e.g. "21:00"
   updatedAt    DateTime @updatedAt
 }
+model EmailLog {
+  id           String   @id @default(cuid())
+  recipient    String
+  subject      String
+  status       String   // "SUCCESS", "FAILED"
+  errorMessage String?  @db.Text
+  createdAt    DateTime @default(now())
+}

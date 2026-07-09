@@ -8,12 +8,20 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Save, Mail, Clock, User } from "lucide-react";
+import { Loader2, Save, Mail, Clock, User, Send, CheckCircle2, XCircle } from "lucide-react";
+import useSWR from "swr";
+import { formatAppDateSync } from "@/lib/date-utils";
+import { useTimezone } from "@/components/TimezoneProvider";
 
 export default function ReportSchedulePage() {
   const router = useRouter();
+  const tz = useTimezone();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  
+  const fetcher = (url: string) => fetch(url).then(res => res.json());
+  const { data: logsData, mutate: mutateLogs } = useSWR("/api/admin/reports/schedule/logs", fetcher);
   
   const [enabled, setEnabled] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
@@ -74,6 +82,26 @@ export default function ReportSchedulePage() {
       toast.error("An error occurred while saving.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setIsTesting(true);
+    try {
+      const res = await fetch("/api/admin/reports/schedule/test", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Test email sent successfully!");
+      } else {
+        toast.error(data.message || "Failed to send test email.");
+      }
+      mutateLogs(); // Refresh logs after testing
+    } catch (error) {
+      toast.error("An error occurred while testing.");
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -164,7 +192,20 @@ export default function ReportSchedulePage() {
           </div>
 
         </CardContent>
-        <CardFooter className="bg-slate-50 border-t border-slate-100 flex justify-end p-4">
+        <CardFooter className="bg-slate-50 border-t border-slate-100 flex justify-end gap-3 p-4">
+          <Button 
+            onClick={handleTestEmail} 
+            disabled={isTesting}
+            variant="outline"
+            className="text-slate-700"
+          >
+            {isTesting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            Send Test Email
+          </Button>
           <Button 
             onClick={handleSave} 
             disabled={isSaving}
@@ -179,6 +220,66 @@ export default function ReportSchedulePage() {
           </Button>
         </CardFooter>
       </Card>
+
+      <div className="mt-8">
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-4">Email Logs</h2>
+        <Card className="border-0 shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-600">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-50/50 border-b border-slate-200">
+                <tr>
+                  <th scope="col" className="px-6 py-3">Date & Time</th>
+                  <th scope="col" className="px-6 py-3">Subject</th>
+                  <th scope="col" className="px-6 py-3">Status</th>
+                  <th scope="col" className="px-6 py-3">Error Message</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {!logsData ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center">
+                      <Loader2 className="h-5 w-5 animate-spin mx-auto text-slate-400" />
+                    </td>
+                  </tr>
+                ) : logsData.logs?.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                      No email logs found.
+                    </td>
+                  </tr>
+                ) : (
+                  logsData.logs?.map((log: any) => (
+                    <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {formatAppDateSync(new Date(log.createdAt), "MMM d, yyyy h:mm a", tz)}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-900">
+                        {log.subject}
+                      </td>
+                      <td className="px-6 py-4">
+                        {log.status === "SUCCESS" ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Success
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                            <XCircle className="w-3.5 h-3.5" />
+                            Failed
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 max-w-xs truncate" title={log.errorMessage || ""}>
+                        {log.errorMessage || "-"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
