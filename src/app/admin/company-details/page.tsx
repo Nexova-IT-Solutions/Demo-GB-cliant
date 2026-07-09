@@ -37,6 +37,7 @@ const companyDetailsSchema = z.object({
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   crNumber: z.string().optional().or(z.literal("")),
   posPrinterName: z.string().optional().or(z.literal("")),
+  posPrintMode: z.string().default("raw"),
   timezone: z.string().optional().default("Asia/Muscat"),
 });
 
@@ -57,6 +58,7 @@ export default function CompanyDetailsPage() {
       email: "",
       crNumber: "",
       posPrinterName: "",
+      posPrintMode: "raw",
       timezone: "Asia/Muscat",
     },
   });
@@ -76,6 +78,7 @@ export default function CompanyDetailsPage() {
           email: data.email || "",
           crNumber: data.crNumber || "",
           posPrinterName: data.posPrinterName || "",
+          posPrintMode: data.posPrintMode || "raw",
           timezone: data.timezone || "Asia/Muscat",
         });
       } catch (error) {
@@ -403,7 +406,36 @@ export default function CompanyDetailsPage() {
                             )}
                           </select>
                         </FormControl>
+                        {printers.length === 0 && (
+                          <p className="text-xs text-slate-500 mt-2">
+                            Make sure QZ Tray is running and click "Connect & Find Printers".
+                          </p>
+                        )}
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="posPrintMode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Print Mode</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Print Mode" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="raw">Raw ESC/POS (Fastest, text only)</SelectItem>
+                            <SelectItem value="raster">Raster / Image (Supports Arabic, slower)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-slate-500 mt-2">
+                          Choose how receipts are formatted for the POS thermal printer.
+                        </p>
                       </FormItem>
                     )}
                   />

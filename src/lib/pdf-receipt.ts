@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import qz from "qz-tray";
 import { amiriBase64 } from "./fonts/Amiri-Regular";
+import html2canvas from "html2canvas";
 
 export interface ReceiptData {
   orderNumber: string;
@@ -26,6 +27,7 @@ export interface ReceiptData {
     email?: string | null;
     crNumber?: string | null;
     posPrinterName?: string | null;
+    posPrintMode?: string | null;
   } | null;
 }
 
@@ -72,96 +74,226 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
   const logoBase64 = await getResizedLogoBase64("/logo/logo.png", 200); // 200px width fits perfectly on 80mm
 
   if (format === "print") {
-    // THERMAL PRINTER RAW TEXT FORMAT
-    const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
-    
-    const rawLines: any[] = [];
+    if (data.companyDetails?.posPrintMode === "raster") {
+      // 80mm THERMAL PRINTER RASTER FORMAT (html2canvas to PNG)
+      const arNum = (n: number | string) => {
+        const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+        return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+      };
 
-    // Init and Center align MUST happen before image is sent
-    rawLines.push(
-      '\x1B\x40', // Init printer
-      '\x1B\x61\x01', // Center align
-    );
-    
-    if (logoBase64) {
-      const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
-      rawLines.push({
-        type: 'raw', 
-        format: 'image', 
-        flavor: 'base64', 
-        data: base64Data, 
-        options: { language: 'ESCPOS', dotDensity: 'double' }
-      });
-      // Add a line feed after the image
-      rawLines.push('\n');
-    }
-
-    rawLines.push(
-      '\x1B\x61\x01', // Ensure center align again just in case
-      '\x1B\x45\x01', // Bold on
-      `${companyName}\n`,
-      '\x1B\x45\x00', // Bold off
-    );
-
-    if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
-    if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
-    if (data.companyDetails?.email) rawLines.push(`${data.companyDetails.email}\n`);
-    if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
-    if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
-    
-    rawLines.push(
-      '-'.repeat(48) + '\n',
-      '\x1B\x61\x00', // Left align
-      `Order: ${data.orderNumber}\n`,
-      `Date: ${data.date}\n`,
-      `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
-      '-'.repeat(48) + '\n'
-    );
-    
-    // Items
-    data.items.forEach(item => {
-      rawLines.push(`${item.name}\n`);
-      if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-      const qtyPrice = `${item.quantity} x OMR ${item.price.toFixed(2)}`;
-      const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
-      // Pad to roughly 48 chars
-      let padding = 48 - qtyPrice.length - total.length;
-      if (padding < 1) padding = 1;
-      rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
-    });
-    
-    rawLines.push(
-      '-'.repeat(48) + '\n',
-      '\x1B\x61\x02', // Right align
-      `Subtotal: OMR ${data.subtotal.toFixed(2)}\n`,
-      `Total: OMR ${data.total.toFixed(2)}\n`
-    );
-    
-    if (data.changeDue > 0) {
-      rawLines.push(`Change Due: OMR ${data.changeDue.toFixed(2)}\n`);
-    }
-    
-    rawLines.push(
-      '\x1B\x61\x01', // Center align
-      '\nThank you for your purchase!\n',
-      '\nPowered by Nexova\n',
-      '\n\n\n\n\n\n', // Feed paper
-      '\x1D\x56\x41\x10' // Full cut
-    );
-
-    if (data.companyDetails?.posPrinterName) {
-      try {
-        if (!qz.websocket.isActive()) {
-          await qz.websocket.connect({ retries: 0 });
+      let itemsHtml = "";
+      data.items.forEach(item => {
+        let itemName = item.name;
+        if (item.nameAr) itemName += ` - ${item.nameAr}`;
+        
+        let qtyPrice = `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+        if (item.discountPercent && item.discountPercent > 0) {
+          qtyPrice += ` (Disc / خصم ${item.discountPercent}%)`;
         }
-        const config = qz.configs.create(data.companyDetails.posPrinterName);
-        await qz.print(config, rawLines);
-        return;
-      } catch (e) {
-        console.error("QZ raw print failed", e);
+        
+        const total = `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
+        
+        itemsHtml += `
+          <div style="margin-bottom: 4px;">
+            <div>${itemName}</div>
+            ${item.sku ? `<div style="font-size: 10px; color: #555;">SKU: ${item.sku}</div>` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 11px;">
+              <div style="flex: 1;">${qtyPrice}</div>
+              <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      const container = document.createElement("div");
+      Object.assign(container.style, {
+        position: "fixed",
+        left: "-9999px",
+        top: "0",
+        width: "280px", // 72mm printable area roughly maps to 280px
+        backgroundColor: "white",
+        color: "black",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        fontSize: "12px",
+        lineHeight: "1.3",
+        padding: "0"
+      });
+
+      const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
+      const logoHtml = originalLogo ? `<div style="text-align: center; margin-bottom: 8px;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 60px;" /></div>` : '';
+
+      container.innerHTML = `
+        ${logoHtml}
+        <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 4px;">${data.companyDetails?.companyName || "STORE RECEIPT"}</div>
+        <div style="text-align: center; font-size: 11px; margin-bottom: 8px;">
+          ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
+          ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
+          ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
+          ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
+          ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
+        </div>
+        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+        <div style="font-size: 11px; margin-bottom: 8px;">
+          <div>Order: ${data.orderNumber}</div>
+          <div>Date: ${data.date}</div>
+          <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
+        </div>
+        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+        <div style="margin-bottom: 8px;">
+          ${itemsHtml}
+        </div>
+        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Subtotal / المجموع الفرعي:</span>
+          <span style="font-weight: bold;">OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
+          <span style="font-weight: bold;">Total / المجموع:</span>
+          <span style="font-weight: bold;">OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}</span>
+        </div>
+        ${data.changeDue > 0 ? `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span>Change Due / الباقي:</span>
+            <span style="font-weight: bold;">OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}</span>
+          </div>
+        ` : ''}
+        <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
+        <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #555;">Powered by Nexova</div>
+      `;
+
+      document.body.appendChild(container);
+
+      if (data.companyDetails?.posPrinterName) {
+        try {
+          if (!qz.websocket.isActive()) {
+            await qz.websocket.connect({ retries: 0 });
+          }
+          await new Promise(r => setTimeout(r, 50));
+          const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            logging: false
+          });
+          const base64Image = canvas.toDataURL("image/png").split(',')[1];
+          const config = qz.configs.create(data.companyDetails.posPrinterName, { margins: 0 });
+          await qz.print(config, [
+            {
+              type: 'raw',
+              format: 'image',
+              flavor: 'base64',
+              data: base64Image,
+              options: { language: "ESCPOS", dotDensity: "double" }
+            },
+            {
+              type: 'raw',
+              format: 'command',
+              flavor: 'hex',
+              data: '1D564100'
+            }
+          ]);
+        } catch (e) {
+          console.error("QZ image print failed", e);
+        } finally {
+          if (document.body.contains(container)) {
+            document.body.removeChild(container);
+          }
+        }
+      } else {
+        document.body.removeChild(container);
       }
+      return;
+    } else {
+      // THERMAL PRINTER RAW TEXT FORMAT
+      const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
+      
+      const rawLines: any[] = [];
+
+      // Init and Center align MUST happen before image is sent
+      rawLines.push(
+        '\x1B\x40', // Init printer
+        '\x1B\x61\x01', // Center align
+      );
+      
+      if (logoBase64) {
+        const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+        rawLines.push({
+          type: 'raw', 
+          format: 'image', 
+          flavor: 'base64', 
+          data: base64Data, 
+          options: { language: 'ESCPOS', dotDensity: 'double' }
+        });
+        // Add a line feed after the image
+        rawLines.push('\n');
+      }
+
+      rawLines.push(
+        '\x1B\x61\x01', // Ensure center align again just in case
+        '\x1B\x45\x01', // Bold on
+        `${companyName}\n`,
+        '\x1B\x45\x00', // Bold off
+      );
+
+      if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
+      if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
+      if (data.companyDetails?.email) rawLines.push(`${data.companyDetails.email}\n`);
+      if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
+      if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
+      
+      rawLines.push(
+        '-'.repeat(48) + '\n',
+        '\x1B\x61\x00', // Left align
+        `Order: ${data.orderNumber}\n`,
+        `Date: ${data.date}\n`,
+        `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
+        '-'.repeat(48) + '\n'
+      );
+      
+      // Items
+      data.items.forEach(item => {
+        rawLines.push(`${item.name}\n`);
+        if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
+        const qtyPrice = `${item.quantity} x OMR ${item.price.toFixed(2)}`;
+        const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
+        // Pad to roughly 48 chars
+        let padding = 48 - qtyPrice.length - total.length;
+        if (padding < 1) padding = 1;
+        rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
+      });
+      
+      rawLines.push(
+        '-'.repeat(48) + '\n',
+        '\x1B\x61\x02', // Right align
+        `Subtotal: OMR ${data.subtotal.toFixed(2)}\n`,
+        `Total: OMR ${data.total.toFixed(2)}\n`
+      );
+      
+      if (data.changeDue > 0) {
+        rawLines.push(`Change Due: OMR ${data.changeDue.toFixed(2)}\n`);
+      }
+      
+      rawLines.push(
+        '\x1B\x61\x01', // Center align
+        '\nThank you for your purchase!\n',
+        '\nPowered by Nexova\n',
+        '\n\n\n\n\n\n', // Feed paper
+        '\x1D\x56\x41\x10' // Full cut
+      );
+
+      if (data.companyDetails?.posPrinterName) {
+        try {
+          if (!qz.websocket.isActive()) {
+            await qz.websocket.connect({ retries: 0 });
+          }
+          const config = qz.configs.create(data.companyDetails.posPrinterName);
+          await qz.print(config, rawLines);
+          return;
+        } catch (e) {
+          console.error("QZ raw print failed", e);
+        }
+      }
+      return;
     }
-    return;
   } else {
     // COLORFUL A4 INVOICE FORMAT
     const doc = new jsPDF({

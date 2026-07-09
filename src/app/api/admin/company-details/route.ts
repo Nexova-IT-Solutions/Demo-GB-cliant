@@ -13,6 +13,7 @@ const companyDetailsSchema = z.object({
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   crNumber: z.string().optional().or(z.literal("")),
   posPrinterName: z.string().optional().or(z.literal("")),
+  posPrintMode: z.string().default("raw"),
   timezone: z.string().optional().default("Asia/Muscat"),
 });
 
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
         email: data.email,
         crNumber: data.crNumber,
         posPrinterName: data.posPrinterName,
+        posPrintMode: data.posPrintMode,
         timezone: data.timezone,
       },
       create: {
@@ -85,6 +87,7 @@ export async function POST(req: Request) {
         email: data.email,
         crNumber: data.crNumber,
         posPrinterName: data.posPrinterName,
+        posPrintMode: data.posPrintMode,
         timezone: data.timezone,
       },
     });

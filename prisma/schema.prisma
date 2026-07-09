@@ -934,6 +934,7 @@ model CompanyDetails {
   email          String?
   crNumber       String?
   posPrinterName String?
+  posPrintMode   String   @default("raw") // "raw" or "raster"
   timezone       String   @default("Asia/Muscat")
   updatedAt      DateTime @updatedAt
 }
