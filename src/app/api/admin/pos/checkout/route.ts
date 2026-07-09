@@ -43,7 +43,7 @@ const posCheckoutSchema = z.object({
   items: z.array(checkoutItemSchema).min(1, "At least one item is required"),
   subtotal: z.number(),
   total: z.number().min(0, "Total must be non-negative"),
-  paymentMethod: z.enum(["POS_CASH", "POS_CARD", "POS_GIFT_CARD", "POS_SPLIT", "CREDIT_CARD", "DEBIT_CARD"]),
+  paymentMethod: z.enum(["POS_CASH", "POS_CARD", "POS_GIFT_CARD", "POS_SPLIT", "CREDIT_CARD", "DEBIT_CARD", "POS_MOBILE_TRANSFER", "POS_CREDIT"]),
   cashTendered: z.number().optional().nullable(),
   changeDue: z.number().optional().nullable(),
   cardReference: z.string().optional().nullable(),

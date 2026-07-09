@@ -79,6 +79,8 @@ export async function POST(req: NextRequest) {
           break;
         case "CREDIT_CARD":
         case "POS_CARD":
+        case "POS_MOBILE_TRANSFER":
+        case "POS_CREDIT":
           expectedCreditFromSales += orderTotal;
           break;
         case "DEBIT_CARD":
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
           if (gw && gw.splitPayments && Array.isArray(gw.splitPayments)) {
             for (const sp of gw.splitPayments) {
               if (sp.method === "POS_CASH") expectedCashFromSales += sp.amount;
-              else if (sp.method === "CREDIT_CARD" || sp.method === "POS_CARD") expectedCreditFromSales += sp.amount;
+              else if (sp.method === "CREDIT_CARD" || sp.method === "POS_CARD" || sp.method === "POS_MOBILE_TRANSFER" || sp.method === "POS_CREDIT") expectedCreditFromSales += sp.amount;
               else if (sp.method === "DEBIT_CARD") expectedDebitFromSales += sp.amount;
               else if (sp.method === "POS_GIFT_CARD") expectedGiftCardTotal += sp.amount;
             }

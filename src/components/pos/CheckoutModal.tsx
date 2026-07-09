@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   Banknote, CreditCard, Gift, Split, Loader2, CheckCircle2,
-  Calculator, Receipt, ArrowRight, Plus, Trash2, Sparkles, ScanLine, Printer, Download,
+  Calculator, Receipt, ArrowRight, Plus, Trash2, Sparkles, ScanLine, Printer, Download, Smartphone, FileText,
 } from "lucide-react";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { usePosCart } from "@/store/use-pos-cart";
@@ -64,7 +64,6 @@ export function CheckoutModal() {
     items: { name: string; quantity: number; price: number; discountPercent?: number }[];
     activatedCodes?: string[];
   } | null>(null);
-  const [cardType, setCardType] = useState<"CREDIT_CARD" | "DEBIT_CARD" | null>(null);
 
   const subtotal = getSubtotal();
   const total = getTotal();
@@ -78,7 +77,6 @@ export function CheckoutModal() {
       setGiftCardError(null);
       setGiftCardIsPhysical(false);
       setSplitEntries([]);
-      setCardType(null);
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -185,7 +183,7 @@ export function CheckoutModal() {
           personalMessage: item.personalMessage,
         })),
         subtotal, total,
-        paymentMethod: payment.method === "POS_CARD" && cardType ? cardType : payment.method,
+        paymentMethod: payment.method,
         cashTendered: payment.method === "POS_CASH" ? payment.cashTendered : 0,
         changeDue: payment.method === "POS_CASH" ? changeDue : 0,
         cardReference: (payment.method === "POS_CARD" || payment.method === "CREDIT_CARD" || payment.method === "DEBIT_CARD") ? payment.cardReference : "",
@@ -220,7 +218,7 @@ export function CheckoutModal() {
         total: data.order.total,
         subtotal,
         changeDue,
-        paymentMethod: payment.method === "POS_CARD" && cardType ? cardType : payment.method,
+        paymentMethod: payment.method,
         items: items.map(i => ({ name: i.name, nameAr: i.nameAr || null, sku: i.sku, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
         activatedCodes: data.order.activatedCodes ?? [],
       });
@@ -269,6 +267,8 @@ export function CheckoutModal() {
   const paymentMethods: { method: PosPaymentMethod; label: string; icon: any }[] = [
     { method: "POS_CASH", label: "Cash", icon: Banknote },
     { method: "POS_CARD", label: "Card", icon: CreditCard },
+    { method: "POS_MOBILE_TRANSFER", label: "Mobile transfer", icon: Smartphone },
+    { method: "POS_CREDIT", label: "Credit", icon: FileText },
     ...(isGiftcardsEnabled ? [{ method: "POS_GIFT_CARD", label: "Gift Card", icon: Gift }] : []),
     ...(isSplitEnabled ? [{ method: "POS_SPLIT", label: "Split", icon: Split }] : []),
   ];
@@ -357,9 +357,6 @@ export function CheckoutModal() {
                 {paymentMethods.map(({ method, label, icon: Icon }) => (
                   <button key={method} onClick={() => {
                     setPaymentMethod(method);
-                    if (method !== "POS_CARD") {
-                      setCardType(null);
-                    }
                   }}
                     className={`flex flex-col items-center gap-1 py-2.5 px-2 rounded-lg text-xs font-medium transition-all ${
                       payment.method === method
@@ -428,44 +425,47 @@ export function CheckoutModal() {
                     <p className="text-xs text-white/50 mt-1">Present card to terminal</p>
                   </div>
 
-                  {/* Card Type Switcher */}
-                  <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                      <CreditCard className="h-3.5 w-3.5 text-slate-400" /> Select Card Type
-                    </Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        type="button"
-                        variant={cardType === "CREDIT_CARD" ? "default" : "outline"}
-                        className={`h-11 rounded-xl text-xs font-semibold transition-all ${
-                          cardType === "CREDIT_CARD"
-                            ? "bg-[#A7066A] hover:bg-[#8A0558] text-white shadow-md"
-                            : "text-slate-600 hover:text-slate-800 hover:bg-slate-50 border-slate-200"
-                        }`}
-                        onClick={() => setCardType("CREDIT_CARD")}
-                      >
-                        Credit Card
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={cardType === "DEBIT_CARD" ? "default" : "outline"}
-                        className={`h-11 rounded-xl text-xs font-semibold transition-all ${
-                          cardType === "DEBIT_CARD"
-                            ? "bg-[#A7066A] hover:bg-[#8A0558] text-white shadow-md"
-                            : "text-slate-600 hover:text-slate-800 hover:bg-slate-50 border-slate-200"
-                        }`}
-                        onClick={() => setCardType("DEBIT_CARD")}
-                      >
-                        Debit Card
-                      </Button>
-                    </div>
-                  </div>
+
 
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-slate-600">Transaction Reference (optional)</Label>
                     <Input value={payment.cardReference}
                       onChange={(e) => setCardReference(e.target.value)}
                       placeholder="e.g., last 4 digits or auth code" className="h-10 text-sm" />
+                  </div>
+                </div>
+              )}
+
+              {/* ─── MOBILE TRANSFER PAYMENT ───────── */}
+              {payment.method === "POS_MOBILE_TRANSFER" && (
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 text-center">
+                    <Smartphone className="h-10 w-10 text-white/50 mx-auto mb-3" />
+                    <p className="text-2xl font-black text-white">{formatPrice(total)}</p>
+                    <p className="text-xs text-white/50 mt-1">Complete transfer via mobile app</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Transaction Reference (optional)</Label>
+                    <Input value={payment.cardReference}
+                      onChange={(e) => setCardReference(e.target.value)}
+                      placeholder="e.g., transfer ID" className="h-10 text-sm" />
+                  </div>
+                </div>
+              )}
+
+              {/* ─── CREDIT PAYMENT ────────────────── */}
+              {payment.method === "POS_CREDIT" && (
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 p-6 text-center">
+                    <FileText className="h-10 w-10 text-white/50 mx-auto mb-3" />
+                    <p className="text-2xl font-black text-white">{formatPrice(total)}</p>
+                    <p className="text-xs text-white/50 mt-1">Add to customer's credit tab</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Credit Note / Reference (optional)</Label>
+                    <Input value={payment.cardReference}
+                      onChange={(e) => setCardReference(e.target.value)}
+                      placeholder="e.g., agreed terms or reference" className="h-10 text-sm" />
                   </div>
                 </div>
               )}
@@ -645,8 +645,7 @@ export function CheckoutModal() {
                   isProcessing || items.length === 0 ||
                   (payment.method === "POS_CASH" && payment.cashTendered < total) ||
                   (payment.method === "POS_SPLIT" && Math.abs(splitRemaining) > 0.01) ||
-                  (payment.method === "POS_GIFT_CARD" && giftCardBalance === null) ||
-                  (payment.method === "POS_CARD" && !cardType)
+                  (payment.method === "POS_GIFT_CARD" && giftCardBalance === null)
                 }
                 className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold shadow-xl transition-all">
                 {isProcessing ? (
