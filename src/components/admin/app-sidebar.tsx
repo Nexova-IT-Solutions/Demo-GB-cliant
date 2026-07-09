@@ -181,6 +181,12 @@ const reportItems: NavItem[] = [
         icon: Banknote,
         requiredPermission: "reports.cash_close",
       },
+      {
+        title: "Schedule Reports",
+        url: "/admin/reports/schedule",
+        icon: BarChart3,
+        requiredPermission: "reports.sales_summary",
+      },
     ],
   },
   {

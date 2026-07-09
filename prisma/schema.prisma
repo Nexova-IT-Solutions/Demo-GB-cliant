@@ -892,3 +892,13 @@ model CompanyDetails {
   posPrinterName String?
   updatedAt      DateTime @updatedAt
 }
+
+model ScheduledReport {
+  id           String   @id @default(cuid())
+  reportType   String   @unique
+  enabled      Boolean  @default(false)
+  emailAddress String
+  ownerName    String
+  scheduleTime String   // e.g. "21:00"
+  updatedAt    DateTime @updatedAt
+}
