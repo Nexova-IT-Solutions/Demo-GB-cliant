@@ -21,7 +21,8 @@ import { hasPermission } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
-import { formatCurrency } from "@/lib/admin-orders";
+import { formatPriceServer } from "@/lib/currency";
+import { getStoreSettings } from "@/lib/queries/store-settings";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { OrderManagementPanel } from "../order-management-panel";
@@ -47,6 +48,10 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
       redirect("/admin");
     }
   }
+
+  const settings = await getStoreSettings();
+  const currency = settings?.currency || "LKR";
+  const formatCurr = (amount: number | string) => formatPriceServer(amount, currency);
 
   const orderData = await db.order.findUnique({
     where: { id },
@@ -278,10 +283,10 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                 <span className="rounded-full bg-[#FCEAF4] px-3 py-1 text-xs font-semibold text-[#A7066A]">Operational Overview</span>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 p-0 pt-0">
-                <StatBox label="Subtotal" value={formatCurrency(order.subtotal)} />
-                <StatBox label="Discount Savings" value={formatCurrency(getDiscountSavings(order.items))} />
-                <StatBox label="Delivery Fee" value={order.deliveryFee === 0 ? "FREE" : formatCurrency(order.deliveryFee)} />
-                <StatBox label="Final Total" value={formatCurrency(order.total)} emphasized />
+                <StatBox label="Subtotal" value={formatCurr(order.subtotal)} />
+                <StatBox label="Discount Savings" value={formatCurr(getDiscountSavings(order.items))} />
+                <StatBox label="Delivery Fee" value={order.deliveryFee === 0 ? "FREE" : formatCurr(order.deliveryFee)} />
+                <StatBox label="Final Total" value={formatCurr(order.total)} emphasized />
               </CardContent>
             </Card>
 
@@ -336,7 +341,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                         </TableCell>
                         <TableCell className="text-[#6B5A64]">{item.quantity}</TableCell>
                         <TableCell className="font-mono text-xs text-[#6B5A64]">{item.sku || "-"}</TableCell>
-                        <TableCell className="text-[#6B5A64]">{formatCurrency(item.salePrice || item.unitPrice)}</TableCell>
+                        <TableCell className="text-[#6B5A64]">{formatCurr(item.salePrice || item.unitPrice)}</TableCell>
                         <TableCell className="text-[#6B5A64]">
                           {item.discountName ? (
                             <div className="space-y-0.5">
@@ -347,7 +352,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                             "-"
                           )}
                         </TableCell>
-                        <TableCell className="text-right font-semibold text-[#1F1720]">{formatCurrency(item.subtotal)}</TableCell>
+                        <TableCell className="text-right font-semibold text-[#1F1720]">{formatCurr(item.subtotal)}</TableCell>
                       </TableRow>
                       );
                     })}
@@ -390,7 +395,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                           Wrapping
                         </div>
                         <p className="text-sm text-[#6B5A64]">
-                          {order.giftWrapName ? `${order.giftWrapName} (${formatCurrency(order.giftWrapPrice || 0)})` : "No wrapping selected"}
+                          {order.giftWrapName ? `${order.giftWrapName} (${formatCurr(order.giftWrapPrice || 0)})` : "No wrapping selected"}
                         </p>
                       </div>
                     </div>
@@ -434,7 +439,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                             <TableCell className="pl-6 font-mono text-xs">
                               {gc.code.substring(0, 8)}...{gc.code.substring(gc.code.length - 4)}
                             </TableCell>
-                            <TableCell className="font-semibold">{formatCurrency(gc.initialValue)}</TableCell>
+                            <TableCell className="font-semibold">{formatCurr(gc.initialValue)}</TableCell>
                             <TableCell>
                               {gc.isActive ? (
                                 <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none">Active</Badge>
