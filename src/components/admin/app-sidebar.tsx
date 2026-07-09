@@ -31,6 +31,7 @@ import {
   Heart,
   Banknote,
   Box,
+  Database,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
@@ -563,7 +564,7 @@ export function AppSidebar() {
   const localePrefix = pathname.split("/")[1]
   const isLocale = ["en", "si", "ta"].includes(localePrefix)
   const toHref = (url: string) => {
-    if (url.startsWith("/admin")) {
+    if (url.startsWith("/admin") || url.startsWith("/devadmin")) {
       return url
     }
     return isLocale ? `/${localePrefix}${url}` : url
@@ -757,6 +758,12 @@ export function AppSidebar() {
             title: "Company Details",
             url: "/admin/company-details",
             icon: Building2,
+            requiredPermission: "",
+          },
+          {
+            title: "Data Wipe",
+            url: "/devadmin/data-wipe",
+            icon: Database,
             requiredPermission: "",
           }
         ])}
