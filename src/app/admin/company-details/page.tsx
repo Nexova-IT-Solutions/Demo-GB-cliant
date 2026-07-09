@@ -153,18 +153,18 @@ export default function CompanyDetailsPage() {
         
         // --- PC720 ---
         { type: 'raw', format: 'command', flavor: 'hex', data: '1B7420' }, // ESC t 32
-        { type: 'raw', format: 'plain', data: "--- PC720 (ESC t 32) ---\n" },
-        { type: 'raw', format: 'plain', data: testContent, options: { encoding: 'Cp720' } },
+        { type: 'raw', data: "--- PC720 (ESC t 32) ---\n" },
+        { type: 'raw', data: testContent, options: { encoding: 'Cp720' } },
         
         // --- PC864 ---
         { type: 'raw', format: 'command', flavor: 'hex', data: '1B7416' }, // ESC t 22
-        { type: 'raw', format: 'plain', data: "--- PC864 (ESC t 22) ---\n" },
-        { type: 'raw', format: 'plain', data: testContent, options: { encoding: 'Cp864' } },
+        { type: 'raw', data: "--- PC864 (ESC t 22) ---\n" },
+        { type: 'raw', data: testContent, options: { encoding: 'Cp864' } },
 
         // --- Windows-1256 ---
         { type: 'raw', format: 'command', flavor: 'hex', data: '1B7425' }, // ESC t 37
-        { type: 'raw', format: 'plain', data: "--- Windows-1256 (ESC t 37) ---\n" },
-        { type: 'raw', format: 'plain', data: testContent, options: { encoding: 'windows-1256' } },
+        { type: 'raw', data: "--- Windows-1256 (ESC t 37) ---\n" },
+        { type: 'raw', data: testContent, options: { encoding: 'windows-1256' } },
         
         "\n\n\n\n\n\n"
       ];
