@@ -521,7 +521,6 @@ export default function SalesSummaryPage() {
                         }}
                       />
                       <YAxis
-                        yAxisId="left"
                         axisLine={false}
                         tickLine={false}
                         tickFormatter={(val) => formatPrice(val)}
