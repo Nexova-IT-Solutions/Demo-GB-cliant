@@ -70,6 +70,11 @@ export function CheckoutModal() {
   const changeDue = payment.method === "POS_CASH"
     ? Math.max(0, payment.cashTendered - total) : 0;
 
+  const arNum = (n: number | string) => {
+    const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+    return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+  };
+
   useEffect(() => {
     if (isOpen) {
       setSuccessOrder(null);
@@ -294,7 +299,10 @@ export function CheckoutModal() {
             <div className="w-full max-w-xs space-y-2 bg-slate-50 rounded-xl p-4">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500 flex flex-col gap-0.5"><span>Total Paid</span><span className="text-[10px] dir-rtl">إجمالي المدفوع</span></span>
-                <span className="font-bold text-slate-800">{formatPrice(successOrder.total)}</span>
+                <span className="font-bold text-slate-800 flex flex-col items-end">
+                  <span>{formatPrice(successOrder.total)}</span>
+                  <span className="text-xs text-slate-500">{arNum(formatPrice(successOrder.total))}</span>
+                </span>
               </div>
               {successOrder.changeDue > 0 && (
                 <div className="flex justify-between text-sm">
@@ -343,8 +351,12 @@ export function CheckoutModal() {
                 Process Payment
               </DialogTitle>
               <DialogDescription>
-                Total: <span className="font-bold text-[#A7066A]">{formatPrice(total)}</span>
-                {" · "}{items.length} item{items.length !== 1 ? "s" : ""}
+                <div className="flex items-center gap-1.5">
+                  Total: <span className="font-bold text-[#A7066A]">{formatPrice(total)}</span>
+                  <span className="font-bold text-[#A7066A] text-xs">({arNum(formatPrice(total))})</span>
+                  <span className="text-slate-400">·</span>
+                  <span>{items.length} item{items.length !== 1 ? "s" : ""}</span>
+                </div>
               </DialogDescription>
             </DialogHeader>
 
@@ -632,7 +644,11 @@ export function CheckoutModal() {
               {/* Order Summary */}
               <div className="space-y-1.5 bg-slate-50 rounded-xl p-4">
                 <div className="flex justify-between text-xs text-slate-500">
-                  <span className="flex gap-2"><span>Subtotal</span><span className="text-[10px] dir-rtl">المجموع الفرعي</span></span><span>{formatPrice(subtotal)}</span>
+                  <span className="flex gap-2"><span>Subtotal</span><span className="text-[10px] dir-rtl">المجموع الفرعي</span></span>
+                  <span className="flex flex-col items-end">
+                    <span>{formatPrice(subtotal)}</span>
+                    <span className="text-[10px]">{arNum(formatPrice(subtotal))}</span>
+                  </span>
                 </div>
                 {payment.giftCardDeduction > 0 && (
                   <div className="flex justify-between text-xs text-emerald-600">
@@ -642,7 +658,10 @@ export function CheckoutModal() {
                 <Separator className="my-1" />
                 <div className="flex justify-between">
                   <span className="text-sm font-bold text-slate-800">Total Due</span>
-                  <span className="text-lg font-black text-[#A7066A]">{formatPrice(total)}</span>
+                  <span className="flex flex-col items-end">
+                    <span className="text-lg font-black text-[#A7066A] leading-tight">{formatPrice(total)}</span>
+                    <span className="text-sm font-bold text-[#A7066A]">{arNum(formatPrice(total))}</span>
+                  </span>
                 </div>
               </div>
 
