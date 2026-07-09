@@ -180,12 +180,19 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         y += 4;
       }
       
-      const qtyPrice = `${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+      let qtyPrice = `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+      
+      // If there is a discount, note it in the line
+      if (item.discountPercent && item.discountPercent > 0) {
+        qtyPrice += ` (Disc / خصم ${item.discountPercent}%)`;
+      }
+      
       const total = `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
       
-      doc.text(qtyPrice, 2, y);
+      const splitQtyPrice = doc.splitTextToSize(qtyPrice, pageWidth - 20);
+      doc.text(splitQtyPrice, 2, y);
       doc.text(total, pageWidth - 2, y, { align: "right" });
-      y += 5;
+      y += splitQtyPrice.length * 5;
     });
 
     // Divider
@@ -196,20 +203,25 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     y += 5;
 
     // Totals
-    doc.text(`Subtotal: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+    doc.text(`Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
     y += 5;
     doc.setFontSize(10);
-    doc.text(`Total: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+    doc.text(`Total / المجموع: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
     y += 5;
     doc.setFontSize(9);
     
     if (data.changeDue > 0) {
-      doc.text(`Change Due: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
+      doc.text(`Change Due / الباقي: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 2, y, { align: "right" });
       y += 5;
     }
 
     y += 5;
     doc.text("Thank you for your purchase!", pageWidth / 2, y, { align: "center" });
+    y += 6;
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Powered by Nexova", pageWidth / 2, y, { align: "center" });
+    doc.setTextColor(0, 0, 0);
 
     if (data.companyDetails?.posPrinterName) {
       try {
