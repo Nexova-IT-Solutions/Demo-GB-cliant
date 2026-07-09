@@ -11,6 +11,7 @@ import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ type OrdersTableProps = {
 export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADMIN" }: OrdersTableProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
 
   const [localOrders, setLocalOrders] = useState(orders);
   useEffect(() => setLocalOrders(orders), [orders]);
@@ -86,7 +88,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
           { header: "Order Content Types", key: "types", type: "string" },
           { header: "Payment Status", key: "paymentStatus", type: "string", alignment: "center" },
           { header: "Order Status", key: "orderStatus", type: "string", alignment: "center" },
-          { header: "Total Value (LKR)", key: "total", type: "currency", alignment: "right" },
+          { header: "Total Value", key: "total", type: "currency", alignment: "right" },
         ],
         data: localOrders.map(order => ({
           ...order,
@@ -272,7 +274,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
     <Card className="overflow-hidden rounded-2xl border border-brand-border bg-white shadow-sm">
       <CardContent className="space-y-5 p-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex-1 grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr]">
+          <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="relative" suppressHydrationWarning>
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -316,17 +318,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
               </SelectContent>
             </Select>
 
-            <Select value={queryState.type || "all"} onValueChange={setType}>
-              <SelectTrigger className="h-11 w-full rounded-xl border-brand-border">
-                <SelectValue placeholder="Order Content Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Content Types</SelectItem>
-                <SelectItem value="STANDARD">Standard (Physical)</SelectItem>
-                <SelectItem value="DIGITAL">Digital Gift Card</SelectItem>
-                <SelectItem value="PAPER">Paper Gift Card</SelectItem>
-              </SelectContent>
-            </Select>
+
           </div>
 
           <Button
@@ -358,7 +350,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Customer</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Type</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Items</TableHead>
-                  <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Total</TableHead>
+                  <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Total Value</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Payment</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Status</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider text-right">Actions</TableHead>
@@ -407,7 +399,7 @@ export function OrdersTable({ locale, orders, totalCount, currentUserRole = "ADM
                           {order.itemsCount} {order.itemsCount === 1 ? "item" : "items"}
                         </span>
                       </TableCell>
-                      <TableCell className="py-4 px-6 font-semibold text-gray-900 text-sm">{formatCurrency(order.total)}</TableCell>
+                      <TableCell className="py-4 px-6 font-semibold text-gray-900 text-sm">{formatPrice(order.total)}</TableCell>
                       <TableCell className="py-4 px-6">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild disabled={!isWebsiteEnabled || validPaymentStatuses.length === 0 || Boolean(updating && updating.orderId === order.id)}>

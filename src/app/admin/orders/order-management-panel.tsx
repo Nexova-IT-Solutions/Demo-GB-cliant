@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Gift, Printer, Loader2, Save, CheckCircle2, PackageSearch, Download } from "lucide-react";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { format } from "date-fns";
 import { generateReceiptPdf } from "@/lib/pdf-receipt";
 
@@ -57,6 +58,7 @@ type OrderPanelProps = {
 export function OrderManagementPanel({ order, customerOrderCount, customerProfileUrl }: OrderPanelProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
   const [internalNotes, setInternalNotes] = React.useState(order.internalNotes ?? "");
   const [draftOrderStatus, setDraftOrderStatus] = React.useState(order.orderStatus);
   const [draftPaymentStatus, setDraftPaymentStatus] = React.useState(order.paymentStatus);
@@ -346,7 +348,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
           <SnapshotRow label="Gift Wrap" value={order.giftWrapName || "Standard Packaging"} />
           <SnapshotRow label="Invoice" value={order.suppressInvoice ? "Don't include price" : "Include price"} />
           <div className="mt-2 border-t border-slate-50 pt-2">
-            <SnapshotRow label="Revenue" value={`LKR ${order.total.toLocaleString()}`} emphasized />
+            <SnapshotRow label="Revenue" value={formatPrice(order.total)} emphasized />
           </div>
         </CardContent>
       </Card>
