@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateDailySalesExcel, generateDailySalesPDF, SalesReportData } from "@/lib/server-report-generator";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, differenceInMinutes, parse } from "date-fns";
 import { getAppTimezone } from "@/lib/date-utils";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, toDate } from "date-fns-tz";
 
 const mailersendToken = process.env.MAILERSEND_TOKEN || "mlsn.194bc6d9ec9ac7189982605b502b056f334745d7eb3388368a7a15b911a33161";
 const fromEmail = process.env.MAIL_FROM || "MS_kJeLLq@nexovaitsolutions.com";
@@ -27,12 +27,21 @@ export async function GET(req: Request) {
 
     const now = new Date();
     const appTimezone = await getAppTimezone();
-    const currentTimeStr = formatInTimeZone(now, appTimezone, "HH:mm");
+    
+    // Parse scheduled time for today in appTimezone
+    const todayDateStr = formatInTimeZone(now, appTimezone, "yyyy-MM-dd");
+    const scheduledDateTimeStr = `${todayDateStr} ${schedule.scheduleTime}`;
+    // Convert the local scheduled time to a Date object in UTC equivalent
+    const scheduledTimeUTC = toDate(scheduledDateTimeStr, { timeZone: appTimezone });
+    
+    // Calculate difference in minutes
+    const diffMins = differenceInMinutes(now, scheduledTimeUTC);
 
-    if (currentTimeStr !== schedule.scheduleTime) {
+    // If the scheduled time is in the future, or more than 5 minutes in the past, skip
+    if (diffMins < 0 || diffMins >= 5) {
       return NextResponse.json({ 
         success: false, 
-        message: `Scheduled time is ${schedule.scheduleTime}, but current time in ${appTimezone} is ${currentTimeStr}. Skipping.` 
+        message: `Scheduled time is ${schedule.scheduleTime}. Current difference is ${diffMins} minutes. Skipping.` 
       });
     }
 
