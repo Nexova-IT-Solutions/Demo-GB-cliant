@@ -26,32 +26,69 @@ export async function generateDailySalesExcel(data: SalesReportData): Promise<Bu
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Daily Sales Summary");
 
+  // Fetch company details for header and currency
+  const company = await db.companyDetails.findUnique({ where: { id: "1" } });
+  const companyName = company?.companyName?.toUpperCase() || "COMPANY NAME";
+  const currency = company?.currency || "OMR";
+
+  const lastColLetter = "C";
+
+  // 1. Merged Header Banner
+  worksheet.mergeCells(`A1:${lastColLetter}1`);
+  const bannerCell = worksheet.getCell("A1");
+  bannerCell.value = `${companyName} — DAILY SALES SUMMARY`;
+  bannerCell.font = {
+    name: "Segoe UI",
+    size: 14,
+    bold: true,
+    color: { argb: "FFFFFFFF" },
+  };
+  bannerCell.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FF104E5B" },
+  };
+  bannerCell.alignment = { horizontal: "center", vertical: "middle" };
+  worksheet.getRow(1).height = 36;
+
+  // 2. Meta Info
+  const dateStr = `${format(data.dateRange.startDate, "yyyy-MM-dd")} to ${format(data.dateRange.endDate, "yyyy-MM-dd")}`;
+  worksheet.mergeCells(`A2:${lastColLetter}2`);
+  const metaCell = worksheet.getCell("A2");
+  metaCell.value = `Generated on ${format(new Date(), "PPpp")} | Period: ${dateStr}`;
+  metaCell.font = { name: "Segoe UI", size: 10, italic: true, color: { argb: "FF555555" } };
+  metaCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F4F6" } };
+  metaCell.alignment = { horizontal: "center", vertical: "middle" };
+  worksheet.getRow(2).height = 20;
+
+  worksheet.addRow([]);
+
+  worksheet.getRow(4).values = ["Metric", "Value", "Currency"];
+  worksheet.getRow(4).font = { bold: true };
+  worksheet.getRow(4).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE5E7EB" } };
+
   worksheet.columns = [
-    { header: "Metric", key: "metric", width: 30 },
-    { header: "Value", key: "value", width: 20 },
+    { key: "metric", width: 30 },
+    { key: "value", width: 20 },
+    { key: "currency", width: 15 },
   ];
 
-  const dateStr = `${format(data.dateRange.startDate, "yyyy-MM-dd")} to ${format(data.dateRange.endDate, "yyyy-MM-dd")}`;
-  
-  worksheet.addRow({ metric: "Report Period", value: dateStr });
-  worksheet.addRow({ metric: "Total Orders", value: data.summary.orderCount });
-  worksheet.addRow({ metric: "Total Sales", value: data.summary.totalSales });
-  worksheet.addRow({ metric: "Total Cost of Sales", value: data.summary.totalCostOfSales });
-  worksheet.addRow({ metric: "Total Discounts", value: data.summary.totalDiscounts });
-  worksheet.addRow({ metric: "Net Profit", value: data.summary.netProfit });
+  worksheet.addRow({ metric: "Total Orders", value: data.summary.orderCount, currency: "" });
+  worksheet.addRow({ metric: "Total Sales", value: data.summary.totalSales, currency });
+  worksheet.addRow({ metric: "Total Cost of Sales", value: data.summary.totalCostOfSales, currency });
+  worksheet.addRow({ metric: "Total Discounts", value: data.summary.totalDiscounts, currency });
+  worksheet.addRow({ metric: "Net Profit", value: data.summary.netProfit, currency });
 
   worksheet.addRow([]);
-  worksheet.addRow({ metric: "Sales By Source", value: "" });
-  worksheet.addRow({ metric: "Online (Web)", value: data.salesBySource.web.total });
-  worksheet.addRow({ metric: "In-Store (POS)", value: data.salesBySource.pos.total });
+  worksheet.addRow({ metric: "Sales By Source", value: "", currency: "" }).font = { bold: true };
+  worksheet.addRow({ metric: "Online (Web)", value: data.salesBySource.web.total, currency });
+  worksheet.addRow({ metric: "In-Store (POS)", value: data.salesBySource.pos.total, currency });
 
   worksheet.addRow([]);
-  worksheet.addRow({ metric: "Sales By Payment Method", value: "" });
+  worksheet.addRow({ metric: "Sales By Payment Method", value: "", currency: "" }).font = { bold: true };
   data.salesByPaymentMethod.forEach(pm => {
-    worksheet.addRow({ metric: pm.method, value: pm.total });
+    worksheet.addRow({ metric: pm.method, value: pm.total, currency });
   });
-
-  worksheet.getRow(1).font = { bold: true };
 
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);
@@ -61,21 +98,32 @@ export async function generateDailySalesPDF(data: SalesReportData): Promise<Buff
   const doc = new jsPDF();
   const dateStr = `${format(data.dateRange.startDate, "yyyy-MM-dd")} to ${format(data.dateRange.endDate, "yyyy-MM-dd")}`;
 
-  doc.setFontSize(18);
-  doc.text("Daily Sales Summary Report", 14, 22);
+  const company = await db.companyDetails.findUnique({ where: { id: "1" } });
+  const companyName = company?.companyName || "Company Name";
+  const currency = company?.currency || "OMR";
+
+  // Header background
+  doc.setFillColor(16, 78, 91); // #104E5B
+  doc.rect(0, 0, 210, 30, 'F');
   
-  doc.setFontSize(12);
-  doc.text(`Period: ${dateStr}`, 14, 32);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.text(`${companyName} — Daily Sales Summary`, 14, 15);
+  
+  doc.setFontSize(10);
+  doc.text(`Period: ${dateStr} | Generated: ${format(new Date(), "PPpp")}`, 14, 23);
+
+  doc.setTextColor(0, 0, 0);
 
   autoTable(doc, {
-    startY: 40,
+    startY: 35,
     head: [["KPI", "Value"]],
     body: [
       ["Total Orders", data.summary.orderCount.toString()],
-      ["Total Sales", `Rs. ${data.summary.totalSales.toFixed(2)}`],
-      ["Cost of Sales", `Rs. ${data.summary.totalCostOfSales.toFixed(2)}`],
-      ["Total Discounts", `Rs. ${data.summary.totalDiscounts.toFixed(2)}`],
-      ["Net Profit", `Rs. ${data.summary.netProfit.toFixed(2)}`],
+      ["Total Sales", `${currency} ${data.summary.totalSales.toFixed(2)}`],
+      ["Cost of Sales", `${currency} ${data.summary.totalCostOfSales.toFixed(2)}`],
+      ["Total Discounts", `${currency} ${data.summary.totalDiscounts.toFixed(2)}`],
+      ["Net Profit", `${currency} ${data.summary.netProfit.toFixed(2)}`],
     ],
   });
 
@@ -83,15 +131,15 @@ export async function generateDailySalesPDF(data: SalesReportData): Promise<Buff
     startY: (doc as any).lastAutoTable.finalY + 10,
     head: [["Channel", "Orders", "Revenue"]],
     body: [
-      ["Online (Web)", data.salesBySource.web.orders.toString(), `Rs. ${data.salesBySource.web.total.toFixed(2)}`],
-      ["In-Store (POS)", data.salesBySource.pos.orders.toString(), `Rs. ${data.salesBySource.pos.total.toFixed(2)}`],
+      ["Online (Web)", data.salesBySource.web.orders.toString(), `${currency} ${data.salesBySource.web.total.toFixed(2)}`],
+      ["In-Store (POS)", data.salesBySource.pos.orders.toString(), `${currency} ${data.salesBySource.pos.total.toFixed(2)}`],
     ],
   });
 
   const paymentBody = data.salesByPaymentMethod.map(pm => [
     pm.method,
     pm.count.toString(),
-    `Rs. ${pm.total.toFixed(2)}`
+    `${currency} ${pm.total.toFixed(2)}`
   ]);
 
   if (paymentBody.length > 0) {
