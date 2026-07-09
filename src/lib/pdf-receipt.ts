@@ -58,13 +58,26 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     // THERMAL PRINTER RAW TEXT FORMAT
     const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
     
-    const rawLines = [
+    const rawLines: any[] = [];
+    
+    if (logoBase64) {
+      const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+      rawLines.push({
+        type: 'raw', 
+        format: 'image', 
+        flavor: 'base64', 
+        data: base64Data, 
+        options: { language: 'ESCPOS', dotDensity: 'double' }
+      });
+    }
+
+    rawLines.push(
       '\x1B\x40', // Init printer
       '\x1B\x61\x01', // Center align
       '\x1B\x45\x01', // Bold on
       `${companyName}\n`,
       '\x1B\x45\x00', // Bold off
-    ];
+    );
 
     if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
     if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
