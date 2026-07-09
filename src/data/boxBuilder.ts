@@ -98,7 +98,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "swiss"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "chocolate",
     occasions: [],
     recipients: [],
   },
@@ -115,7 +115,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "ferrero"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "chocolate",
     occasions: [],
     recipients: [],
   },
@@ -132,7 +132,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "godiva", "belgian"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "chocolate",
     occasions: [],
     recipients: [],
   },
@@ -149,7 +149,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["chocolate", "kitkat"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "chocolate",
     occasions: [],
     recipients: [],
   },
@@ -168,7 +168,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["perfume", "fragrance"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "gift",
     occasions: [],
     recipients: [],
   },
@@ -185,7 +185,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["keychain", "accessory"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "gift",
     occasions: [],
     recipients: [],
   },
@@ -202,7 +202,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["frame", "photo"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "gift",
     occasions: [],
     recipients: [],
   },
@@ -219,7 +219,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["sachet", "lavender"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "gift",
     occasions: [],
     recipients: [],
   },
@@ -238,7 +238,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["rose", "flower"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "flower",
     occasions: [],
     recipients: [],
   },
@@ -255,7 +255,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["carnation", "flower"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "flower",
     occasions: [],
     recipients: [],
   },
@@ -272,7 +272,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["orchid", "plant"],
     inStock: true,
     capacityUnits: 3,
-    
+    category: "flower",
     occasions: [],
     recipients: [],
   },
@@ -291,7 +291,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["teddy", "cute"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "teddy",
     occasions: [],
     recipients: [],
   },
@@ -308,7 +308,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["teddy", "heart"],
     inStock: true,
     capacityUnits: 2,
-    
+    category: "teddy",
     occasions: [],
     recipients: [],
   },
@@ -327,7 +327,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["card", "birthday"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "card",
     occasions: [],
     recipients: [],
   },
@@ -344,7 +344,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["card", "love"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "card",
     occasions: [],
     recipients: [],
   },
@@ -361,7 +361,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["card", "thank you"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "card",
     occasions: [],
     recipients: [],
   },
@@ -380,7 +380,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["party", "popper"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "addon",
     occasions: [],
     recipients: [],
   },
@@ -397,7 +397,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["candles", "birthday"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "addon",
     occasions: [],
     recipients: [],
   },
@@ -414,7 +414,7 @@ export const boxBuilderItems: BoxBuilderItem[] = [
     tags: ["confetti", "party"],
     inStock: true,
     capacityUnits: 1,
-    
+    category: "addon",
     occasions: [],
     recipients: [],
   },
