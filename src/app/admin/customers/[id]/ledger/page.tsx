@@ -4,10 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
 import { redirect } from "next/navigation";
-import { formatPriceServer as formatPrice } from "@/lib/currency";
+import { formatPriceServer as formatPrice, getCurrencyServer } from "@/lib/currency";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, ArrowDownLeft, FileText } from "lucide-react";
-import { format } from "date-fns";
+import { formatAppDateSync as format, getAppTimezone } from "@/lib/date-utils";
 
 export const metadata: Metadata = {
   title: "Customer Ledger | Admin",
@@ -35,6 +35,9 @@ export default async function CustomerLedgerPage({ params }: { params: Promise<{
     redirect("/admin/reports/accounts-receivable");
   }
 
+  const currency = await getCurrencyServer();
+  const timezone = await getAppTimezone();
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
@@ -56,20 +59,20 @@ export default async function CustomerLedgerPage({ params }: { params: Promise<{
         <div>
           <p className="text-sm font-medium text-slate-500 mb-1">Current Outstanding Balance</p>
           <p className={`text-4xl font-black ${customer.outstandingBalance > 0 ? "text-amber-600" : "text-emerald-600"}`}>
-            {formatPrice(customer.outstandingBalance)}
+            {formatPrice(customer.outstandingBalance, currency)}
           </p>
         </div>
         <div className="flex gap-4">
           <div className="px-4 py-3 bg-slate-50 rounded-lg border border-slate-100 min-w-[140px]">
             <p className="text-xs text-slate-500 mb-1">Total Debits</p>
             <p className="font-semibold text-slate-900">
-              {formatPrice(customer.ledgerEntries.filter(e => e.type === "DEBIT").reduce((s, e) => s + e.amount, 0))}
+              {formatPrice(customer.ledgerEntries.filter(e => e.type === "DEBIT").reduce((s, e) => s + e.amount, 0), currency)}
             </p>
           </div>
           <div className="px-4 py-3 bg-slate-50 rounded-lg border border-slate-100 min-w-[140px]">
             <p className="text-xs text-slate-500 mb-1">Total Credits</p>
             <p className="font-semibold text-slate-900">
-              {formatPrice(customer.ledgerEntries.filter(e => e.type === "CREDIT").reduce((s, e) => s + e.amount, 0))}
+              {formatPrice(customer.ledgerEntries.filter(e => e.type === "CREDIT").reduce((s, e) => s + e.amount, 0), currency)}
             </p>
           </div>
         </div>
@@ -105,13 +108,13 @@ export default async function CustomerLedgerPage({ params }: { params: Promise<{
                     <p className={`font-bold whitespace-nowrap ${
                       entry.type === "DEBIT" ? "text-amber-600" : "text-emerald-600"
                     }`}>
-                      {entry.type === "DEBIT" ? "+" : "-"}{formatPrice(entry.amount)}
+                      {entry.type === "DEBIT" ? "+" : "-"}{formatPrice(entry.amount, currency)}
                     </p>
                   </div>
                   
                   <div className="flex items-center justify-between text-sm text-slate-500">
                     <p className="truncate pr-4">{entry.description}</p>
-                    <p className="whitespace-nowrap shrink-0">{format(new Date(entry.createdAt), "MMM d, yyyy h:mm a")}</p>
+                    <p className="whitespace-nowrap shrink-0">{format(new Date(entry.createdAt), "MMM d, yyyy h:mm a", timezone)}</p>
                   </div>
                   
                   {(entry.orderId || entry.paymentMethod) && (
