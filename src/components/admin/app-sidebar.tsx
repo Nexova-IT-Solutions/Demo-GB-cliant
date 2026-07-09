@@ -191,7 +191,7 @@ const reportItems: NavItem[] = [
         title: "Accounts Receivable",
         url: "/admin/reports/accounts-receivable",
         icon: Banknote,
-        requiredPermission: "reports.sales_summary",
+        requiredPermission: "reports.accounts_receivable",
       },
     ],
   },
@@ -234,7 +234,7 @@ const reportItems: NavItem[] = [
         title: "Returned Items",
         url: "/admin/reports/returns",
         icon: PackageX,
-        requiredPermission: "reports.stock_audit", // reusing a relevant permission
+        requiredPermission: "reports.returns",
       },
     ],
   },

@@ -14,15 +14,16 @@ export const metadata: Metadata = {
   description: "Customer credit and debit history",
 };
 
-export default async function CustomerLedgerPage({ params }: { params: { id: string } }) {
+export default async function CustomerLedgerPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
-  if (!hasPermission(session, "customers.view")) {
+  if (!hasPermission(session, "customers.manage")) {
     redirect("/admin");
   }
 
   const customer = await db.user.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       ledgerEntries: {
         orderBy: { createdAt: "desc" },
@@ -35,7 +36,7 @@ export default async function CustomerLedgerPage({ params }: { params: { id: str
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
         <Link 
           href="/admin/reports/accounts-receivable"

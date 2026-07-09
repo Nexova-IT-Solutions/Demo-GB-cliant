@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default async function AccountsReceivablePage() {
   const session = await getServerSession(authOptions);
 
-  if (!hasPermission(session, "reports.view")) {
+  if (!hasPermission(session, "reports.accounts_receivable")) {
     redirect("/admin");
   }
 
@@ -45,7 +45,7 @@ export default async function AccountsReceivablePage() {
   const totalOutstanding = customersWithDebt.reduce((sum, customer) => sum + customer.outstandingBalance, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Accounts Receivable</h1>

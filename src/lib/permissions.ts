@@ -32,6 +32,8 @@ export const PERMISSION_TREE_STRUCTURE = {
       customer_insights: "View Customer LTV Insights",
       supplier_products: "View Supplier-wise Products",
       category_sales: "View Category Sales & Drill-down",
+      accounts_receivable: "View Accounts Receivable",
+      returns: "View Returned Items Report",
     },
   },
   catalog: {
