@@ -9,6 +9,7 @@ export function Providers({
   children,
   initialCurrency = "LKR",
   initialToggles = {},
+  initialTimezone = "Asia/Muscat",
 }: {
   children: React.ReactNode;
   initialCurrency?: string;
