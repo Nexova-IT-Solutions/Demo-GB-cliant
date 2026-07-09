@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { OrderManagementPanel } from "../order-management-panel";
 import { CustomerInsightsPanel } from "./customer-insights-panel";
+import { OrderItemsTable } from "@/components/admin/orders/OrderItemsTable";
 
 type PageProps = {
   params: Promise<{ locale: string; id: string }>;
@@ -285,80 +286,13 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                 <StatBox label="Discount Savings" value={formatCurr(getDiscountSavings(order.items))} />
                 <StatBox label="Delivery Fee" value={order.deliveryFee === 0 ? "FREE" : formatCurr(order.deliveryFee)} />
                 <StatBox label="Final Total" value={formatCurr(order.total)} emphasized />
+                {order.refundedAmount > 0 && (
+                  <StatBox label="Refunded Amount" value={formatCurr(order.refundedAmount)} />
+                )}
               </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border border-brand-border bg-white shadow-sm p-5 md:p-6">
-              <CardHeader className="p-0 mb-1.5 bg-transparent">
-                <CardTitle className="text-base font-bold text-[#1F1720]">Order Items</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 pt-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Item</TableHead>
-                      <TableHead>Qty</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Unit Price</TableHead>
-                      <TableHead>Discount</TableHead>
-                      <TableHead className="text-right">Subtotal</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {order.items.map((item) => {
-                      let displayName = item.productName;
-                      let selectedVariantName = null;
-                      
-                      // Extract variant which was appended as " - VariantName" in checkout
-                      const dashIndex = item.productName.lastIndexOf(" - ");
-                      if (dashIndex > 0) {
-                        displayName = item.productName.substring(0, dashIndex);
-                        selectedVariantName = item.productName.substring(dashIndex + 3);
-                      }
-
-                      return (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-slate-100">
-                              {item.productImage ? (
-                                <Image src={item.productImage} alt={displayName} fill className="object-cover" />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">No image</div>
-                              )}
-                            </div>
-                            <div className="space-y-1">
-                              <p className="font-medium text-sm text-[#1F1720]">{displayName}</p>
-                              {selectedVariantName ? (
-                                <p className="text-xs text-neutral-500">Variant: {selectedVariantName}</p>
-                              ) : (
-                                <p className="text-xs text-[#6B5A64]">Line item</p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-[#6B5A64]">{item.quantity}</TableCell>
-                        <TableCell className="font-mono text-xs text-[#6B5A64]">{item.sku || "-"}</TableCell>
-                        <TableCell className="text-[#6B5A64]">{formatCurr(item.salePrice || item.unitPrice)}</TableCell>
-                        <TableCell className="text-[#6B5A64]">
-                          {item.discountName ? (
-                            <div className="space-y-0.5">
-                              <p className="text-sm font-medium text-emerald-700">{item.discountName}</p>
-                              <p className="text-xs text-emerald-700">{item.discountValue ? `${item.discountValue}%` : "Applied"}</p>
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold text-[#1F1720]">{formatCurr(item.subtotal)}</TableCell>
-                      </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
+            <OrderItemsTable orderId={order.id} items={order.items as any} />
 
             {order.isGift ? (
               <Card className="rounded-2xl border border-brand-border bg-white shadow-sm p-5 md:p-6">

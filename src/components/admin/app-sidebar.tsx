@@ -224,6 +224,12 @@ const reportItems: NavItem[] = [
         icon: Truck,
         requiredPermission: "reports.supplier_products",
       },
+      {
+        title: "Returned Items",
+        url: "/admin/reports/returns",
+        icon: PackageX,
+        requiredPermission: "reports.stock_audit", // reusing a relevant permission
+      },
     ],
   },
   {
