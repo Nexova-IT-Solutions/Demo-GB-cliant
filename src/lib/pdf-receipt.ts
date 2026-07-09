@@ -241,11 +241,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
       if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
       
-      const arNum = (n: number | string) => {
-        const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-        return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
-      };
-
       rawLines.push(
         '-'.repeat(48) + '\n',
         '\x1B\x61\x00', // Left align
@@ -261,10 +256,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         if (item.nameAr) nameLine += ` - ${item.nameAr}`;
         rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-        const westernPriceStr = item.price.toFixed(2);
-        const qtyPrice = `Qty/الكمية: ${item.quantity}/${arNum(item.quantity)} x OMR ${westernPriceStr}/${arNum(westernPriceStr)}`;
-        const westernTotalStr = (item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2);
-        const total = `OMR ${westernTotalStr}/${arNum(westernTotalStr)}`;
+        const qtyPrice = `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(2)}`;
+        const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
         // Pad to roughly 48 chars
         let padding = 48 - qtyPrice.length - total.length;
         if (padding < 1) padding = 1;
@@ -274,12 +267,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       rawLines.push(
         '-'.repeat(48) + '\n',
         '\x1B\x61\x02', // Right align
-        `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}\n`,
-        `Total / المجموع: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}\n`
+        `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(2)}\n`,
+        `Total / المجموع: OMR ${data.total.toFixed(2)}\n`
       );
       
       if (data.changeDue > 0) {
-        rawLines.push(`Change Due / الباقي: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}\n`);
+        rawLines.push(`Change Due / الباقي: OMR ${data.changeDue.toFixed(2)}\n`);
       }
       
       rawLines.push(
