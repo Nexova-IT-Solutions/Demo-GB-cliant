@@ -49,6 +49,11 @@ async function getBase64ImageFromUrl(imageUrl: string): Promise<string | null> {
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
   const logoBase64 = await getBase64ImageFromUrl("/logo/logo.png");
 
+  const arNum = (n: number | string) => {
+    const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+    return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+  };
+
   if (format === "print") {
     // THERMAL PRINTER RAW TEXT FORMAT
     const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
@@ -80,8 +85,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     data.items.forEach(item => {
       rawLines.push(`${item.name}\n`);
       if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-      const qtyPrice = `${item.quantity} x OMR ${item.price.toFixed(2)}`;
-      const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
+      const qtyPrice = `${item.quantity} / ${arNum(item.quantity)} x OMR ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+      const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
       // Pad to roughly 48 chars
       let padding = 48 - qtyPrice.length - total.length;
       if (padding < 1) padding = 1;
@@ -91,12 +96,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     rawLines.push(
       '-'.repeat(48) + '\n',
       '\x1B\x61\x02', // Right align
-      `Subtotal: OMR ${data.subtotal.toFixed(2)}\n`,
-      `Total: OMR ${data.total.toFixed(2)}\n`
+      `Subtotal: OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}\n`,
+      `Total: OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}\n`
     );
     
     if (data.changeDue > 0) {
-      rawLines.push(`Change Due: OMR ${data.changeDue.toFixed(2)}\n`);
+      rawLines.push(`Change Due: OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}\n`);
     }
     
     rawLines.push(
@@ -121,11 +126,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     return;
   } else {
     // COLORFUL A4 INVOICE FORMAT
-    const arNum = (n: number | string) => {
-      const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-      return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
-    };
-
     const doc = new jsPDF({
       unit: "mm",
       format: "a4", // 210 x 297 mm
