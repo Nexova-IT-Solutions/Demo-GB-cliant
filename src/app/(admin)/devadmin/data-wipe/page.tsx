@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { AlertTriangle, Trash2, Database, ShieldAlert } from "lucide-react";
 
 export default function DataWipePage() {
