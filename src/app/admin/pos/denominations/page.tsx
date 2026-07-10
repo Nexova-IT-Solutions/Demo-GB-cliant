@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { DenominationsClient } from "./denominations-client";
 import { hasPermission } from "@/lib/permissions";
+import { getCurrencyServer } from "@/lib/currency";
 
 export default async function DenominationsPage() {
   const session = await getServerSession(authOptions);
@@ -18,6 +19,8 @@ export default async function DenominationsPage() {
     },
   });
 
+  const currency = await getCurrencyServer();
+
   return (
     <div className="w-full bg-[#FAFAFA] min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1000px] mx-auto">
@@ -26,7 +29,7 @@ export default async function DenominationsPage() {
           <p className="text-[#6B5A64] mt-1">Configure active banknotes and coins used for daily drawer baselines and EOD cash counts.</p>
         </div>
 
-        <DenominationsClient initialData={denominations} />
+        <DenominationsClient initialData={denominations} currency={currency} />
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN"];
 
 const createDenominationSchema = z.object({
   value: z.number().int().positive("Value must be a positive integer"),
+  type: z.enum(["NOTE", "COIN"]).optional().default("NOTE"),
   isActive: z.boolean().optional().default(true),
 });
 
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { value, isActive } = parsedPayload.data;
+    const { value, isActive, type } = parsedPayload.data;
 
     // Check if denomination value already exists
     const existing = await db.denomination.findUnique({
@@ -133,6 +134,7 @@ export async function POST(req: NextRequest) {
       data: {
         value,
         isActive,
+        type,
       },
     });
 

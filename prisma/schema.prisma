@@ -858,6 +858,7 @@ model Denomination {
   id        String   @id @default(cuid())
   value     Int      @unique
   isActive  Boolean  @default(true)
+  type      CurrencyDenomType @default(NOTE)
   createdAt DateTime @default(now())
 }
 

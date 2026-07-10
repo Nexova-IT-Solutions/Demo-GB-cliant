@@ -25,22 +25,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface DenominationRecord {
   id: string;
   value: number;
   isActive: boolean;
+  type: "NOTE" | "COIN";
   createdAt: Date | string;
 }
 
 interface DenominationsClientProps {
   initialData: DenominationRecord[];
+  currency?: string;
 }
 
-export function DenominationsClient({ initialData }: DenominationsClientProps) {
+export function DenominationsClient({ initialData, currency = "LKR" }: DenominationsClientProps) {
   const [denominations, setDenominations] = useState<DenominationRecord[]>(initialData);
   const [newValue, setNewValue] = useState("");
+  const [newType, setNewType] = useState<"NOTE" | "COIN">("NOTE");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -64,10 +74,11 @@ export function DenominationsClient({ initialData }: DenominationsClientProps) {
 
     setIsSubmitting(true);
     try {
+      const reqType = valueToAdd !== undefined ? (intValue >= 20 ? "NOTE" : "COIN") : newType;
       const res = await fetch("/api/admin/denominations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: intValue, isActive: true }),
+        body: JSON.stringify({ value: intValue, isActive: true, type: reqType }),
       });
 
       const data = await res.json();
@@ -133,7 +144,7 @@ export function DenominationsClient({ initialData }: DenominationsClientProps) {
   };
 
   const formatPrice = (price: number) => {
-    return `Rs. ${price.toLocaleString("en-LK")}`;
+    return `${currency === 'LKR' ? 'Rs.' : currency} ${price.toLocaleString("en-LK")}`;
   };
 
   return (
@@ -153,9 +164,18 @@ export function DenominationsClient({ initialData }: DenominationsClientProps) {
             {/* Input Form */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Note/Coin Value (LKR)
+                Note/Coin Value ({currency})
               </label>
               <div className="flex gap-2">
+                <Select value={newType} onValueChange={(v: "NOTE" | "COIN") => setNewType(v)} disabled={isSubmitting}>
+                  <SelectTrigger className="w-[100px] h-10 text-xs font-bold">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NOTE">Note</SelectItem>
+                    <SelectItem value="COIN">Coin</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Input
                   type="number"
                   min={1}
@@ -247,7 +267,7 @@ export function DenominationsClient({ initialData }: DenominationsClientProps) {
             <Table>
               <TableHeader className="bg-gray-50 border-b border-gray-150">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Value (LKR)</TableHead>
+                  <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Value ({currency})</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Classification</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Status</TableHead>
                   <TableHead className="py-3.5 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider text-right">Toggle Active</TableHead>
@@ -255,7 +275,7 @@ export function DenominationsClient({ initialData }: DenominationsClientProps) {
               </TableHeader>
               <TableBody>
                 {denominations.map((denom) => {
-                  const isNote = denom.value >= 20;
+                  const isNote = denom.type === "NOTE";
                   return (
                     <TableRow key={denom.id} className="even:bg-gray-50/40 hover:bg-gray-50/80 transition-colors border-b border-gray-100">
                       <TableCell className="py-4 px-6 font-semibold text-gray-900 text-sm">
