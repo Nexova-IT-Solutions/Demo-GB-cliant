@@ -15,6 +15,10 @@ export interface PosCartItem {
   stock: number;
   discountPercent: number;
   manualDiscount: number;
+  discountId?: string | null;
+  discountName?: string | null;
+  discountType?: "PERCENTAGE" | "FIXED" | null;
+  discountValue?: number | null;
   // Gift card issuance fields
   isGiftCard: boolean;
   isPhysical?: boolean;

@@ -25,6 +25,13 @@ import { resolveStorageUrl } from "@/lib/utils";
 import { usePosCart } from "@/store/use-pos-cart";
 import { CustomerSearch } from "@/components/pos/CustomerSearch";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tag } from "lucide-react";
 
 export function PosCart() {
   const items = usePosCart((s) => s.items);
@@ -32,6 +39,7 @@ export function PosCart() {
   const notes = usePosCart((s) => s.notes);
   const removeItem = usePosCart((s) => s.removeItem);
   const updateItemQuantity = usePosCart((s) => s.updateItemQuantity);
+  const setItemDiscount = usePosCart((s) => s.setItemDiscount);
   const clearCart = usePosCart((s) => s.clearCart);
   const setNotes = usePosCart((s) => s.setNotes);
   const openCheckout = usePosCart((s) => s.openCheckout);
@@ -45,6 +53,9 @@ export function PosCart() {
 
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
   const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
+
+  const { data: discountData } = useSWR("/api/admin/pos/discounts");
+  const activeDiscounts = discountData?.discounts || [];
 
   // ─── Voucher state ─────────────────────────────────────────
   const [voucherInput, setVoucherInput] = useState("");
@@ -183,8 +194,27 @@ export function PosCart() {
                             <Plus className="h-3 w-3 text-slate-500" />
                           </button>
                         </div>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="p-1 text-slate-400 hover:text-[#A7066A] transition-colors ml-1" title="Apply Discount">
+                              <Tag className="h-3.5 w-3.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-48">
+                            <DropdownMenuItem onClick={() => setItemDiscount(item.id, { id: null, name: null, type: null, value: null })}>
+                              Remove Discount
+                            </DropdownMenuItem>
+                            {activeDiscounts.map((d: any) => (
+                              <DropdownMenuItem key={d.id} onClick={() => setItemDiscount(item.id, { id: d.id, name: d.name, type: d.type, value: d.value })}>
+                                {d.name} ({d.type === 'PERCENTAGE' ? `${d.value}%` : formatPrice(d.value)})
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
                         {item.discountPercent > 0 && (
-                          <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 text-[10px] px-1 py-0">
+                          <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 text-[10px] px-1 py-0 ml-1" title={item.discountName || "Discount Applied"}>
                             <Percent className="h-2.5 w-2.5 mr-0.5" />{item.discountPercent.toFixed(0)}%
                           </Badge>
                         )}

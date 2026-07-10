@@ -45,6 +45,7 @@ interface PosCartState {
   removeItem: (id: string) => void;
   updateItemQuantity: (id: string, quantity: number) => void;
   setManualDiscount: (id: string, discountPercent: number) => void;
+  setItemDiscount: (id: string, discount: { id: string | null; name: string | null; type: "PERCENTAGE" | "FIXED" | null; value: number | null }) => void;
   clearCart: () => void;
 
   // Barcode Scan Action
@@ -268,6 +269,50 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
             manualDiscount: clamped,
             effectivePrice: newEffective,
             discountPercent: clamped,
+            discountId: null,
+            discountName: `Manual ${clamped}%`,
+            discountType: "PERCENTAGE",
+            discountValue: clamped,
+            subtotal: Math.round(newEffective * item.quantity * 100) / 100,
+          };
+        }
+        return item;
+      }),
+    }));
+  },
+
+  setItemDiscount: (id, discount) => {
+    set((state) => ({
+      items: state.items.map((item) => {
+        if (item.id === id) {
+          let newEffective = item.price;
+          let computedPercent = 0;
+          
+          if (discount.value !== null && discount.type) {
+            if (discount.type === "PERCENTAGE") {
+              newEffective = Math.round(item.price * (1 - discount.value / 100) * 100) / 100;
+              computedPercent = discount.value;
+            } else if (discount.type === "FIXED") {
+              newEffective = Math.max(0, item.price - discount.value);
+              computedPercent = item.price > 0 ? (discount.value / item.price) * 100 : 0;
+            }
+          }
+
+          // Ensure salePrice takes precedence if it's lower
+          if (item.salePrice && item.salePrice < newEffective && !discount.value) {
+            newEffective = item.salePrice;
+            computedPercent = item.price > 0 ? ((item.price - newEffective) / item.price) * 100 : 0;
+          }
+
+          return {
+            ...item,
+            effectivePrice: newEffective,
+            discountPercent: Math.round(computedPercent * 100) / 100,
+            discountId: discount.id,
+            discountName: discount.name,
+            discountType: discount.type,
+            discountValue: discount.value,
+            manualDiscount: 0,
             subtotal: Math.round(newEffective * item.quantity * 100) / 100,
           };
         }
