@@ -101,6 +101,6 @@ export async function POST(
     return NextResponse.json({ success: true, returnRecord: result });
   } catch (error) {
     console.error("Error processing return:", error);
-    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
   }
 }
