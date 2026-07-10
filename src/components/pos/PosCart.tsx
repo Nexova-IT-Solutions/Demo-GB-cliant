@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tag } from "lucide-react";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export function PosCart() {
   const items = usePosCart((s) => s.items);
   const activeShift = usePosCart((s) => s.activeShift);
@@ -51,10 +53,10 @@ export function PosCart() {
   const subtotal = getSubtotal();
   const itemCount = getItemCount();
 
-  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles");
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
 
-  const { data: discountData } = useSWR("/api/admin/pos/discounts");
+  const { data: discountData } = useSWR("/api/admin/pos/discounts", fetcher);
   const activeDiscounts = discountData?.discounts || [];
 
   // ─── Voucher state ─────────────────────────────────────────
