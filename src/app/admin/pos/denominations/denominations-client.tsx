@@ -56,6 +56,8 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
 
   // Common LKR currency structures for one-click insertion
   const standardLKR = [5000, 2000, 1000, 500, 100, 50, 20, 10, 5, 2, 1];
+  const standardOMR = [50, 20, 10, 5, 1, 0.5, 0.1, 0.05, 0.025, 0.01, 0.005];
+  const quickAddSuggestions = currency === "OMR" ? standardOMR : standardLKR;
 
   const handleCreate = async (valueToAdd?: number) => {
     const valString = valueToAdd !== undefined ? String(valueToAdd) : newValue;
@@ -68,13 +70,15 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
 
     const existing = denominations.find((d) => d.value === intValue);
     if (existing && existing.isActive) {
-      toast.error(`Denomination Rs. ${intValue.toLocaleString("en-LK")} already exists.`);
+      toast.error(`Denomination ${currency === "LKR" ? "Rs." : currency} ${intValue.toLocaleString("en-LK")} already exists.`);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const reqType = valueToAdd !== undefined ? (intValue >= 20 ? "NOTE" : "COIN") : newType;
+      const reqType = valueToAdd !== undefined 
+        ? (currency === "OMR" ? (intValue >= 0.1 ? "NOTE" : "COIN") : (intValue >= 20 ? "NOTE" : "COIN")) 
+        : newType;
       const res = await fetch("/api/admin/denominations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -183,7 +187,7 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
                   value={newValue}
                   onChange={(e) => setNewValue(e.target.value)}
                   className="h-10 text-xs font-bold"
-                  placeholder="e.g. 5000"
+                  placeholder={currency === "OMR" ? "e.g. 0.005" : "e.g. 5000"}
                   disabled={isSubmitting}
                 />
                 <Button
@@ -207,7 +211,7 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
                 Quick-Add Suggestions
               </label>
               <div className="flex flex-wrap gap-1.5">
-                {standardLKR.map((val) => {
+                {quickAddSuggestions.map((val) => {
                   const alreadyExists = denominations.some((d) => d.value === val);
                   return (
                     <Button
