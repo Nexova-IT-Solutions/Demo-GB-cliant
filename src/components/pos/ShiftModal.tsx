@@ -46,6 +46,8 @@ export function ShiftModal() {
   const setActiveShift = usePosCart((s) => s.setActiveShift);
   const fetchActiveShift = usePosCart((s) => s.fetchActiveShift);
 
+  const { mutate } = useSWRConfig();
+  const { formatPrice } = useCurrency();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [startingCash, setStartingCash] = useState<string>("0");
@@ -143,8 +145,8 @@ export function ShiftModal() {
         if (json.success && json.denominations && json.denominations.length > 0) {
           const formatted = json.denominations.map((d: any) => ({
             value: d.value,
-            label: `Rs. ${d.value}`,
-            type: d.value >= 20 ? ("NOTE" as const) : ("COIN" as const),
+            label: formatPrice(d.value),
+            type: d.type as "NOTE" | "COIN",
             count: 0,
           }));
           setDenomCounts(formatted);
@@ -311,8 +313,6 @@ export function ShiftModal() {
       setIsLoading(false);
     }
   };
-
-  const { formatPrice } = useCurrency();
 
   const cashVarianceVal = useMemo(() => {
     if (!activeShift) return 0;
@@ -664,7 +664,7 @@ export function ShiftModal() {
                       }`}>
                         {eodSummary.isFetching
                           ? "…"
-                          : `Rs. ${eodSummary.systemCredit.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`
+                          : formatPrice(eodSummary.systemCredit)
                         }
                       </span>
                       {!eodSummary.isFetching &&
@@ -696,7 +696,7 @@ export function ShiftModal() {
                       }`}>
                         {eodSummary.isFetching
                           ? "…"
-                          : `Rs. ${eodSummary.systemDebit.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`
+                          : formatPrice(eodSummary.systemDebit)
                         }
                       </span>
                       {!eodSummary.isFetching &&
@@ -728,7 +728,7 @@ export function ShiftModal() {
                       }`}>
                         {eodSummary.isFetching
                           ? "…"
-                          : `Rs. ${eodSummary.systemGiftCard.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`
+                          : formatPrice(eodSummary.systemGiftCard)
                         }
                       </span>
                       {!eodSummary.isFetching &&

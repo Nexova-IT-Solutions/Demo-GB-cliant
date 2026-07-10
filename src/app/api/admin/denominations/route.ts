@@ -7,7 +7,7 @@ import { z } from "zod";
 const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN"];
 
 const createDenominationSchema = z.object({
-  value: z.number().int().positive("Value must be a positive integer"),
+  value: z.number().positive("Value must be a positive number"),
   type: z.enum(["NOTE", "COIN"]).optional().default("NOTE"),
   isActive: z.boolean().optional().default(true),
 });

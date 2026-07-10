@@ -59,10 +59,10 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
 
   const handleCreate = async (valueToAdd?: number) => {
     const valString = valueToAdd !== undefined ? String(valueToAdd) : newValue;
-    const intValue = parseInt(valString);
+    const intValue = parseFloat(valString);
 
     if (isNaN(intValue) || intValue <= 0) {
-      toast.error("Denomination must be a positive integer value");
+      toast.error("Denomination must be a positive number");
       return;
     }
 
@@ -178,7 +178,8 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
                 </Select>
                 <Input
                   type="number"
-                  min={1}
+                  min={0.001}
+                  step="0.001"
                   value={newValue}
                   onChange={(e) => setNewValue(e.target.value)}
                   className="h-10 text-xs font-bold"

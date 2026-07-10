@@ -856,7 +856,7 @@ model PosShift {
 
 model Denomination {
   id        String   @id @default(cuid())
-  value     Int      @unique
+  value     Float      @unique
   isActive  Boolean  @default(true)
   type      CurrencyDenomType @default(NOTE)
   createdAt DateTime @default(now())
@@ -871,9 +871,10 @@ model ShiftCashCount {
   id              String        @id @default(cuid())
   shiftId         String
   shift           PosShift      @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  denominationVal Int
-  quantity        Int
   type            CashCountType
+  denominationVal Float
+  quantity        Int
+  total           Float    @default(0) // denominationVal * quantity
 
   @@index([shiftId])
 }

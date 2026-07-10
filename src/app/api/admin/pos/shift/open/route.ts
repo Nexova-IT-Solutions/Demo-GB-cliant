@@ -9,7 +9,7 @@ const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN"];
 const openShiftSchema = z.object({
   denominations: z.array(
     z.object({
-      value: z.number().int().positive("Denomination value must be positive"),
+      value: z.number().positive("Denomination value must be positive"),
       quantity: z.number().int().nonnegative("Quantity must be a non-negative number"),
     })
   ).min(1, "At least one denomination entry is required"),
