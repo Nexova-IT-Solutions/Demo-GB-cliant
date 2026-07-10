@@ -21,9 +21,10 @@ interface ReturnItemModalProps {
     quantity: number;
     returnedQuantity: number;
   };
+  onSuccess?: (qty: number) => void;
 }
 
-export function ReturnItemModal({ isOpen, onClose, orderId, item }: ReturnItemModalProps) {
+export function ReturnItemModal({ isOpen, onClose, orderId, item, onSuccess }: ReturnItemModalProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -62,6 +63,7 @@ export function ReturnItemModal({ isOpen, onClose, orderId, item }: ReturnItemMo
 
       if (res.ok) {
         toast.success(`${quantity}x ${item.productName} returned successfully`);
+        onSuccess?.(quantity);
         onClose();
         router.refresh(); // Refresh page to show updated quantities
       } else {

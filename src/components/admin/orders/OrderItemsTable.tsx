@@ -31,8 +31,9 @@ interface OrderItemsTableProps {
   items: OrderItem[];
 }
 
-export function OrderItemsTable({ orderId, items }: OrderItemsTableProps) {
+export function OrderItemsTable({ items, orderId }: OrderItemsTableProps) {
   const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
+  const [optimisticReturned, setOptimisticReturned] = useState<Record<string, number>>({});
 
   return (
     <Card className="rounded-2xl border border-brand-border bg-white shadow-sm p-5 md:p-6">
@@ -63,7 +64,11 @@ export function OrderItemsTable({ orderId, items }: OrderItemsTableProps) {
                 selectedVariantName = item.productName.substring(dashIndex + 3);
               }
 
-              const canReturn = item.quantity - (item.returnedQuantity || 0) > 0;
+              const actualReturnedQty = item.returnedQuantity || 0;
+              const optimisticQty = optimisticReturned[item.id] || 0;
+              const effectiveReturnedQty = Math.max(actualReturnedQty, optimisticQty);
+              
+              const canReturn = item.quantity - effectiveReturnedQty > 0;
 
               return (
               <TableRow key={item.id}>
@@ -83,9 +88,9 @@ export function OrderItemsTable({ orderId, items }: OrderItemsTableProps) {
                       ) : (
                         <p className="text-xs text-[#6B5A64]">Line item</p>
                       )}
-                      {item.returnedQuantity > 0 && (
+                      {effectiveReturnedQty > 0 && (
                         <Badge variant="destructive" className="mt-1 text-[10px] py-0 px-1.5 bg-rose-100 text-rose-700 hover:bg-rose-100 border-none">
-                          {item.returnedQuantity} Returned
+                          {effectiveReturnedQty} Returned
                         </Badge>
                       )}
                     </div>
@@ -134,6 +139,12 @@ export function OrderItemsTable({ orderId, items }: OrderItemsTableProps) {
           onClose={() => setSelectedItem(null)} 
           orderId={orderId} 
           item={selectedItem} 
+          onSuccess={(qty) => {
+            setOptimisticReturned(prev => ({
+              ...prev,
+              [selectedItem.id]: Math.max(selectedItem.returnedQuantity || 0, prev[selectedItem.id] || 0) + qty
+            }));
+          }}
         />
       )}
     </Card>
