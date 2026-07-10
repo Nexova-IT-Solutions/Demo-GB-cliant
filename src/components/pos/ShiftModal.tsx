@@ -46,7 +46,6 @@ export function ShiftModal() {
   const setActiveShift = usePosCart((s) => s.setActiveShift);
   const fetchActiveShift = usePosCart((s) => s.fetchActiveShift);
 
-  const { mutate } = useSWRConfig();
   const { formatPrice } = useCurrency();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
