@@ -146,10 +146,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     if (isRaster) {
       // 80mm THERMAL PRINTER RASTER FORMAT (html2canvas to PNG)
-      const arNum = (n: number | string) => {
-        const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-        return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
-      };
+
 
       let itemsHtml = "";
       data.items.forEach(item => {
