@@ -156,7 +156,7 @@ export default function FeatureTogglesClient({ initialToggles }: FeatureTogglesC
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-full bg-white/80 border-[#A7066A] text-[#A7066A] font-bold uppercase tracking-wider px-3 py-1">
-              DevAdmin Only
+              for dev admin only
             </Badge>
           </div>
         </div>
