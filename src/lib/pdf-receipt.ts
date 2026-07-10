@@ -4,6 +4,11 @@ import qz from "qz-tray";
 import { amiriBase64 } from "./fonts/Amiri-Regular";
 import html2canvas from "html2canvas";
 
+const arNum = (n: number | string) => {
+  const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+};
+
 export interface ReceiptData {
   orderNumber: string;
   total: number;
