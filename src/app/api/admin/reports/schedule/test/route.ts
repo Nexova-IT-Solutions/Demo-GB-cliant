@@ -141,7 +141,7 @@ export async function POST(req: Request) {
                 email: schedule.emailAddress
               }
             ],
-            subject: `[TEST] Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+            subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
             html: emailHtml,
             attachments: [
               {
@@ -166,7 +166,7 @@ export async function POST(req: Request) {
         await db.emailLog.create({
           data: {
             recipient: schedule.emailAddress,
-            subject: `[TEST] Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+            subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
             status: "SUCCESS"
           }
         });
@@ -174,7 +174,7 @@ export async function POST(req: Request) {
         await db.emailLog.create({
           data: {
             recipient: schedule.emailAddress,
-            subject: `[TEST] Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+            subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
             status: "FAILED",
             errorMessage: emailError?.message || "Unknown error occurred"
           }
@@ -186,7 +186,7 @@ export async function POST(req: Request) {
       await db.emailLog.create({
         data: {
           recipient: schedule.emailAddress,
-          subject: `[TEST] Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+          subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
           status: "FAILED",
           errorMessage: "MAILERSEND_TOKEN is not configured."
         }

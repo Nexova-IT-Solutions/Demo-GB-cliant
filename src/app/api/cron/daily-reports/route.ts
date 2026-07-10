@@ -134,7 +134,7 @@ export async function GET(req: Request) {
     const emailHtml = `
       <div style="font-family: sans-serif; color: #333;">
         <p>Dear ${schedule.ownerName},</p>
-        <p>This is the daily sales summary of Sohar Pet Center for ${startDate.toLocaleDateString()}.</p>
+        <p>This is the SPC Daily Sales Summary of Sohar Pet Center for ${startDate.toLocaleDateString()}.</p>
         <p>Please find the detailed PDF and Excel reports attached to this email.</p>
         <p>Regards,<br/>Sohar Pet Center System</p>
       </div>
@@ -160,7 +160,7 @@ export async function GET(req: Request) {
                 email: schedule.emailAddress
               }
             ],
-            subject: `Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+            subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
             html: emailHtml,
             attachments: [
               {
@@ -185,7 +185,7 @@ export async function GET(req: Request) {
         await db.emailLog.create({
           data: {
             recipient: schedule.emailAddress,
-            subject: `Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+            subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
             status: "SUCCESS"
           }
         });
@@ -193,7 +193,7 @@ export async function GET(req: Request) {
         await db.emailLog.create({
           data: {
             recipient: schedule.emailAddress,
-            subject: `Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+            subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
             status: "FAILED",
             errorMessage: emailError?.message || "Unknown error occurred"
           }
@@ -204,7 +204,7 @@ export async function GET(req: Request) {
       await db.emailLog.create({
         data: {
           recipient: schedule.emailAddress,
-          subject: `Daily Sales Summary - ${startDate.toLocaleDateString()}`,
+          subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,
           status: "FAILED",
           errorMessage: "MAILERSEND_TOKEN is not configured."
         }

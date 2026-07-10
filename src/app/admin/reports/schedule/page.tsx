@@ -19,6 +19,8 @@ export default function ReportSchedulePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
   
   const fetcher = (url: string) => fetch(url).then(res => res.json());
   const { data: logsData, mutate: mutateLogs } = useSWR("/api/admin/reports/schedule/logs", fetcher);
@@ -248,8 +250,11 @@ export default function ReportSchedulePage() {
                     </td>
                   </tr>
                 ) : (
-                  logsData.logs?.map((log: any) => (
-                    <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                  (() => {
+                    const sortedLogs = [...logsData.logs].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                    const currentLogs = sortedLogs.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+                    return currentLogs.map((log: any) => (
+                      <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {formatAppDateSync(new Date(log.createdAt), "MMM d, yyyy h:mm a", tz)}
                       </td>
@@ -273,11 +278,37 @@ export default function ReportSchedulePage() {
                         {log.errorMessage || "-"}
                       </td>
                     </tr>
-                  ))
+                    ));
+                  })()
                 )}
               </tbody>
             </table>
           </div>
+          {logsData && logsData.logs && logsData.logs.length > rowsPerPage && (
+            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50/50">
+              <span className="text-sm text-slate-500">
+                Showing {((currentPage - 1) * rowsPerPage) + 1} to {Math.min(currentPage * rowsPerPage, logsData.logs.length)} of {logsData.logs.length} entries
+              </span>
+              <div className="flex space-x-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(logsData.logs.length / rowsPerPage)))}
+                  disabled={currentPage >= Math.ceil(logsData.logs.length / rowsPerPage)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
     </div>
