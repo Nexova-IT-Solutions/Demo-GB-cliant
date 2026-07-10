@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateDailySalesExcel, generateDailySalesPDF, SalesReportData } from "@/lib/server-report-generator";
-import { startOfDay, endOfDay, differenceInMinutes, parse } from "date-fns";
+import { startOfDay, endOfDay, differenceInMinutes, parse, subDays } from "date-fns";
 import { getAppTimezone } from "@/lib/date-utils";
 import { formatInTimeZone, toDate } from "date-fns-tz";
 
@@ -45,8 +45,10 @@ export async function GET(req: Request) {
       });
     }
 
-    const startDate = startOfDay(now);
-    const endDate = endOfDay(now);
+    // If the report runs early in the morning (before 6 AM), it's intended for the previous day
+    const targetDate = now.getHours() < 6 ? subDays(now, 1) : now;
+    const startDate = startOfDay(targetDate);
+    const endDate = endOfDay(targetDate);
 
     const orders = await db.order.findMany({
       where: {

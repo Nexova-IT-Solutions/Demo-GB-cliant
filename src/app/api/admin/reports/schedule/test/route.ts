@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
 import { generateDailySalesExcel, generateDailySalesPDF, SalesReportData } from "@/lib/server-report-generator";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, subDays } from "date-fns";
 
 const mailersendToken = process.env.MAILERSEND_TOKEN || "mlsn.194bc6d9ec9ac7189982605b502b056f334745d7eb3388368a7a15b911a33161";
 const fromEmail = process.env.MAIL_FROM || "MS_kJeLLq@nexovaitsolutions.com";
@@ -26,8 +26,9 @@ export async function POST(req: Request) {
     }
 
     const now = new Date();
-    const startDate = startOfDay(now);
-    const endDate = endOfDay(now);
+    const targetDate = now.getHours() < 6 ? subDays(now, 1) : now;
+    const startDate = startOfDay(targetDate);
+    const endDate = endOfDay(targetDate);
 
     const orders = await db.order.findMany({
       where: {
