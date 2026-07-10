@@ -285,6 +285,11 @@ export function DenominationsClient({ initialData, currency = "LKR" }: Denominat
                     <TableRow key={denom.id} className="even:bg-gray-50/40 hover:bg-gray-50/80 transition-colors border-b border-gray-100">
                       <TableCell className="py-4 px-6 font-semibold text-gray-900 text-sm">
                         {formatPrice(denom.value)}
+                        {currency === "OMR" && denom.value < 1 && (
+                          <span className="text-gray-400 text-xs ml-2 font-normal">
+                            ({Math.round(denom.value * 1000)} Baisa)
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="py-4 px-6">
                         {isNote ? (

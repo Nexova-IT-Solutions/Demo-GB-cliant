@@ -46,7 +46,7 @@ export function ShiftModal() {
   const setActiveShift = usePosCart((s) => s.setActiveShift);
   const fetchActiveShift = usePosCart((s) => s.fetchActiveShift);
 
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency } = useCurrency();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [startingCash, setStartingCash] = useState<string>("0");
@@ -144,7 +144,7 @@ export function ShiftModal() {
         if (json.success && json.denominations && json.denominations.length > 0) {
           const formatted = json.denominations.map((d: any) => ({
             value: d.value,
-            label: formatPrice(d.value),
+            label: formatPrice(d.value) + (currency === "OMR" && d.value < 1 ? ` (${Math.round(d.value * 1000)} Baisa)` : ""),
             type: d.type as "NOTE" | "COIN",
             count: 0,
           }));
