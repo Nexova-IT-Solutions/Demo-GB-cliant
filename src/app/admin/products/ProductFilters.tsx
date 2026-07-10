@@ -44,15 +44,7 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (q !== initialFilters.q) {
-        updateSearchParams({ q, page: "1" });
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [q, initialFilters.q]);
+
 
   // Sync state with URL when it changes externally
   useEffect(() => {
@@ -112,22 +104,40 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
       <div className="flex flex-wrap items-center gap-4">
         {/* Search */}
         <div className="min-w-[300px] flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B5A64]" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name or SKU..."
-              className="h-11 pl-10 pr-10 rounded-xl border-brand-border focus:ring-[#A7066A]"
-            />
-            {q && (
-              <button
-                onClick={() => setQ("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B5A64] hover:text-[#A7066A]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B5A64]" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    updateSearchParams({ q, page: "1" });
+                  }
+                }}
+                placeholder="Search by name or SKU..."
+                className="h-11 pl-10 pr-10 rounded-xl border-brand-border focus:ring-[#A7066A]"
+              />
+              {q && (
+                <button
+                  onClick={() => {
+                    setQ("");
+                    updateSearchParams({ q: "", page: "1" });
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B5A64] hover:text-[#A7066A]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <Button 
+              onClick={() => updateSearchParams({ q, page: "1" })}
+              className="h-11 px-4 bg-[#A7066A] text-white hover:bg-[#8A0558] rounded-xl flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden sm:inline">Search</span>
+            </Button>
           </div>
         </div>
 
