@@ -6,16 +6,17 @@ import { hasPermission } from "@/lib/permissions";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     // Using 'pos.manage_returns' as the permission for handling returns
     if (!hasPermission(session, "pos.manage_returns")) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
-    const orderId = params.id;
+    const orderId = id;
     const body = await req.json();
     const { orderItemId, quantity, reason, restock } = body;
 
