@@ -78,7 +78,7 @@ export async function POST(
 
       // 4. Update Product stock if restock is true and it's linked to a product
       if (restock && orderItem.productId && orderItem.productId !== "digital-gift-card") {
-        await tx.product.update({
+        await tx.product.updateMany({
           where: { id: orderItem.productId },
           data: { stock: { increment: quantity } },
         });
