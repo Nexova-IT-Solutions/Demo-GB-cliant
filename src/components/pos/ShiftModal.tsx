@@ -414,7 +414,6 @@ export function ShiftModal() {
                   <ul className="text-xs text-slate-600 space-y-2 list-disc pl-4 leading-relaxed">
                     <li>Reconcile baseline cash drawer counts before transactions.</li>
                     <li>Always input physical note counts Autoratatively.</li>
-                    <li>Ensure dual check procedures if opening drawer &gt; Rs. 50,000.</li>
                   </ul>
                 </div>
 
