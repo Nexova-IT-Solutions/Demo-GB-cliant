@@ -10,8 +10,8 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    // Assuming 'orders.manage' is the permission for handling orders/returns
-    if (!hasPermission(session, "orders.manage")) {
+    // Using 'pos.manage_returns' as the permission for handling returns
+    if (!hasPermission(session, "pos.manage_returns")) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
