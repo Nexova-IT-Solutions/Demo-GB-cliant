@@ -9,6 +9,55 @@ const arNum = (n: number | string) => {
   return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
 };
 
+// ─── Windows-1256 Arabic encoder ────────────────────────────────────────────
+// Maps Unicode codepoints → Windows-1256 byte values for Arabic characters.
+// This lets us pre-encode strings entirely in JavaScript so QZ Tray / Java
+// never has to perform charset conversion (which fails silently on some setups).
+const WIN1256_MAP: Record<number, number> = {
+  0x20AC:0x80, 0x067E:0x81, 0x201A:0x82, 0x0192:0x83, 0x201E:0x84,
+  0x2026:0x85, 0x2020:0x86, 0x2021:0x87, 0x02C6:0x88, 0x2030:0x89,
+  0x0698:0x8A, 0x2039:0x8B, 0x0152:0x8C, 0x0686:0x8D, 0x0688:0x8F,
+  0x06AF:0x90, 0x2018:0x91, 0x2019:0x92, 0x201C:0x93, 0x201D:0x94,
+  0x2022:0x95, 0x2013:0x96, 0x2014:0x97, 0x02DC:0x98, 0x2122:0x99,
+  0x200C:0x9A, 0x203A:0x9B, 0x0153:0x9C, 0x200D:0x9D, 0x200E:0x9E, 0x200F:0x9F,
+  // Arabic punctuation
+  0x060C:0xA1, 0x061F:0xBF,
+  // Arabic letters U+0621–U+063A
+  0x0621:0xC1, 0x0622:0xC2, 0x0623:0xC3, 0x0624:0xC4, 0x0625:0xC5,
+  0x0626:0xC6, 0x0627:0xC7, 0x0628:0xC8, 0x0629:0xC9, 0x062A:0xCA,
+  0x062B:0xCB, 0x062C:0xCC, 0x062D:0xCD, 0x062E:0xCE, 0x062F:0xCF,
+  0x0630:0xD0, 0x0631:0xD1, 0x0632:0xD2, 0x0633:0xD3, 0x0634:0xD4,
+  0x0635:0xD5, 0x0636:0xD6, 0x0637:0xD7, 0x0638:0xD8, 0x0639:0xD9,
+  0x063A:0xDA,
+  // Arabic letters U+0641–U+0652
+  0x0641:0xE1, 0x0642:0xE2, 0x0643:0xE3, 0x0644:0xE4, 0x0645:0xE5,
+  0x0646:0xE6, 0x0647:0xE7, 0x0648:0xE8, 0x0649:0xE9, 0x064A:0xEA,
+  0x064B:0xEB, 0x064C:0xEC, 0x064D:0xED, 0x064E:0xEE, 0x064F:0xEF,
+  0x0650:0xF0, 0x0651:0xF1, 0x0652:0xF2,
+};
+
+/**
+ * Converts a JS Unicode string to a Windows-1256 hex byte string.
+ * ASCII chars (< 0x80) pass through directly.
+ * Arabic/special chars are looked up in WIN1256_MAP.
+ * Unknown chars are replaced with a space (0x20).
+ * ESC/POS control bytes (e.g. \x1B) are kept as-is.
+ */
+function toW1256Hex(str: string): string {
+  let hex = '';
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code < 0x80) {
+      hex += code.toString(16).padStart(2, '0');
+    } else if (WIN1256_MAP[code] !== undefined) {
+      hex += WIN1256_MAP[code].toString(16).padStart(2, '0');
+    } else {
+      hex += '20'; // replace unknown with space
+    }
+  }
+  return hex;
+}
+
 export interface ReceiptData {
   orderNumber: string;
   total: number;
@@ -379,28 +428,94 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           } else {
             console.log("[QZ] Websocket already active.");
           }
-          
+
           console.log("[QZ] Creating printer config for:", data.companyDetails.posPrinterName);
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
-          // NOTE: Do NOT pass encoding:'windows-1256' here.
-          // On Java 11 + QZ Tray 2.1.x, explicitly setting this encoding can cause
-          // an internal Java charset exception that silently aborts the print job.
-          // QZ Tray handles string-to-bytes conversion automatically when no encoding is set.
           const config = qz.configs.create(qzTarget);
           console.log("[QZ] Config created. Queuing print job...");
-          
-          printQueue = printQueue.then(async () => {
-            console.log("[QZ] Executing qz.print()...");
-            await qz.print(config, rawLines);
-            console.log("[QZ] qz.print() completed successfully!");
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }).catch(e => {
-            console.error("[QZ] qz.print() failed in queue:", e);
-          });
-          
+
+          if (!isEnglish) {
+            // ── Arabic mode: build entire receipt as pre-encoded Windows-1256 hex ──
+            // This completely bypasses Java's charset conversion in QZ Tray,
+            // which is the root cause of silent Arabic print failures.
+            console.log("[QZ] Building Arabic hex payload...");
+            const hexLines: string[] = [
+              '1B40',       // ESC @ — Init printer
+              '1B7401',     // ESC t 1 — Set code page to PC437 (safe default; we send pre-encoded bytes anyway)
+              '1B6101',     // ESC a 1 — Center align
+            ];
+            if (logoBase64) {
+              hexLines.push('1C700100', '0A'); // NV logo + LF
+            }
+            // Company name (bold)
+            hexLines.push('1B4501'); // Bold on
+            hexLines.push(toW1256Hex(companyName + '\n'));
+            hexLines.push('1B4500'); // Bold off
+            if (data.companyDetails?.address)      hexLines.push(toW1256Hex(data.companyDetails.address + '\n'));
+            if (data.companyDetails?.mobileNumber) hexLines.push(toW1256Hex('Tel: ' + data.companyDetails.mobileNumber + '\n'));
+            if (data.companyDetails?.email)        hexLines.push(toW1256Hex(data.companyDetails.email + '\n'));
+            if (data.companyDetails?.website)      hexLines.push(toW1256Hex(data.companyDetails.website + '\n'));
+            if (data.companyDetails?.crNumber)     hexLines.push(toW1256Hex('CR: ' + data.companyDetails.crNumber + '\n'));
+            // Separator + order info
+            hexLines.push(toW1256Hex('-'.repeat(32) + '\n'));
+            hexLines.push('1B6100'); // Left align
+            hexLines.push(toW1256Hex(`Order / ${String.fromCharCode(0x0637,0x0644,0x0628)}: ${data.orderNumber}\n`));
+            hexLines.push(toW1256Hex(`Date / ${String.fromCharCode(0x062A,0x0627,0x0631,0x064A,0x062E)}: ${data.date}\n`));
+            hexLines.push(toW1256Hex(`Payment / ${String.fromCharCode(0x062F,0x0641,0x0639)}: ${data.paymentMethod.replace('POS_', '')}\n`));
+            hexLines.push(toW1256Hex('-'.repeat(32) + '\n'));
+            // Items
+            data.items.forEach(item => {
+              const nameLine = item.nameAr ? `${item.name} - ${item.nameAr}` : item.name;
+              hexLines.push(toW1256Hex(nameLine + '\n'));
+              if (item.sku) hexLines.push(toW1256Hex(`SKU: ${item.sku}\n`));
+              const qtyLabel = `Qty/${String.fromCharCode(0x0627,0x0644,0x0643,0x0645,0x064A,0x0629)}: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
+              const lineTotal = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
+              hexLines.push(toW1256Hex(qtyLabel + '  ' + lineTotal + '\n'));
+            });
+            // Totals (right-align)
+            hexLines.push(toW1256Hex('-'.repeat(32) + '\n'));
+            hexLines.push('1B6102'); // Right align
+            const subtotalLabel = `Subtotal / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639,0x20,0x0641,0x0631,0x0639,0x064A)}`;
+            hexLines.push(toW1256Hex(`${subtotalLabel}: OMR ${data.subtotal.toFixed(3)}\n`));
+            const totalLabel = `Total / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639)}`;
+            hexLines.push(toW1256Hex(`${totalLabel}: OMR ${data.total.toFixed(3)}\n`));
+            if (data.changeDue > 0) {
+              const changeLabel = `Change / ${String.fromCharCode(0x0628,0x0627,0x0642,0x064A)}`;
+              hexLines.push(toW1256Hex(`${changeLabel}: OMR ${data.changeDue.toFixed(3)}\n`));
+            }
+            // Footer
+            hexLines.push('1B6101'); // Center
+            hexLines.push(toW1256Hex('\nThank you / ' + String.fromCharCode(0x0634,0x0643,0x0631,0x0627,0x064B) + '\n'));
+            hexLines.push(toW1256Hex('\nPowered by Nexova\n'));
+            hexLines.push('0A0A0A0A0A0A'); // 6x line feed
+            hexLines.push('1D564100');      // Full cut
+
+            const fullHex = hexLines.join('');
+            console.log("[QZ] Arabic hex payload built, length:", fullHex.length);
+
+            printQueue = printQueue.then(async () => {
+              console.log("[QZ] Executing qz.print() with hex payload...");
+              await qz.print(config, [{ type: 'raw', format: 'command', flavor: 'hex', data: fullHex }]);
+              console.log("[QZ] qz.print() Arabic hex completed!");
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }).catch(e => {
+              console.error("[QZ] Arabic hex print failed in queue:", e);
+            });
+
+          } else {
+            // ── English mode: send as plain string array (already working) ──
+            printQueue = printQueue.then(async () => {
+              console.log("[QZ] Executing qz.print() with raw string lines...");
+              await qz.print(config, rawLines);
+              console.log("[QZ] qz.print() English completed!");
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }).catch(e => {
+              console.error("[QZ] qz.print() failed in queue:", e);
+            });
+          }
+
           await printQueue;
           console.log("[QZ] Print queue finished.");
-          
           return;
         } catch (e) {
           console.error("[QZ] raw print overall catch block triggered:", e);
