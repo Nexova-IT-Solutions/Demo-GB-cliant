@@ -159,8 +159,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         if (!isEnglish && item.nameAr) itemName += ` - ${item.nameAr}`;
         
         let qtyPrice = isEnglish 
-          ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(2)}`
-          : `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`;
+          ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
+          : `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(3)} / ${arNum(item.price.toFixed(3))}`;
           
         if (item.discountPercent && item.discountPercent > 0) {
           qtyPrice += isEnglish 
@@ -169,8 +169,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         }
         
         const total = isEnglish
-          ? `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`
-          : `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`;
+          ? `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`
+          : `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3))}`;
         
         itemsHtml += `
           <div style="margin-bottom: 4px;">
@@ -225,16 +225,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
           <span>${isEnglish ? 'Subtotal:' : 'Subtotal / المجموع الفرعي:'}</span>
-          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(2)}` : `OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`}</span>
+          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(3)}` : `OMR ${data.subtotal.toFixed(3)} / ${arNum(data.subtotal.toFixed(3))}`}</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
           <span style="font-weight: bold;">${isEnglish ? 'Total:' : 'Total / المجموع:'}</span>
-          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.total.toFixed(2)}` : `OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`}</span>
+          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.total.toFixed(3)}` : `OMR ${data.total.toFixed(3)} / ${arNum(data.total.toFixed(3))}`}</span>
         </div>
         ${data.changeDue > 0 ? `
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span>${isEnglish ? 'Change Due:' : 'Change Due / الباقي:'}</span>
-            <span style="font-weight: bold;">${isEnglish ? `OMR ${data.changeDue.toFixed(2)}` : `OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`}</span>
+            <span style="font-weight: bold;">${isEnglish ? `OMR ${data.changeDue.toFixed(3)}` : `OMR ${data.changeDue.toFixed(3)} / ${arNum(data.changeDue.toFixed(3))}`}</span>
           </div>
         ` : ''}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
@@ -342,8 +342,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         if (!isEnglish && item.nameAr) nameLine += ` - ${item.nameAr}`;
         rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-        const qtyPrice = isEnglish ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(2)}` : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(2)}`;
-        const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)}`;
+        const qtyPrice = isEnglish ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}` : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
+        const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
         // Pad to roughly 48 chars
         let padding = 48 - qtyPrice.length - total.length;
         if (padding < 1) padding = 1;
@@ -353,12 +353,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       rawLines.push(
         '-'.repeat(48) + '\n',
         '\x1B\x61\x02', // Right align
-        isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(2)}\n` : `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(2)}\n`,
-        isEnglish ? `Total: OMR ${data.total.toFixed(2)}\n` : `Total / المجموع: OMR ${data.total.toFixed(2)}\n`
+        isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(3)}\n` : `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(3)}\n`,
+        isEnglish ? `Total: OMR ${data.total.toFixed(3)}\n` : `Total / المجموع: OMR ${data.total.toFixed(3)}\n`
       );
       
       if (data.changeDue > 0) {
-        rawLines.push(isEnglish ? `Change Due: OMR ${data.changeDue.toFixed(2)}\n` : `Change Due / الباقي: OMR ${data.changeDue.toFixed(2)}\n`);
+        rawLines.push(isEnglish ? `Change Due: OMR ${data.changeDue.toFixed(3)}\n` : `Change Due / الباقي: OMR ${data.changeDue.toFixed(3)}\n`);
       }
       
       rawLines.push(
@@ -500,9 +500,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       return [
         itemName,
         `${item.quantity} / ${arNum(item.quantity)}`,
-        `OMR ${item.price.toFixed(2)} / ${arNum(item.price.toFixed(2))}`,
+        `OMR ${item.price.toFixed(3)} / ${arNum(item.price.toFixed(3))}`,
         discountText,
-        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(2))}`,
+        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3))}`,
       ];
     });
 
@@ -536,14 +536,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setTextColor(100, 100, 100);
     
     doc.text("Subtotal / المجموع الفرعي:", pageWidth - 110, totalY);
-    doc.text(`OMR ${data.subtotal.toFixed(2)} / ${arNum(data.subtotal.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`OMR ${data.subtotal.toFixed(3)} / ${arNum(data.subtotal.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106);
     doc.text("Total / المجموع:", pageWidth - 110, totalY);
-    doc.text(`OMR ${data.total.toFixed(2)} / ${arNum(data.total.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`OMR ${data.total.toFixed(3)} / ${arNum(data.total.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
       totalY += 10;
@@ -551,7 +551,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text("Change Due / الباقي:", pageWidth - 110, totalY);
-      doc.text(`OMR ${data.changeDue.toFixed(2)} / ${arNum(data.changeDue.toFixed(2))}`, pageWidth - 20, totalY, { align: "right" });
+      doc.text(`OMR ${data.changeDue.toFixed(3)} / ${arNum(data.changeDue.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
     }
 
     // Footer

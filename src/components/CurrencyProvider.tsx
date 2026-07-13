@@ -6,7 +6,7 @@ import useSWR from "swr";
 const CURRENCY_MAP = {
   LKR: { symbol: "LKR ", locale: "en-LK", decimals: 2 },
   USD: { symbol: "$", locale: "en-US", decimals: 2 },
-  OMR: { symbol: "OMR ", locale: "en-OM", decimals: 2 },
+  OMR: { symbol: "OMR ", locale: "en-OM", decimals: 3 },
 } as const;
 
 type CurrencyCode = keyof typeof CURRENCY_MAP;

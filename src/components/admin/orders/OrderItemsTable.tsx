@@ -10,7 +10,7 @@ import { ReturnItemModal } from "./ReturnItemModal";
 import { formatPriceClient } from "@/lib/currency-client"; // using client formatter if exists, or simple formatter
 
 // Simple currency formatter since we are on client side
-const formatCurr = (val: number) => `OMR ${val.toFixed(2)}`;
+const formatCurr = (val: number) => `OMR ${val.toFixed(3)}`;
 
 interface OrderItem {
   id: string;

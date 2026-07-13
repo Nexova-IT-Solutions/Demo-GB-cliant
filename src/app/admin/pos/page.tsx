@@ -114,7 +114,7 @@ export default function PosTerminalPage() {
           }
           // Payment method + code are already set in store by scanBarcode() in use-pos-cart
           toast.success(
-            `Gift Card: ${gc.code} — Balance: Rs. ${gc.balance.toFixed(2)}`,
+            `Gift Card: ${gc.code} — Balance: Rs. ${gc.balance.toFixed(3)}`,
             {
               duration: 5000,
               action: {

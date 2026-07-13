@@ -232,11 +232,11 @@ function calculateSalePrice(basePrice: number, discount?: DiscountData | null) {
   }
 
   if (discount.type === "FIXED") {
-    return Math.max(0, Number((basePrice - discount.value).toFixed(2)));
+    return Math.max(0, Number((basePrice - discount.value).toFixed(3)));
   }
 
   const capped = Math.min(Math.max(discount.value, 0), 100);
-  return Math.max(0, Number((basePrice - (basePrice * capped) / 100).toFixed(2)));
+  return Math.max(0, Number((basePrice - (basePrice * capped) / 100).toFixed(3)));
 }
 
 function parseImages(images: unknown): ProductImageData[] {
@@ -964,7 +964,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           : Math.min(basePrice, (basePrice * Math.min(Math.max(selectedDiscountForSubmit.value, 0), 100)) / 100)
         : 0;
       const enforcedSalePrice = selectedDiscountForSubmit
-        ? Math.max(0, Number((basePrice - discountAmount).toFixed(2)))
+        ? Math.max(0, Number((basePrice - discountAmount).toFixed(3)))
         : null;
 
       const res = await fetch(isEdit ? `/api/admin/products/${product?.id}` : "/api/admin/products", {

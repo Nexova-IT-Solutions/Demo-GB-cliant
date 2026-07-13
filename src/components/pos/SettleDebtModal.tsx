@@ -37,7 +37,7 @@ export function SettleDebtModal({ isOpen, onClose, customer, onSettled }: Settle
 
   const handleSubmit = async () => {
     if (amount <= 0 || amount > maxAmount) {
-      toast.error(`Amount must be between 0.01 and ${maxAmount.toFixed(2)}`);
+      toast.error(`Amount must be between 0.001 and ${maxAmount.toFixed(3)}`);
       return;
     }
 
@@ -51,7 +51,7 @@ export function SettleDebtModal({ isOpen, onClose, customer, onSettled }: Settle
 
       const data = await res.json();
       if (res.ok) {
-        toast.success(`Successfully settled OMR ${amount.toFixed(2)}`);
+        toast.success(`Successfully settled OMR ${amount.toFixed(3)}`);
         onSettled(maxAmount - amount);
         onClose();
       } else {
@@ -74,7 +74,7 @@ export function SettleDebtModal({ isOpen, onClose, customer, onSettled }: Settle
             Settle Debt for {customer.name}
           </DialogTitle>
           <DialogDescription>
-            Outstanding Balance: <strong>OMR {maxAmount.toFixed(2)}</strong>
+            Outstanding Balance: <strong>OMR {maxAmount.toFixed(3)}</strong>
           </DialogDescription>
         </DialogHeader>
         

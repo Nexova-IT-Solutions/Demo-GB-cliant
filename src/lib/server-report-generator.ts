@@ -121,10 +121,10 @@ export async function generateDailySalesPDF(data: SalesReportData): Promise<Buff
     head: [["KPI", "Value"]],
     body: [
       ["Total Orders", data.summary.orderCount.toString()],
-      ["Total Sales", `${currency} ${data.summary.totalSales.toFixed(2)}`],
-      ["Cost of Sales", `${currency} ${data.summary.totalCostOfSales.toFixed(2)}`],
-      ["Total Discounts", `${currency} ${data.summary.totalDiscounts.toFixed(2)}`],
-      ["Net Profit", `${currency} ${data.summary.netProfit.toFixed(2)}`],
+      ["Total Sales", `${currency} ${data.summary.totalSales.toFixed(3)}`],
+      ["Cost of Sales", `${currency} ${data.summary.totalCostOfSales.toFixed(3)}`],
+      ["Total Discounts", `${currency} ${data.summary.totalDiscounts.toFixed(3)}`],
+      ["Net Profit", `${currency} ${data.summary.netProfit.toFixed(3)}`],
     ],
   });
 
@@ -132,15 +132,15 @@ export async function generateDailySalesPDF(data: SalesReportData): Promise<Buff
     startY: (doc as any).lastAutoTable.finalY + 10,
     head: [["Channel", "Orders", "Revenue"]],
     body: [
-      ["Online (Web)", data.salesBySource.web.orders.toString(), `${currency} ${data.salesBySource.web.total.toFixed(2)}`],
-      ["In-Store (POS)", data.salesBySource.pos.orders.toString(), `${currency} ${data.salesBySource.pos.total.toFixed(2)}`],
+      ["Online (Web)", data.salesBySource.web.orders.toString(), `${currency} ${data.salesBySource.web.total.toFixed(3)}`],
+      ["In-Store (POS)", data.salesBySource.pos.orders.toString(), `${currency} ${data.salesBySource.pos.total.toFixed(3)}`],
     ],
   });
 
   const paymentBody = data.salesByPaymentMethod.map(pm => [
     pm.method,
     pm.count.toString(),
-    `${currency} ${pm.total.toFixed(2)}`
+    `${currency} ${pm.total.toFixed(3)}`
   ]);
 
   if (paymentBody.length > 0) {

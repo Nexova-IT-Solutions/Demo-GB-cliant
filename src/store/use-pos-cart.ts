@@ -425,7 +425,7 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
         return {
           success: true,
           type: "giftcard",
-          message: `Gift card found — Balance: Rs.${gc.balance.toFixed(2)}`,
+          message: `Gift card found — Balance: Rs.${gc.balance.toFixed(3)}`,
         };
       }
 

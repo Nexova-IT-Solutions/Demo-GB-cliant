@@ -142,11 +142,11 @@ export async function POST(req: NextRequest) {
       }
 
       const splitTotal = splitPayments.reduce((sum: number, sp) => sum + (sp.amount || 0), 0);
-      if (Math.abs(splitTotal - total) > 0.01) {
+      if (Math.abs(splitTotal - total) > 0.001) {
         return NextResponse.json(
           {
             success: false,
-            message: `Split payment total (${splitTotal.toFixed(2)}) does not match order total (${total.toFixed(2)})`,
+            message: `Split payment total (${splitTotal.toFixed(3)}) does not match order total (${total.toFixed(3)})`,
           },
           { status: 400 }
         );
@@ -395,7 +395,7 @@ export async function POST(req: NextRequest) {
         }
         if (Number(giftCard.balance) < validAmount) {
           throw new Error(
-            `Gift card balance (Rs.${Number(giftCard.balance).toFixed(2)}) is less than deduction amount (Rs.${validAmount.toFixed(2)})`
+            `Gift card balance (Rs.${Number(giftCard.balance).toFixed(3)}) is less than deduction amount (Rs.${validAmount.toFixed(3)})`
           );
         }
 

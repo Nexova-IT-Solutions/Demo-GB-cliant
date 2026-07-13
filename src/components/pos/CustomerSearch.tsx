@@ -188,7 +188,7 @@ export function CustomerSearch() {
             {customer.name || "Unknown Customer"}
             {(customer.outstandingBalance || 0) > 0 && (
               <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm whitespace-nowrap">
-                Owes OMR {customer.outstandingBalance?.toFixed(2)}
+                Owes OMR {customer.outstandingBalance?.toFixed(3)}
               </span>
             )}
           </p>
@@ -286,7 +286,7 @@ export function CustomerSearch() {
                       {c.name || "Unknown Customer"}
                       {(c as any).outstandingBalance > 0 && (
                         <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm">
-                          Owes OMR {(c as any).outstandingBalance.toFixed(2)}
+                          Owes OMR {(c as any).outstandingBalance.toFixed(3)}
                         </span>
                       )}
                     </p>
