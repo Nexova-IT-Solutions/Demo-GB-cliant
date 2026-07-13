@@ -297,10 +297,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       rawLines.push(
         '\x1B\x40', // Init printer
       );
-      
-      if (!isEnglish) {
-        rawLines.push('\x1B\x74\x21'); // Select character code table 33 (WPC1256 for Arabic)
-      }
+      // NOTE: We intentionally do NOT send an ESC/POS code page command here.
+      // Sending \x1B\x74\x21 (WPC1256) is not universally supported and can
+      // cause some printers to abort the entire print stream silently.
+      // Instead we let QZ Tray handle the text encoding natively.
 
       rawLines.push(
         '\x1B\x61\x01', // Center align
@@ -382,7 +382,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           
           console.log("[QZ] Creating printer config for:", data.companyDetails.posPrinterName);
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
-          const config = qz.configs.create(qzTarget, { encoding: 'windows-1256' });
+          // NOTE: Do NOT pass encoding:'windows-1256' here.
+          // On Java 11 + QZ Tray 2.1.x, explicitly setting this encoding can cause
+          // an internal Java charset exception that silently aborts the print job.
+          // QZ Tray handles string-to-bytes conversion automatically when no encoding is set.
+          const config = qz.configs.create(qzTarget);
           console.log("[QZ] Config created. Queuing print job...");
           
           printQueue = printQueue.then(async () => {
