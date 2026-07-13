@@ -54,9 +54,9 @@ export function CurrencyProvider({
     const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
     if (isNaN(numericAmount)) return `${config.symbol}0.00`;
     
-    // No round ups: truncate to 2 decimals
+    // No round ups: truncate to 2 decimals. Added small epsilon to fix floating point math (2.3 * 100 = 229.9999999)
     const factor = Math.pow(10, config.decimals);
-    const truncatedAmount = Math.trunc(numericAmount * factor) / factor;
+    const truncatedAmount = Math.trunc(numericAmount * factor + 0.000001) / factor;
     
     return `${config.symbol}${truncatedAmount.toLocaleString(config.locale, {
       minimumFractionDigits: config.decimals,
