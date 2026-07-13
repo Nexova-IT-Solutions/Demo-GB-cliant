@@ -371,25 +371,38 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       if (data.companyDetails?.posPrinterName) {
         try {
+          console.log("[QZ] Checking websocket connection...");
           if (!qz.websocket.isActive()) {
+            console.log("[QZ] Connecting to websocket...");
             await qz.websocket.connect({ retries: 0 });
+            console.log("[QZ] Connected successfully!");
+          } else {
+            console.log("[QZ] Websocket already active.");
           }
+          
+          console.log("[QZ] Creating printer config for:", data.companyDetails.posPrinterName);
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
           const config = qz.configs.create(qzTarget, { encoding: 'windows-1256' });
+          console.log("[QZ] Config created. Queuing print job...");
           
           printQueue = printQueue.then(async () => {
+            console.log("[QZ] Executing qz.print()...");
             await qz.print(config, rawLines);
+            console.log("[QZ] qz.print() completed successfully!");
             await new Promise(resolve => setTimeout(resolve, 500));
           }).catch(e => {
-            console.error("QZ raw print failed in queue", e);
+            console.error("[QZ] qz.print() failed in queue:", e);
           });
           
           await printQueue;
+          console.log("[QZ] Print queue finished.");
           
           return;
         } catch (e) {
-          console.error("QZ raw print failed", e);
+          console.error("[QZ] raw print overall catch block triggered:", e);
         }
+      } else {
+        console.warn("[QZ] No posPrinterName configured in Company Details.");
       }
       return;
     }
