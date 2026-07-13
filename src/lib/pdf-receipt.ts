@@ -341,15 +341,13 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       
       const rawLines: any[] = [];
 
-      // Init and Center align MUST happen before image is sent
-      // Init and Center align MUST happen before image is sent
       rawLines.push(
         '\x1B\x40', // Init printer
       );
-      // NOTE: We intentionally do NOT send an ESC/POS code page command here.
-      // Sending \x1B\x74\x21 (WPC1256) is not universally supported and can
-      // cause some printers to abort the entire print stream silently.
-      // Instead we let QZ Tray handle the text encoding natively.
+
+      if (!isEnglish) {
+        rawLines.push('\x1B\x74\x21'); // Select character code table 33 (WPC1256 for Arabic)
+      }
 
       rawLines.push(
         '\x1B\x61\x01', // Center align
@@ -376,13 +374,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
       if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
       
+      const COL = 42; // Safe column width for 80mm thermal printers
       rawLines.push(
-        '-'.repeat(48) + '\n',
+        '-'.repeat(COL) + '\n',
         '\x1B\x61\x00', // Left align
         isEnglish ? `Order: ${data.orderNumber}\n` : `Order / الطلب: ${data.orderNumber}\n`,
         isEnglish ? `Date: ${data.date}\n` : `Date / التاريخ: ${data.date}\n`,
         isEnglish ? `Payment: ${data.paymentMethod.replace("POS_", "")}\n` : `Payment / الدفع: ${data.paymentMethod.replace("POS_", "")}\n`,
-        '-'.repeat(48) + '\n'
+        '-'.repeat(COL) + '\n'
       );
       
       // Items
@@ -393,14 +392,21 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
         const qtyPrice = isEnglish ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}` : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
         const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
-        // Pad to roughly 48 chars
-        let padding = 48 - qtyPrice.length - total.length;
-        if (padding < 1) padding = 1;
-        rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
+        // If combined line fits within COL, print on one line; otherwise put total on its own right-aligned line
+        const combined = qtyPrice.length + 1 + total.length;
+        if (combined <= COL) {
+          const padding = COL - qtyPrice.length - total.length;
+          rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
+        } else {
+          rawLines.push(`${qtyPrice}\n`);
+          rawLines.push('\x1B\x61\x02'); // Right align
+          rawLines.push(`${total}\n`);
+          rawLines.push('\x1B\x61\x00'); // Back to left align
+        }
       });
       
       rawLines.push(
-        '-'.repeat(48) + '\n',
+        '-'.repeat(COL) + '\n',
         '\x1B\x61\x02', // Right align
         isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(3)}\n` : `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(3)}\n`,
         isEnglish ? `Total: OMR ${data.total.toFixed(3)}\n` : `Total / المجموع: OMR ${data.total.toFixed(3)}\n`
@@ -431,7 +437,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
           console.log("[QZ] Creating printer config for:", data.companyDetails.posPrinterName);
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
-          const config = qz.configs.create(qzTarget);
+          const config = qz.configs.create(qzTarget, { encoding: 'windows-1256' });
           console.log("[QZ] Config created. Queuing print job...");
 
           if (!isEnglish) {
