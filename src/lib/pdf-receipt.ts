@@ -133,49 +133,51 @@ function canvasToEscposHex(canvas: HTMLCanvasElement): string {
   const imgData = ctx.getImageData(0, 0, width, height);
   const data = imgData.data;
 
-  // ESCPOS Image Header: 1D 76 30 00 xL xH yL yH
-  const widthBytes = Math.ceil(width / 8);
-  const xL = widthBytes & 0xFF;
-  const xH = (widthBytes >> 8) & 0xFF;
-  const yL = height & 0xFF;
-  const yH = (height >> 8) & 0xFF;
+  // ESC * (Select bit-image mode)
+  // m = 1 (8-dot double density)
+  // n1 = width & 0xFF
+  // n2 = (width >> 8) & 0xFF
+  const n1 = width & 0xFF;
+  const n2 = (width >> 8) & 0xFF;
 
-  let hex = '1D763000';
-  hex += xL.toString(16).padStart(2, '0');
-  hex += xH.toString(16).padStart(2, '0');
-  hex += yL.toString(16).padStart(2, '0');
-  hex += yH.toString(16).padStart(2, '0');
+  const n1Hex = n1.toString(16).padStart(2, '0');
+  const n2Hex = n2.toString(16).padStart(2, '0');
 
-  // Convert pixels to monochrome bytes
-  const bytes = new Uint8Array(widthBytes * height);
-  for (let y = 0; y < height; y++) {
+  let hex = '';
+
+  // Set line spacing to 8 dots (ESC 3 8) -> 1B 33 08 to prevent vertical white gaps
+  hex += '1B3308';
+
+  // Process image in 8-dot vertical slices
+  for (let y = 0; y < height; y += 8) {
+    // Send ESC * command: 1B 2A 01 n1 n2
+    hex += '1B2A01' + n1Hex + n2Hex;
+
     for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 4;
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const a = data[i + 3];
-      
-      // Calculate luminance
-      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-      // White threshold logic: if pixel is dark and opaque, it is printed (black bit=1)
-      const isBlack = (a > 128 && luminance < 160);
-
-      if (isBlack) {
-        const byteIndex = (y * widthBytes) + Math.floor(x / 8);
-        const bitOffset = 7 - (x % 8);
-        bytes[byteIndex] |= (1 << bitOffset);
+      let byteValue = 0;
+      for (let b = 0; b < 8; b++) {
+        const targetY = y + b;
+        if (targetY < height) {
+          const i = (targetY * width + x) * 4;
+          const r = data[i];
+          const g = data[i + 1];
+          const bVal = data[i + 2];
+          const a = data[i + 3];
+          const luminance = 0.299 * r + 0.587 * g + 0.114 * bVal;
+          const isBlack = (a > 128 && luminance < 160);
+          if (isBlack) {
+            byteValue |= (1 << (7 - b));
+          }
+        }
       }
+      hex += byteValue.toString(16).padStart(2, '0');
     }
+    // Line feed after each 8-dot row
+    hex += '0A';
   }
 
-  // Convert Uint8Array to hex string efficiently
-  const hexArr = new Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) {
-    hexArr[i] = bytes[i].toString(16).padStart(2, '0');
-  }
-  
-  hex += hexArr.join('');
+  // Restore default line spacing (ESC 2) -> 1B 32
+  hex += '1B32';
 
   return hex.toUpperCase();
 }
