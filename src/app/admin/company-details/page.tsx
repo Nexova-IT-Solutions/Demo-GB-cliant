@@ -438,34 +438,31 @@ export default function CompanyDetailsPage() {
                       name="receiptPrintArea"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Printer Paper Size (Print Area)</FormLabel>
-                          <Select onValueChange={(val) => {
-                            const num = parseInt(val);
-                            field.onChange(num);
-                            // Auto-adjust defaults when paper size changes to assist operators
-                            if (num === 58) {
-                              form.setValue("receiptCharWidth", 32);
-                              form.setValue("receiptLogoWidth", 136);
-                              form.setValue("receiptLogoHeight", 56);
-                            } else {
-                              form.setValue("receiptCharWidth", 42);
-                              form.setValue("receiptLogoWidth", 200);
-                              form.setValue("receiptLogoHeight", 80);
-                            }
-                          }} defaultValue={String(field.value)} value={String(field.value)}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Paper Size" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="80">80mm Paper Width (Standard)</SelectItem>
-                              <SelectItem value="58">58mm Paper Width (Compact)</SelectItem>
-                              <SelectItem value="110">110mm Paper Width (Wide)</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <FormLabel className="flex justify-between items-center">
+                            <span>Printer Paper Size (Print Area)</span>
+                            <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} mm</span>
+                          </FormLabel>
+                          <FormControl>
+                            <input
+                              type="range"
+                              min="50"
+                              max="120"
+                              step="1"
+                              value={field.value}
+                              onChange={(e) => {
+                                const num = parseInt(e.target.value);
+                                field.onChange(num);
+                                // Proportional layout auto-tuner
+                                const ratio = num / 80;
+                                form.setValue("receiptCharWidth", Math.min(48, Math.max(32, Math.round(ratio * 42))));
+                                form.setValue("receiptLogoWidth", Math.floor((Math.round(ratio * 200)) / 8) * 8);
+                                form.setValue("receiptLogoHeight", Math.round(ratio * 80));
+                              }}
+                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                            />
+                          </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Auto-configures recommended layouts when changed.
+                            Drags from 50mm to 120mm. Auto-scales recommended settings.
                           </p>
                         </FormItem>
                       )}
