@@ -381,29 +381,36 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `${SEP}\n`
       );
       
-      // Items — left aligned, with price truly right-aligned via ESC/POS command
+      // Items — qty/name left aligned, total always right-aligned by the printer hardware
       data.items.forEach(item => {
         let nameLine = item.name;
         if (!isEnglish && item.nameAr) nameLine += ` - ${item.nameAr}`;
+
+        // Name line (left aligned)
+        rawLines.push('\x1B\x61\x00'); // Left align
         rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
+
+        // Qty line (left aligned)
         const qtyPrice = isEnglish
           ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
           : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
-        const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
-        // If combined line fits within COL, print on one line with space padding
-        const combined = qtyPrice.length + 1 + total.length;
-        if (combined <= COL) {
-          const padding = COL - qtyPrice.length - total.length;
-          rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
-        } else {
-          // Qty on its own line, then total truly right-aligned by the printer
-          rawLines.push('\x1B\x61\x00'); // Left align
-          rawLines.push(`${qtyPrice}\n`);
-          rawLines.push('\x1B\x61\x02'); // Right align
-          rawLines.push(`${total}\n`);
-          rawLines.push('\x1B\x61\x00'); // Back to left align
+        rawLines.push(`${qtyPrice}\n`);
+
+        // Discount line if applicable (left aligned)
+        if (item.discountPercent && item.discountPercent > 0) {
+          const discountedTotal = item.quantity * item.price * (1 - item.discountPercent / 100);
+          const discLine = isEnglish
+            ? `Discount: ${item.discountPercent}% off -> OMR ${discountedTotal.toFixed(3)}`
+            : `Discount / خصم: ${item.discountPercent}%`;
+          rawLines.push(`${discLine}\n`);
         }
+
+        // Total — always right-aligned by the printer's own hardware command
+        const lineTotal = item.quantity * item.price * (1 - (item.discountPercent || 0) / 100);
+        rawLines.push('\x1B\x61\x02'); // Right align
+        rawLines.push(`OMR ${lineTotal.toFixed(3)}\n`);
+        rawLines.push('\x1B\x61\x00'); // Back to left align
       });
 
       // Separator then right-aligned totals
