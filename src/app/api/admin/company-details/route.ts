@@ -17,6 +17,8 @@ const companyDetailsSchema = z.object({
   timezone: z.string().optional().default("Asia/Muscat"),
   receiptCharWidth: z.number().int().min(32).max(48).optional().default(42),
   receiptLogoWidth: z.number().int().min(100).max(300).optional().default(200),
+  receiptLogoHeight: z.number().int().min(40).max(200).optional().default(80),
+  receiptPrintArea: z.number().int().min(50).max(120).optional().default(80),
 });
 
 export async function GET() {
@@ -81,6 +83,8 @@ export async function POST(req: Request) {
         timezone: data.timezone,
         receiptCharWidth: data.receiptCharWidth,
         receiptLogoWidth: data.receiptLogoWidth,
+        receiptLogoHeight: data.receiptLogoHeight,
+        receiptPrintArea: data.receiptPrintArea,
       },
       create: {
         id: "1",
@@ -95,6 +99,8 @@ export async function POST(req: Request) {
         timezone: data.timezone,
         receiptCharWidth: data.receiptCharWidth,
         receiptLogoWidth: data.receiptLogoWidth,
+        receiptLogoHeight: data.receiptLogoHeight,
+        receiptPrintArea: data.receiptPrintArea,
       },
     });
 

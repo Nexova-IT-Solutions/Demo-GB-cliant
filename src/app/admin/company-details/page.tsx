@@ -43,6 +43,8 @@ const companyDetailsSchema = z.object({
   timezone: z.string().optional().default("Asia/Muscat"),
   receiptCharWidth: z.number().int().min(32).max(48).default(42),
   receiptLogoWidth: z.number().int().min(100).max(300).default(200),
+  receiptLogoHeight: z.number().int().min(40).max(200).default(80),
+  receiptPrintArea: z.number().int().min(50).max(120).default(80),
 });
 
 type CompanyDetailsValues = z.infer<typeof companyDetailsSchema>;
@@ -66,6 +68,8 @@ export default function CompanyDetailsPage() {
       timezone: "Asia/Muscat",
       receiptCharWidth: 42,
       receiptLogoWidth: 200,
+      receiptLogoHeight: 80,
+      receiptPrintArea: 80,
     },
   });
 
@@ -88,6 +92,8 @@ export default function CompanyDetailsPage() {
           timezone: data.timezone || "Asia/Muscat",
           receiptCharWidth: data.receiptCharWidth ?? 42,
           receiptLogoWidth: data.receiptLogoWidth ?? 200,
+          receiptLogoHeight: data.receiptLogoHeight ?? 80,
+          receiptPrintArea: data.receiptPrintArea ?? 80,
         });
       } catch (error) {
         toast.error("Failed to load company details");
@@ -425,8 +431,46 @@ export default function CompanyDetailsPage() {
                     )}
                   />
 
-                  {/* Sliders in a grid */}
+                  {/* Sliders and Selectors in a grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="receiptPrintArea"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Printer Paper Size (Print Area)</FormLabel>
+                          <Select onValueChange={(val) => {
+                            const num = parseInt(val);
+                            field.onChange(num);
+                            // Auto-adjust defaults when paper size changes to assist operators
+                            if (num === 58) {
+                              form.setValue("receiptCharWidth", 32);
+                              form.setValue("receiptLogoWidth", 136);
+                              form.setValue("receiptLogoHeight", 56);
+                            } else {
+                              form.setValue("receiptCharWidth", 42);
+                              form.setValue("receiptLogoWidth", 200);
+                              form.setValue("receiptLogoHeight", 80);
+                            }
+                          }} defaultValue={String(field.value)} value={String(field.value)}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Paper Size" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="80">80mm Paper Width (Standard)</SelectItem>
+                              <SelectItem value="58">58mm Paper Width (Compact)</SelectItem>
+                              <SelectItem value="110">110mm Paper Width (Wide)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-[10px] text-slate-400">
+                            Auto-configures recommended layouts when changed.
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="receiptCharWidth"
@@ -448,7 +492,7 @@ export default function CompanyDetailsPage() {
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Normally 42 for 80mm printers, or 32 for 58mm printers.
+                            Adjust column character width bounds.
                           </p>
                         </FormItem>
                       )}
@@ -475,11 +519,65 @@ export default function CompanyDetailsPage() {
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Adjust logo size. Must be divisible by 8 (auto-rounded).
+                            Logo horizontal size constraint (divisible by 8).
                           </p>
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="receiptLogoHeight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex justify-between items-center">
+                            <span>Receipt Logo Height</span>
+                            <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} px</span>
+                          </FormLabel>
+                          <FormControl>
+                            <input
+                              type="range"
+                              min="40"
+                              max="200"
+                              step="4"
+                              value={field.value}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                            />
+                          </FormControl>
+                          <p className="text-[10px] text-slate-400">
+                            Logo vertical size constraint.
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Standard Sizes Information Reference Card */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-600">
+                    <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
+                      💡 Standard Printer Layout Reference:
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 font-medium pt-1">
+                      <div className="border-r border-slate-200 pr-2">
+                        <div className="text-[#A7066A] font-bold">80mm Thermal Printer</div>
+                        <div className="text-[10px] mt-1 text-slate-500">
+                          • Paper Size: 80mm<br/>
+                          • Column Width: 42 - 48 chars<br/>
+                          • Logo Width: 200 - 240px<br/>
+                          • Logo Height: 60 - 100px
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[#A7066A] font-bold">58mm Thermal Printer</div>
+                        <div className="text-[10px] mt-1 text-slate-500">
+                          • Paper Size: 58mm<br/>
+                          • Column Width: 32 chars<br/>
+                          • Logo Width: 120 - 144px<br/>
+                          • Logo Height: 40 - 64px
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-3">
@@ -512,9 +610,9 @@ export default function CompanyDetailsPage() {
                     <div className="flex flex-col items-center mb-4">
                       <div 
                         className="bg-slate-200 border-2 border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-500 font-bold mb-2 transition-all"
-                        style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${(form.watch("receiptLogoWidth") / 2) * 0.4}px` }}
+                        style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${form.watch("receiptLogoHeight") / 2}px` }}
                       >
-                        LOGO ({form.watch("receiptLogoWidth")}px)
+                        LOGO ({form.watch("receiptLogoWidth")}x{form.watch("receiptLogoHeight")}px)
                       </div>
                       <div className="font-bold text-xs">{form.watch("companyName") || "Sohar Pet Center"}</div>
                       <div className="text-[10px] text-center max-w-[240px] mt-1">{form.watch("address") || "Sohar, North Al Batinah"}</div>

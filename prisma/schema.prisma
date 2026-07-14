@@ -940,6 +940,8 @@ model CompanyDetails {
   timezone         String   @default("Asia/Muscat")
   receiptCharWidth Int      @default(42)
   receiptLogoWidth Int      @default(200)
+  receiptLogoHeight Int     @default(80)
+  receiptPrintArea Int      @default(80)
   updatedAt        DateTime @updatedAt
 }
 

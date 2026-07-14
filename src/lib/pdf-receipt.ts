@@ -340,9 +340,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       return;
     } else {
       // THERMAL PRINTER RAW TEXT FORMAT
-      const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
       const charWidth = data.companyDetails?.receiptCharWidth || 42;
       const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
+      const logoHeight = data.companyDetails?.receiptLogoHeight || 80;
       
       const rawLines: any[] = [];
 
@@ -476,7 +476,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                   img.onload = () => {
                     const c = document.createElement('canvas');
                     const maxW = logoWidth;
-                    const scale = Math.min(1, maxW / img.width);
+                    const maxH = logoHeight;
+                    const scale = Math.min(1, maxW / img.width, maxH / img.height);
                     c.width = Math.floor((img.width * scale) / 8) * 8;
                     c.height = Math.floor(img.height * scale);
                     const ctx = c.getContext('2d');
@@ -566,7 +567,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                     img.onload = () => {
                       const c = document.createElement('canvas');
                       const maxW = logoWidth;
-                      const scale = Math.min(1, maxW / img.width);
+                      const maxH = logoHeight;
+                      const scale = Math.min(1, maxW / img.width, maxH / img.height);
                       c.width = Math.floor((img.width * scale) / 8) * 8;
                       c.height = Math.floor(img.height * scale);
                       const ctx = c.getContext('2d');
