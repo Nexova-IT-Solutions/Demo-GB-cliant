@@ -471,7 +471,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                     const c = document.createElement('canvas');
                     const maxW = 200;
                     const scale = Math.min(1, maxW / img.width);
-                    c.width = Math.floor(img.width * scale);
+                    c.width = Math.floor((img.width * scale) / 8) * 8;
                     c.height = Math.floor(img.height * scale);
                     const ctx = c.getContext('2d');
                     if (!ctx) { resolve(null); return; }
@@ -561,7 +561,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                       const c = document.createElement('canvas');
                       const maxW = 200;
                       const scale = Math.min(1, maxW / img.width);
-                      c.width = Math.floor(img.width * scale);
+                      c.width = Math.floor((img.width * scale) / 8) * 8;
                       c.height = Math.floor(img.height * scale);
                       const ctx = c.getContext('2d');
                       if (!ctx) { resolve(null); return; }
