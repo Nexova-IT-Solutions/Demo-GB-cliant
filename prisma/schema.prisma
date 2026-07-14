@@ -936,9 +936,11 @@ model CompanyDetails {
   email          String?
   crNumber       String?
   posPrinterName String?
-  posPrintMode   String   @default("raw") // "raw" or "raster"
-  timezone       String   @default("Asia/Muscat")
-  updatedAt      DateTime @updatedAt
+  posPrintMode     String   @default("raw") // "raw" or "raster"
+  timezone         String   @default("Asia/Muscat")
+  receiptCharWidth Int      @default(42)
+  receiptLogoWidth Int      @default(200)
+  updatedAt        DateTime @updatedAt
 }
 
 model ScheduledReport {

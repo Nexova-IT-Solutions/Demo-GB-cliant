@@ -15,6 +15,8 @@ const companyDetailsSchema = z.object({
   posPrinterName: z.string().optional().or(z.literal("")),
   posPrintMode: z.string().default("raw"),
   timezone: z.string().optional().default("Asia/Muscat"),
+  receiptCharWidth: z.number().int().min(32).max(48).optional().default(42),
+  receiptLogoWidth: z.number().int().min(100).max(300).optional().default(200),
 });
 
 export async function GET() {
@@ -77,6 +79,8 @@ export async function POST(req: Request) {
         posPrinterName: data.posPrinterName,
         posPrintMode: data.posPrintMode,
         timezone: data.timezone,
+        receiptCharWidth: data.receiptCharWidth,
+        receiptLogoWidth: data.receiptLogoWidth,
       },
       create: {
         id: "1",
@@ -89,6 +93,8 @@ export async function POST(req: Request) {
         posPrinterName: data.posPrinterName,
         posPrintMode: data.posPrintMode,
         timezone: data.timezone,
+        receiptCharWidth: data.receiptCharWidth,
+        receiptLogoWidth: data.receiptLogoWidth,
       },
     });
 

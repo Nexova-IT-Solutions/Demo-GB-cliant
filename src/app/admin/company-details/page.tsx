@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { generateReceiptPdf } from "@/lib/pdf-receipt";
 
 const TIMEZONES = [
   { value: "Asia/Muscat", label: "Oman (Muscat) - UTC+4" },
@@ -40,6 +41,8 @@ const companyDetailsSchema = z.object({
   posPrinterName: z.string().optional().or(z.literal("")),
   posPrintMode: z.string().default("raw"),
   timezone: z.string().optional().default("Asia/Muscat"),
+  receiptCharWidth: z.number().int().min(32).max(48).default(42),
+  receiptLogoWidth: z.number().int().min(100).max(300).default(200),
 });
 
 type CompanyDetailsValues = z.infer<typeof companyDetailsSchema>;
@@ -61,6 +64,8 @@ export default function CompanyDetailsPage() {
       posPrinterName: "",
       posPrintMode: "raw",
       timezone: "Asia/Muscat",
+      receiptCharWidth: 42,
+      receiptLogoWidth: 200,
     },
   });
 
@@ -81,6 +86,8 @@ export default function CompanyDetailsPage() {
           posPrinterName: data.posPrinterName || "",
           posPrintMode: data.posPrintMode || "raw",
           timezone: data.timezone || "Asia/Muscat",
+          receiptCharWidth: data.receiptCharWidth ?? 42,
+          receiptLogoWidth: data.receiptLogoWidth ?? 200,
         });
       } catch (error) {
         toast.error("Failed to load company details");
@@ -132,23 +139,19 @@ export default function CompanyDetailsPage() {
       return;
     }
     try {
-      initQZSecurity();
-      if (!qz.websocket.isActive()) {
-        await qz.websocket.connect({ retries: 0 });
-      }
-      const config = qz.configs.create(selectedPrinter);
-      // Basic raw text print for testing connectivity, followed by some newlines to push paper out
-      const data = [
-        "\n",
-        "TEST PRINT SUCCESSFUL\n",
-        "--------------------------\n",
-        "If you can read this, your\n",
-        "printer is connected and\n",
-        "ready to use with the POS.\n",
-        "\n\n\n\n\n\n"
-      ];
-      await qz.print(config, data);
-      toast.success("Test print sent to printer!");
+      toast.info("Sending layout test print to printer...");
+      generateReceiptPdf({
+        orderNumber: "POS-TEST-EN",
+        total: 36.000,
+        subtotal: 40.000,
+        changeDue: 4.000,
+        paymentMethod: "CARD",
+        date: new Date().toLocaleString(),
+        items: [
+          { name: "Nexova-Product", sku: "N00011", quantity: 2, price: 20.000, discountPercent: 10 }
+        ],
+        companyDetails: form.getValues(),
+      }, "print");
     } catch (err) {
       console.error(err);
       toast.error("Failed to send test print. Is the printer online?");
@@ -162,65 +165,19 @@ export default function CompanyDetailsPage() {
       return;
     }
     try {
-      if (!qz.websocket.isActive()) {
-        await qz.websocket.connect({ retries: 0 });
-      }
-      const config = qz.configs.create(selectedPrinter, { margins: 0 });
-      
-      const htmlContent = `
-        <html>
-          <head>
-            <style>
-              body { 
-                margin: 0; 
-                padding: 10px; 
-                font-family: sans-serif; 
-                color: #000;
-                background: #fff;
-              }
-              h2 { text-align: center; margin-bottom: 20px; font-size: 24px; }
-              .text-lg { font-size: 18px; line-height: 1.5; }
-              .divider { border-top: 1px dashed #000; margin: 15px 0; }
-            </style>
-          </head>
-          <body>
-            <h2>HTML Raster Test</h2>
-            <div class="text-lg">
-              1234567890<br/>
-              ١٢٣٤٥٦٧٨٩٠
-            </div>
-            <div class="divider"></div>
-            <div class="text-lg">
-              OMR 1.50 / ١.٥٠<br/>
-              OMR 65.00 / ٦٥.٠٠
-            </div>
-            <div class="divider"></div>
-            <div class="text-lg" style="text-align: center;">
-              Thank you!
-            </div>
-          </body>
-        </html>
-      `;
-      
-      const data = [
-        { 
-          type: 'raw', 
-          format: 'html', 
-          flavor: 'plain', 
-          data: htmlContent, 
-          options: { 
-            language: 'ESCPOS',
-            dotDensity: 'double',
-            pageWidth: 3.15
-          }
-        },
-        // Feed some lines and cut
-        '\n\n\n\n\n\n',
-        '\x1D\x56\x41\x10'
-      ];
-      
-      await qz.print(config, data);
-      toast.success("Arabic test print sent to printer!");
+      toast.info("Sending Arabic layout test print to printer...");
+      generateReceiptPdf({
+        orderNumber: "POS-TEST-AR",
+        total: 36.000,
+        subtotal: 40.000,
+        changeDue: 4.000,
+        paymentMethod: "POS_CARD",
+        date: new Date().toLocaleString(),
+        items: [
+          { name: "Sohar Pet Product", nameAr: "منتج صحار الأليف", sku: "N00011", quantity: 2, price: 20.000, discountPercent: 10 }
+        ],
+        companyDetails: form.getValues(),
+      }, "print");
     } catch (err) {
       console.error(err);
       toast.error("Failed to send Arabic test print.");
@@ -449,30 +406,159 @@ export default function CompanyDetailsPage() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Dynamic Formatting Sliders */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
+                    <FormField
+                      control={form.control}
+                      name="receiptCharWidth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex justify-between items-center">
+                            <span>Receipt Column Width (Characters)</span>
+                            <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} chars</span>
+                          </FormLabel>
+                          <FormControl>
+                            <input
+                              type="range"
+                              min="32"
+                              max="48"
+                              step="1"
+                              value={field.value}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                            />
+                          </FormControl>
+                          <p className="text-[10px] text-slate-400">
+                            Normally 42 for 80mm printers, or 32 for 58mm printers.
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="receiptLogoWidth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex justify-between items-center">
+                            <span>Receipt Logo Size (Width in Pixels)</span>
+                            <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} px</span>
+                          </FormLabel>
+                          <FormControl>
+                            <input
+                              type="range"
+                              min="100"
+                              max="300"
+                              step="8"
+                              value={field.value}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                            />
+                          </FormControl>
+                          <p className="text-[10px] text-slate-400">
+                            Adjust logo rendering bounds. Must be divisible by 8 (auto-rounded).
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2 mb-[2px]">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={fetchPrinters} 
-                    disabled={isConnectingQz}
-                  >
-                    {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    onClick={handleTestPrint} 
-                  >
-                    Test Printer
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    onClick={handleTestArabicPrint} 
-                  >
-                    Test Arabic Print
-                  </Button>
+
+                {/* Print Action Buttons & Live Mock Preview */}
+                <div className="flex flex-col lg:flex-row gap-6 mt-6 pt-6 border-t border-slate-100">
+                  <div className="flex-1 space-y-4">
+                    <h3 className="font-medium text-sm text-slate-900">Test Connectivity</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={fetchPrinters} 
+                        disabled={isConnectingQz}
+                        className="h-10 text-xs"
+                      >
+                        {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="secondary" 
+                        onClick={handleTestPrint} 
+                        className="h-10 text-xs"
+                      >
+                        Test Printer
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="secondary" 
+                        onClick={handleTestArabicPrint} 
+                        className="h-10 text-xs"
+                      >
+                        Test Arabic Print
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Mono-spaced Live Layout Preview Panel */}
+                  <div className="w-full lg:w-[360px] shrink-0">
+                    <h3 className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-2">Live Receipt Preview</h3>
+                    <div className="bg-[#FAF9F5] border border-amber-100 rounded-xl p-5 shadow-inner font-mono text-[11px] leading-relaxed text-[#1e293b] select-none overflow-x-auto">
+                      <div className="flex flex-col items-center mb-4">
+                        <div 
+                          className="bg-slate-200 border-2 border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-500 font-bold mb-2 transition-all"
+                          style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${(form.watch("receiptLogoWidth") / 2) * 0.4}px` }}
+                        >
+                          LOGO ({form.watch("receiptLogoWidth")}px)
+                        </div>
+                        <div className="font-bold text-xs">{form.watch("companyName") || "Sohar Pet Center"}</div>
+                        <div className="text-[10px] text-center max-w-[240px] mt-1">{form.watch("address") || "Sohar, North Al Batinah"}</div>
+                        <div className="text-[10px] mt-0.5">Tel: {form.watch("mobileNumber") || "+96894750350"}</div>
+                      </div>
+
+                      {/* Monospace formatting calculator */}
+                      {(() => {
+                        const charW = form.watch("receiptCharWidth") || 42;
+                        const sep = "-".repeat(charW);
+                        
+                        // Calc Mock Item Padding
+                        const qtyText = "Qty: 2 x OMR 20.000";
+                        const discText = "Discount: 10% off -> OMR 36.000";
+                        const priceText = "OMR 36.000";
+                        
+                        let itemLine = "";
+                        if (qtyText.length + priceText.length + 1 <= charW) {
+                          itemLine = qtyText + " ".repeat(charW - qtyText.length - priceText.length) + priceText;
+                        } else {
+                          itemLine = qtyText + "\n" + " ".repeat(charW - priceText.length) + priceText;
+                        }
+
+                        // Calc Mock Totals Padding
+                        const subtotalLabel = "Subtotal: OMR 36.000";
+                        const totalLabel = "Total: OMR 36.000";
+                        const subtotalLine = " ".repeat(Math.max(0, charW - subtotalLabel.length)) + subtotalLabel;
+                        const totalLine = " ".repeat(Math.max(0, charW - totalLabel.length)) + totalLabel;
+
+                        return (
+                          <pre className="whitespace-pre font-mono leading-tight">
+{sep}
+Order: POS-TEST-EN
+Date: {new Date().toLocaleDateString()}
+Payment: CARD
+{sep}
+Nexova-Product
+SKU: N00011
+{itemLine}
+{discText}
+{sep}
+{subtotalLine}
+{totalLine}
+
+    Thank you for your purchase!
+         Powered by Nexova
+                          </pre>
+                        );
+                      })()}
+                    </div>
+                  </div>
                 </div>
               </div>
               <p className="text-xs text-slate-500 mt-2">

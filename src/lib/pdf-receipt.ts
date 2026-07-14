@@ -371,8 +371,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
       if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
       
-      const SEP = '-'.repeat(48); // Full-width separator for 80mm thermal printer
-      const COL = 42; // Safe content column width for item line fitting check
+      const charWidth = data.companyDetails?.receiptCharWidth || 42;
+      const SEP = '-'.repeat(charWidth);
+      const COL = Math.max(30, charWidth - 6);
 
       // Switch to left align before first separator so it spans full width
       rawLines.push(
@@ -464,6 +465,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
               '1B7401',     // ESC t 1 — Set code page to PC437 (safe default; we send pre-encoded bytes anyway)
               '1B6101',     // ESC a 1 — Center align
             ];
+            const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
+            const arabicSep = '-'.repeat(Math.max(28, charWidth - 10));
+
             // Logo: convert to real raster ESC/POS hex bytes
             if (logoBase64) {
               try {
@@ -471,7 +475,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                   const img = new Image();
                   img.onload = () => {
                     const c = document.createElement('canvas');
-                    const maxW = 200;
+                    const maxW = logoWidth;
                     const scale = Math.min(1, maxW / img.width);
                     c.width = Math.floor((img.width * scale) / 8) * 8;
                     c.height = Math.floor(img.height * scale);
@@ -504,12 +508,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             if (data.companyDetails?.website)      hexLines.push(toW1256Hex(data.companyDetails.website + '\n'));
             if (data.companyDetails?.crNumber)     hexLines.push(toW1256Hex('CR: ' + data.companyDetails.crNumber + '\n'));
             // Separator + order info
-            hexLines.push(toW1256Hex('-'.repeat(32) + '\n'));
+            hexLines.push(toW1256Hex(arabicSep + '\n'));
             hexLines.push('1B6100'); // Left align
             hexLines.push(toW1256Hex(`Order / ${String.fromCharCode(0x0637,0x0644,0x0628)}: ${data.orderNumber}\n`));
             hexLines.push(toW1256Hex(`Date / ${String.fromCharCode(0x062A,0x0627,0x0631,0x064A,0x062E)}: ${data.date}\n`));
             hexLines.push(toW1256Hex(`Payment / ${String.fromCharCode(0x062F,0x0641,0x0639)}: ${data.paymentMethod.replace('POS_', '')}\n`));
-            hexLines.push(toW1256Hex('-'.repeat(32) + '\n'));
+            hexLines.push(toW1256Hex(arabicSep + '\n'));
             // Items
             data.items.forEach(item => {
               const nameLine = item.nameAr ? `${item.name} - ${item.nameAr}` : item.name;
@@ -520,7 +524,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
               hexLines.push(toW1256Hex(qtyLabel + '  ' + lineTotal + '\n'));
             });
             // Totals (right-align)
-            hexLines.push(toW1256Hex('-'.repeat(32) + '\n'));
+            hexLines.push(toW1256Hex(arabicSep + '\n'));
             hexLines.push('1B6102'); // Right align
             const subtotalLabel = `Subtotal / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639,0x20,0x0641,0x0631,0x0639,0x064A)}`;
             hexLines.push(toW1256Hex(`${subtotalLabel}: OMR ${data.subtotal.toFixed(3)}\n`));
@@ -561,7 +565,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                     const img = new Image();
                     img.onload = () => {
                       const c = document.createElement('canvas');
-                      const maxW = 200;
+                      const maxW = logoWidth;
                       const scale = Math.min(1, maxW / img.width);
                       c.width = Math.floor((img.width * scale) / 8) * 8;
                       c.height = Math.floor(img.height * scale);
