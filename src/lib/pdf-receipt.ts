@@ -368,40 +368,49 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
       if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
       
-      const COL = 42; // Safe column width for 80mm thermal printers
+      const SEP = '-'.repeat(48); // Full-width separator for 80mm thermal printer
+      const COL = 42; // Safe content column width for item line fitting check
+
+      // Switch to left align before first separator so it spans full width
       rawLines.push(
-        '-'.repeat(COL) + '\n',
         '\x1B\x61\x00', // Left align
+        `${SEP}\n`,
         isEnglish ? `Order: ${data.orderNumber}\n` : `Order / الطلب: ${data.orderNumber}\n`,
         isEnglish ? `Date: ${data.date}\n` : `Date / التاريخ: ${data.date}\n`,
         isEnglish ? `Payment: ${data.paymentMethod.replace("POS_", "")}\n` : `Payment / الدفع: ${data.paymentMethod.replace("POS_", "")}\n`,
-        '-'.repeat(COL) + '\n'
+        `${SEP}\n`
       );
       
-      // Items
+      // Items — left aligned, with price truly right-aligned via ESC/POS command
       data.items.forEach(item => {
         let nameLine = item.name;
         if (!isEnglish && item.nameAr) nameLine += ` - ${item.nameAr}`;
         rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-        const qtyPrice = isEnglish ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}` : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
+        const qtyPrice = isEnglish
+          ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
+          : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
         const total = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
-        // If combined line fits within COL, print on one line; otherwise put total on its own right-aligned line
+        // If combined line fits within COL, print on one line with space padding
         const combined = qtyPrice.length + 1 + total.length;
         if (combined <= COL) {
           const padding = COL - qtyPrice.length - total.length;
           rawLines.push(`${qtyPrice}${' '.repeat(padding)}${total}\n`);
         } else {
+          // Qty on its own line, then total truly right-aligned by the printer
+          rawLines.push('\x1B\x61\x00'); // Left align
           rawLines.push(`${qtyPrice}\n`);
           rawLines.push('\x1B\x61\x02'); // Right align
           rawLines.push(`${total}\n`);
           rawLines.push('\x1B\x61\x00'); // Back to left align
         }
       });
-      
+
+      // Separator then right-aligned totals
       rawLines.push(
-        '-'.repeat(COL) + '\n',
-        '\x1B\x61\x02', // Right align
+        '\x1B\x61\x00', // Left align for separator
+        `${SEP}\n`,
+        '\x1B\x61\x02', // Right align for totals
         isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(3)}\n` : `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(3)}\n`,
         isEnglish ? `Total: OMR ${data.total.toFixed(3)}\n` : `Total / المجموع: OMR ${data.total.toFixed(3)}\n`
       );
