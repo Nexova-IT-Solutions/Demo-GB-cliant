@@ -353,13 +353,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         '\x1B\x61\x01', // Center align
       );
       
-      if (logoBase64) {
-        // Instead of processing the image on-the-fly (which takes 10-20 seconds),
-        // we trigger the printer's internal NV Logo #1.
-        // The user must upload the logo to the printer using the NV Download tool.
-        // FS p n m (n=1 for logo 1, m=0 for normal mode)
-        rawLines.push('\x1C\x70\x01\x00', '\n');
-      }
+      // Logo will be sent as a real raster image via ESC/POS hex (built later, before qz.print)
 
       rawLines.push(
         '\x1B\x61\x01', // Ensure center align again just in case
@@ -450,8 +444,35 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
               '1B7401',     // ESC t 1 — Set code page to PC437 (safe default; we send pre-encoded bytes anyway)
               '1B6101',     // ESC a 1 — Center align
             ];
+            // Logo: convert to real raster ESC/POS hex bytes
             if (logoBase64) {
-              hexLines.push('1C700100', '0A'); // NV logo + LF
+              try {
+                const logoCanvas = await new Promise<HTMLCanvasElement | null>((resolve) => {
+                  const img = new Image();
+                  img.onload = () => {
+                    const c = document.createElement('canvas');
+                    const maxW = 200;
+                    const scale = Math.min(1, maxW / img.width);
+                    c.width = Math.floor(img.width * scale);
+                    c.height = Math.floor(img.height * scale);
+                    const ctx = c.getContext('2d');
+                    if (!ctx) { resolve(null); return; }
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, c.width, c.height);
+                    ctx.drawImage(img, 0, 0, c.width, c.height);
+                    resolve(c);
+                  };
+                  img.onerror = () => resolve(null);
+                  img.src = logoBase64;
+                });
+                if (logoCanvas) {
+                  hexLines.push('1B6101'); // Center align before logo
+                  hexLines.push(canvasToEscposHex(logoCanvas));
+                  hexLines.push('0A'); // Line feed after logo
+                }
+              } catch (logoErr) {
+                console.warn('[QZ] Arabic logo conversion failed, skipping:', logoErr);
+              }
             }
             // Company name (bold)
             hexLines.push('1B4501'); // Bold on
@@ -509,10 +530,44 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             });
 
           } else {
-            // ── English mode: send as plain string array (already working) ──
+            // ── English mode: build logo as ESC/POS raster hex, then send text lines ──
             printQueue = printQueue.then(async () => {
               console.log("[QZ] Executing qz.print() with raw string lines...");
-              await qz.print(config, rawLines);
+              const printData: any[] = [];
+              // Build logo raster hex and prepend as a hex-flavored item
+              if (logoBase64) {
+                try {
+                  const logoCanvas = await new Promise<HTMLCanvasElement | null>((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                      const c = document.createElement('canvas');
+                      const maxW = 200;
+                      const scale = Math.min(1, maxW / img.width);
+                      c.width = Math.floor(img.width * scale);
+                      c.height = Math.floor(img.height * scale);
+                      const ctx = c.getContext('2d');
+                      if (!ctx) { resolve(null); return; }
+                      ctx.fillStyle = '#FFFFFF';
+                      ctx.fillRect(0, 0, c.width, c.height);
+                      ctx.drawImage(img, 0, 0, c.width, c.height);
+                      resolve(c);
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = logoBase64;
+                  });
+                  if (logoCanvas) {
+                    // Center align + raster image bytes + line feed
+                    const logoHex = '1B6101' + canvasToEscposHex(logoCanvas) + '0A';
+                    printData.push({ type: 'raw', format: 'command', flavor: 'hex', data: logoHex });
+                    console.log('[QZ] English logo raster hex built, length:', logoHex.length);
+                  }
+                } catch (logoErr) {
+                  console.warn('[QZ] English logo conversion failed, skipping:', logoErr);
+                }
+              }
+              // Append all the text rawLines after the logo
+              printData.push(...rawLines);
+              await qz.print(config, printData);
               console.log("[QZ] qz.print() English completed!");
               await new Promise(resolve => setTimeout(resolve, 500));
             }).catch(e => {
