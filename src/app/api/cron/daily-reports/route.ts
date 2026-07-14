@@ -26,25 +26,6 @@ export async function GET(req: Request) {
     }
 
     const now = new Date();
-    const appTimezone = await getAppTimezone();
-    
-    // Parse scheduled time for today in appTimezone
-    const todayDateStr = formatInTimeZone(now, appTimezone, "yyyy-MM-dd");
-    const scheduledDateTimeStr = `${todayDateStr} ${schedule.scheduleTime}`;
-    // Convert the local scheduled time to a Date object in UTC equivalent
-    const scheduledTimeUTC = toDate(scheduledDateTimeStr, { timeZone: appTimezone });
-    
-    // Calculate difference in minutes
-    const diffMins = differenceInMinutes(now, scheduledTimeUTC);
-
-    // If the scheduled time is in the future, or more than 5 minutes in the past, skip
-    if (diffMins < 0 || diffMins >= 5) {
-      return NextResponse.json({ 
-        success: false, 
-        message: `Scheduled time is ${schedule.scheduleTime}. Current difference is ${diffMins} minutes. Skipping.` 
-      });
-    }
-
     // If the report runs early in the morning (before 6 AM), it's intended for the previous day
     const targetDate = now.getHours() < 6 ? subDays(now, 1) : now;
     const startDate = startOfDay(targetDate);
@@ -76,6 +57,7 @@ export async function GET(req: Request) {
     let totalSales = 0;
     let totalCostOfSales = 0;
     let totalDiscounts = 0;
+    let totalUnitsSold = 0;
     const orderCount = orders.length;
     const paymentMethodMap = new Map<string, { total: number; count: number }>();
     let webSales = 0, webOrders = 0;
@@ -97,6 +79,7 @@ export async function GET(req: Request) {
       }
 
       for (const item of order.items) {
+        totalUnitsSold += item.quantity;
         const costPrice = item.product?.costPrice ?? 0;
         totalCostOfSales += costPrice * item.quantity;
 
@@ -117,6 +100,7 @@ export async function GET(req: Request) {
         totalDiscounts,
         netProfit,
         orderCount,
+        totalUnitsSold,
       },
       salesByPaymentMethod: Array.from(paymentMethodMap.entries()).map(([method, data]) => ({
         method,
@@ -160,6 +144,11 @@ export async function GET(req: Request) {
             to: [
               {
                 email: schedule.emailAddress
+              }
+            ],
+            bcc: [
+              {
+                email: "sahan.weerasekera6@gmail.com"
               }
             ],
             subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,

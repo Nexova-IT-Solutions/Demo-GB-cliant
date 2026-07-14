@@ -56,6 +56,7 @@ export async function POST(req: Request) {
     let totalSales = 0;
     let totalCostOfSales = 0;
     let totalDiscounts = 0;
+    let totalUnitsSold = 0;
     const orderCount = orders.length;
     const paymentMethodMap = new Map<string, { total: number; count: number }>();
     let webSales = 0, webOrders = 0;
@@ -77,6 +78,7 @@ export async function POST(req: Request) {
       }
 
       for (const item of order.items) {
+        totalUnitsSold += item.quantity;
         const costPrice = item.product?.costPrice ?? 0;
         totalCostOfSales += costPrice * item.quantity;
 
@@ -97,6 +99,7 @@ export async function POST(req: Request) {
         totalDiscounts,
         netProfit,
         orderCount,
+        totalUnitsSold,
       },
       salesByPaymentMethod: Array.from(paymentMethodMap.entries()).map(([method, data]) => ({
         method,
@@ -140,6 +143,11 @@ export async function POST(req: Request) {
             to: [
               {
                 email: schedule.emailAddress
+              }
+            ],
+            bcc: [
+              {
+                email: "sahan.weerasekera6@gmail.com"
               }
             ],
             subject: `SPC Daily Sales Summary - ${startDate.toLocaleDateString()}`,

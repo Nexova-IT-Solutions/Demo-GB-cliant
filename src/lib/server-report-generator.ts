@@ -11,6 +11,7 @@ export interface SalesReportData {
     totalDiscounts: number;
     netProfit: number;
     orderCount: number;
+    totalUnitsSold: number;
   };
   salesByPaymentMethod: { method: string; total: number; count: number }[];
   salesBySource: {
@@ -75,6 +76,7 @@ export async function generateDailySalesExcel(data: SalesReportData): Promise<Bu
   ];
 
   worksheet.addRow({ metric: "Total Orders", value: data.summary.orderCount, currency: "" });
+  worksheet.addRow({ metric: "Total Units Sold", value: data.summary.totalUnitsSold, currency: "" });
   worksheet.addRow({ metric: "Total Sales", value: data.summary.totalSales, currency });
   worksheet.addRow({ metric: "Total Cost of Sales", value: data.summary.totalCostOfSales, currency });
   worksheet.addRow({ metric: "Total Discounts", value: data.summary.totalDiscounts, currency });
@@ -121,6 +123,7 @@ export async function generateDailySalesPDF(data: SalesReportData): Promise<Buff
     head: [["KPI", "Value"]],
     body: [
       ["Total Orders", data.summary.orderCount.toString()],
+      ["Total Units Sold", data.summary.totalUnitsSold.toString()],
       ["Total Sales", `${currency} ${data.summary.totalSales.toFixed(3)}`],
       ["Cost of Sales", `${currency} ${data.summary.totalCostOfSales.toFixed(3)}`],
       ["Total Discounts", `${currency} ${data.summary.totalDiscounts.toFixed(3)}`],
