@@ -341,6 +341,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     } else {
       // THERMAL PRINTER RAW TEXT FORMAT
       const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
+      const charWidth = data.companyDetails?.receiptCharWidth || 42;
+      const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
       
       const rawLines: any[] = [];
 
@@ -371,7 +373,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
       if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
       
-      const charWidth = data.companyDetails?.receiptCharWidth || 42;
       const SEP = '-'.repeat(charWidth);
       const COL = Math.max(30, charWidth - 6);
 
@@ -465,7 +466,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
               '1B7401',     // ESC t 1 — Set code page to PC437 (safe default; we send pre-encoded bytes anyway)
               '1B6101',     // ESC a 1 — Center align
             ];
-            const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
             const arabicSep = '-'.repeat(Math.max(28, charWidth - 10));
 
             // Logo: convert to real raster ESC/POS hex bytes
