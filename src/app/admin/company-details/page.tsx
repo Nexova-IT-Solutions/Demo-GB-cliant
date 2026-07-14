@@ -431,7 +431,7 @@ export default function CompanyDetailsPage() {
                     )}
                   />
 
-                  {/* Sliders and Selectors in a grid */}
+                  {/* Text inputs in a grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -443,14 +443,13 @@ export default function CompanyDetailsPage() {
                             <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} mm</span>
                           </FormLabel>
                           <FormControl>
-                            <input
-                              type="range"
-                              min="50"
-                              max="120"
-                              step="1"
+                            <Input
+                              type="number"
+                              min={50}
+                              max={120}
                               value={field.value}
                               onChange={(e) => {
-                                const num = parseInt(e.target.value);
+                                const num = parseInt(e.target.value) || 50;
                                 field.onChange(num);
                                 // Proportional layout auto-tuner
                                 const ratio = num / 80;
@@ -458,11 +457,11 @@ export default function CompanyDetailsPage() {
                                 form.setValue("receiptLogoWidth", Math.floor((Math.round(ratio * 200)) / 8) * 8);
                                 form.setValue("receiptLogoHeight", Math.round(ratio * 80));
                               }}
-                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                              className="focus:ring-2 focus:ring-[#A7066A]"
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Drags from 50mm to 120mm. Auto-scales recommended settings.
+                            Enter paper size in mm (e.g., 58, 80). Auto-scales recommended settings.
                           </p>
                         </FormItem>
                       )}
@@ -478,18 +477,17 @@ export default function CompanyDetailsPage() {
                             <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} chars</span>
                           </FormLabel>
                           <FormControl>
-                            <input
-                              type="range"
-                              min="32"
-                              max="48"
-                              step="1"
+                            <Input
+                              type="number"
+                              min={32}
+                              max={48}
                               value={field.value}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 32)}
+                              className="focus:ring-2 focus:ring-[#A7066A]"
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Adjust column character width bounds.
+                            Adjust column character width bounds (usually 32 to 48).
                           </p>
                         </FormItem>
                       )}
@@ -505,18 +503,17 @@ export default function CompanyDetailsPage() {
                             <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} px</span>
                           </FormLabel>
                           <FormControl>
-                            <input
-                              type="range"
-                              min="100"
-                              max="300"
-                              step="8"
+                            <Input
+                              type="number"
+                              min={100}
+                              max={300}
                               value={field.value}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 100)}
+                              className="focus:ring-2 focus:ring-[#A7066A]"
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Logo horizontal size constraint (divisible by 8).
+                            Logo horizontal size constraint in pixels.
                           </p>
                         </FormItem>
                       )}
@@ -532,18 +529,17 @@ export default function CompanyDetailsPage() {
                             <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} px</span>
                           </FormLabel>
                           <FormControl>
-                            <input
-                              type="range"
-                              min="40"
-                              max="200"
-                              step="4"
+                            <Input
+                              type="number"
+                              min={40}
+                              max={200}
                               value={field.value}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                              className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 40)}
+                              className="focus:ring-2 focus:ring-[#A7066A]"
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Logo vertical size constraint.
+                            Logo vertical size constraint in pixels.
                           </p>
                         </FormItem>
                       )}
