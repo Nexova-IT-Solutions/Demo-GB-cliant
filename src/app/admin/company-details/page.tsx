@@ -544,23 +544,27 @@ export default function CompanyDetailsPage() {
                       const subtotalLine = " ".repeat(Math.max(0, charW - subtotalLabel.length)) + subtotalLabel;
                       const totalLine = " ".repeat(Math.max(0, charW - totalLabel.length)) + totalLabel;
 
-                      return (
-                        <pre className="whitespace-pre font-mono leading-tight">
-{sep}
-Order: POS-TEST-EN
-Date: {new Date().toLocaleDateString()}
-Payment: CARD
-{sep}
-Nexova-Product
-SKU: N00011
-{itemLine}
-{discText}
-{sep}
-{subtotalLine}
-{totalLine}
+                      const textLines = [
+                        sep,
+                        "Order: POS-TEST-EN",
+                        `Date: ${new Date().toLocaleDateString()}`,
+                        "Payment: CARD",
+                        sep,
+                        "Nexova-Product",
+                        "SKU: N00011",
+                        itemLine,
+                        discText,
+                        sep,
+                        subtotalLine,
+                        totalLine,
+                        "",
+                        "    Thank you for your purchase!",
+                        "         Powered by Nexova"
+                      ].join("\n");
 
-    Thank you for your purchase!
-         Powered by Nexova
+                      return (
+                        <pre className="whitespace-pre-wrap font-mono leading-tight text-xs bg-slate-900 text-green-400 p-3 rounded-lg border border-slate-800">
+                          {textLines}
                         </pre>
                       );
                     })()}
