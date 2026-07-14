@@ -94,6 +94,19 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
     }, "download");
   };
 
+  const handlePrintReceipt = () => {
+    generateReceiptPdf({
+      orderNumber: order.orderNumber,
+      total: order.total,
+      subtotal: order.subtotal,
+      changeDue: 0,
+      paymentMethod: order.paymentMethod,
+      date: format(new Date(order.createdAt), "PPpp"),
+      items: order.items,
+      companyDetails: companyDetails,
+    }, "print");
+  };
+
   const handleSaveStatusChanges = () => {
     if (requiresTrackingNumber && !trackingNumber.trim()) {
       toast({
@@ -298,7 +311,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
               type="button" 
               variant="outline" 
               className="h-11 w-full rounded-xl border-brand-border bg-white font-semibold text-[#1F1720] hover:bg-slate-50 hover:text-[#A7066A]" 
-              onClick={() => window.print()}
+              onClick={handlePrintReceipt}
             >
               <Printer className="mr-2 size-4" />
               Print Receipt
