@@ -333,7 +333,7 @@ export function PosCart() {
             <Trash2 className="h-3.5 w-3.5 mr-1.5" />Clear
           </Button>
           <Button onClick={openCheckout} disabled={items.length === 0 || !activeShift} className="h-11 text-xs bg-[#A7066A] hover:bg-[#8A0558] text-white shadow-lg shadow-pink-200/50 transition-all">
-            <Receipt className="h-3.5 w-3.5 mr-1.5" />Charge {formatPrice(effectiveTotal)}
+            <Receipt className="h-3.5 w-3.5 mr-1.5" />Charge
           </Button>
         </div>
 
