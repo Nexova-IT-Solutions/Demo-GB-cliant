@@ -344,8 +344,10 @@ export default function CompanyDetailsPage() {
                 <Printer className="w-5 h-5 text-[#A7066A]" />
                 POS Receipt Printer
               </h2>
-              <div className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1">
+
+              {/* Printer Select and Connect Connection Line */}
+              <div className="flex flex-col md:flex-row gap-4 items-end mb-6">
+                <div className="flex-grow">
                   <FormField
                     control={form.control}
                     name="posPrinterName"
@@ -380,7 +382,23 @@ export default function CompanyDetailsPage() {
                       </FormItem>
                     )}
                   />
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={fetchPrinters} 
+                  disabled={isConnectingQz}
+                  className="h-10 text-xs shrink-0"
+                >
+                  {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
+                </Button>
+              </div>
 
+              {/* Layout adjustments and receipt preview column grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 border-t border-slate-100">
+                
+                {/* Left side: Print Options & Sliders */}
+                <div className="lg:col-span-7 space-y-6">
                   <FormField
                     control={form.control}
                     name="posPrintMode"
@@ -407,15 +425,15 @@ export default function CompanyDetailsPage() {
                     )}
                   />
 
-                  {/* Dynamic Formatting Sliders */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
+                  {/* Sliders in a grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="receiptCharWidth"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex justify-between items-center">
-                            <span>Receipt Column Width (Characters)</span>
+                            <span>Receipt Column Width</span>
                             <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} chars</span>
                           </FormLabel>
                           <FormControl>
@@ -442,7 +460,7 @@ export default function CompanyDetailsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex justify-between items-center">
-                            <span>Receipt Logo Size (Width in Pixels)</span>
+                            <span>Receipt Logo Width</span>
                             <span className="text-[#A7066A] font-bold text-xs bg-pink-50 px-2 py-0.5 rounded-full">{field.value} px</span>
                           </FormLabel>
                           <FormControl>
@@ -457,33 +475,21 @@ export default function CompanyDetailsPage() {
                             />
                           </FormControl>
                           <p className="text-[10px] text-slate-400">
-                            Adjust logo rendering bounds. Must be divisible by 8 (auto-rounded).
+                            Adjust logo size. Must be divisible by 8 (auto-rounded).
                           </p>
                         </FormItem>
                       )}
                     />
                   </div>
-                </div>
 
-                {/* Print Action Buttons & Live Mock Preview */}
-                <div className="flex flex-col lg:flex-row gap-6 mt-6 pt-6 border-t border-slate-100">
-                  <div className="flex-1 space-y-4">
-                    <h3 className="font-medium text-sm text-slate-900">Test Connectivity</h3>
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-xs text-slate-500 uppercase tracking-wider">Test Settings</h3>
                     <div className="flex flex-wrap gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={fetchPrinters} 
-                        disabled={isConnectingQz}
-                        className="h-10 text-xs"
-                      >
-                        {isConnectingQz ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Connect & Find Printers"}
-                      </Button>
                       <Button 
                         type="button" 
                         variant="secondary" 
                         onClick={handleTestPrint} 
-                        className="h-10 text-xs"
+                        className="h-10 text-xs px-4"
                       >
                         Test Printer
                       </Button>
@@ -491,54 +497,55 @@ export default function CompanyDetailsPage() {
                         type="button" 
                         variant="secondary" 
                         onClick={handleTestArabicPrint} 
-                        className="h-10 text-xs"
+                        className="h-10 text-xs px-4"
                       >
                         Test Arabic Print
                       </Button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Mono-spaced Live Layout Preview Panel */}
-                  <div className="w-full lg:w-[360px] shrink-0">
-                    <h3 className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-2">Live Receipt Preview</h3>
-                    <div className="bg-[#FAF9F5] border border-amber-100 rounded-xl p-5 shadow-inner font-mono text-[11px] leading-relaxed text-[#1e293b] select-none overflow-x-auto">
-                      <div className="flex flex-col items-center mb-4">
-                        <div 
-                          className="bg-slate-200 border-2 border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-500 font-bold mb-2 transition-all"
-                          style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${(form.watch("receiptLogoWidth") / 2) * 0.4}px` }}
-                        >
-                          LOGO ({form.watch("receiptLogoWidth")}px)
-                        </div>
-                        <div className="font-bold text-xs">{form.watch("companyName") || "Sohar Pet Center"}</div>
-                        <div className="text-[10px] text-center max-w-[240px] mt-1">{form.watch("address") || "Sohar, North Al Batinah"}</div>
-                        <div className="text-[10px] mt-0.5">Tel: {form.watch("mobileNumber") || "+96894750350"}</div>
+                {/* Right side: Receipt Live Preview */}
+                <div className="lg:col-span-5">
+                  <h3 className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-2">Live Receipt Preview</h3>
+                  <div className="bg-[#FAF9F5] border border-amber-100 rounded-xl p-5 shadow-inner font-mono text-[11px] leading-relaxed text-[#1e293b] select-none overflow-x-auto">
+                    <div className="flex flex-col items-center mb-4">
+                      <div 
+                        className="bg-slate-200 border-2 border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-500 font-bold mb-2 transition-all"
+                        style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${(form.watch("receiptLogoWidth") / 2) * 0.4}px` }}
+                      >
+                        LOGO ({form.watch("receiptLogoWidth")}px)
                       </div>
+                      <div className="font-bold text-xs">{form.watch("companyName") || "Sohar Pet Center"}</div>
+                      <div className="text-[10px] text-center max-w-[240px] mt-1">{form.watch("address") || "Sohar, North Al Batinah"}</div>
+                      <div className="text-[10px] mt-0.5">Tel: {form.watch("mobileNumber") || "+96894750350"}</div>
+                    </div>
 
-                      {/* Monospace formatting calculator */}
-                      {(() => {
-                        const charW = form.watch("receiptCharWidth") || 42;
-                        const sep = "-".repeat(charW);
-                        
-                        // Calc Mock Item Padding
-                        const qtyText = "Qty: 2 x OMR 20.000";
-                        const discText = "Discount: 10% off -> OMR 36.000";
-                        const priceText = "OMR 36.000";
-                        
-                        let itemLine = "";
-                        if (qtyText.length + priceText.length + 1 <= charW) {
-                          itemLine = qtyText + " ".repeat(charW - qtyText.length - priceText.length) + priceText;
-                        } else {
-                          itemLine = qtyText + "\n" + " ".repeat(charW - priceText.length) + priceText;
-                        }
+                    {/* Monospace formatting calculator */}
+                    {(() => {
+                      const charW = form.watch("receiptCharWidth") || 42;
+                      const sep = "-".repeat(charW);
+                      
+                      // Calc Mock Item Padding
+                      const qtyText = "Qty: 2 x OMR 20.000";
+                      const discText = "Discount: 10% off -> OMR 36.000";
+                      const priceText = "OMR 36.000";
+                      
+                      let itemLine = "";
+                      if (qtyText.length + priceText.length + 1 <= charW) {
+                        itemLine = qtyText + " ".repeat(charW - qtyText.length - priceText.length) + priceText;
+                      } else {
+                        itemLine = qtyText + "\n" + " ".repeat(charW - priceText.length) + priceText;
+                      }
 
-                        // Calc Mock Totals Padding
-                        const subtotalLabel = "Subtotal: OMR 36.000";
-                        const totalLabel = "Total: OMR 36.000";
-                        const subtotalLine = " ".repeat(Math.max(0, charW - subtotalLabel.length)) + subtotalLabel;
-                        const totalLine = " ".repeat(Math.max(0, charW - totalLabel.length)) + totalLabel;
+                      // Calc Mock Totals Padding
+                      const subtotalLabel = "Subtotal: OMR 36.000";
+                      const totalLabel = "Total: OMR 36.000";
+                      const subtotalLine = " ".repeat(Math.max(0, charW - subtotalLabel.length)) + subtotalLabel;
+                      const totalLine = " ".repeat(Math.max(0, charW - totalLabel.length)) + totalLabel;
 
-                        return (
-                          <pre className="whitespace-pre font-mono leading-tight">
+                      return (
+                        <pre className="whitespace-pre font-mono leading-tight">
 {sep}
 Order: POS-TEST-EN
 Date: {new Date().toLocaleDateString()}
@@ -554,12 +561,12 @@ SKU: N00011
 
     Thank you for your purchase!
          Powered by Nexova
-                          </pre>
-                        );
-                      })()}
-                    </div>
+                        </pre>
+                      );
+                    })()}
                   </div>
                 </div>
+
               </div>
               <p className="text-xs text-slate-500 mt-2">
                 Select the LAN/Local printer to use for direct receipt printing in the POS. 
