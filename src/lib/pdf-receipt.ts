@@ -340,6 +340,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       return;
     } else {
       // THERMAL PRINTER RAW TEXT FORMAT
+      const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
       const charWidth = data.companyDetails?.receiptCharWidth || 42;
       const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
       const logoHeight = data.companyDetails?.receiptLogoHeight || 80;
