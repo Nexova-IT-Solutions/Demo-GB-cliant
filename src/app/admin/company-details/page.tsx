@@ -8,6 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Save, Building2, Printer } from "lucide-react";
 import qz from "qz-tray";
+import { initQZSecurity } from "@/lib/qz-init";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -97,6 +98,7 @@ export default function CompanyDetailsPage() {
   const fetchPrinters = async () => {
     setIsConnectingQz(true);
     try {
+      initQZSecurity();
       if (!qz.websocket.isActive()) {
         await qz.websocket.connect({ retries: 0 });
       }
@@ -113,6 +115,7 @@ export default function CompanyDetailsPage() {
 
   useEffect(() => {
     // Attempt to auto-connect to QZ Tray silently in the background
+    initQZSecurity();
     qz.websocket.connect({ retries: 0 }).then(() => {
       return qz.printers.find();
     }).then((foundPrinters) => {
@@ -129,6 +132,7 @@ export default function CompanyDetailsPage() {
       return;
     }
     try {
+      initQZSecurity();
       if (!qz.websocket.isActive()) {
         await qz.websocket.connect({ retries: 0 });
       }

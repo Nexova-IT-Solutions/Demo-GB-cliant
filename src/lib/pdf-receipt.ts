@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import qz from "qz-tray";
 import { amiriBase64 } from "./fonts/Amiri-Regular";
 import html2canvas from "html2canvas";
+import { initQZSecurity } from "./qz-init";
 
 const arNum = (n: number | string) => {
   const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
@@ -437,6 +438,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.posPrinterName) {
         try {
           console.log("[QZ] Checking websocket connection...");
+          initQZSecurity();
           if (!qz.websocket.isActive()) {
             console.log("[QZ] Connecting to websocket...");
             await qz.websocket.connect({ retries: 0 });
