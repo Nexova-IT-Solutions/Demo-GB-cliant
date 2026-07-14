@@ -19,6 +19,7 @@ const companyDetailsSchema = z.object({
   receiptLogoWidth: z.number().int().min(100).max(300).optional().default(200),
   receiptLogoHeight: z.number().int().min(40).max(200).optional().default(80),
   receiptPrintArea: z.number().int().min(50).max(120).optional().default(80),
+  logoBase64: z.string().optional().nullable(),
 });
 
 export async function GET() {
@@ -85,6 +86,7 @@ export async function POST(req: Request) {
         receiptLogoWidth: data.receiptLogoWidth,
         receiptLogoHeight: data.receiptLogoHeight,
         receiptPrintArea: data.receiptPrintArea,
+        logoBase64: data.logoBase64,
       },
       create: {
         id: "1",
@@ -101,6 +103,7 @@ export async function POST(req: Request) {
         receiptLogoWidth: data.receiptLogoWidth,
         receiptLogoHeight: data.receiptLogoHeight,
         receiptPrintArea: data.receiptPrintArea,
+        logoBase64: data.logoBase64,
       },
     });
 

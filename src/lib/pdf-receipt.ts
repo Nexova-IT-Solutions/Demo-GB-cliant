@@ -194,7 +194,7 @@ function getQZPrinterConfig(printerName: string): string | { host: string; port:
 let printQueue = Promise.resolve();
 
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
-  const logoBase64 = await getResizedLogoBase64("/logo/logo.png", 200); // 200px width fits perfectly on 80mm
+  const logoBase64 = data.companyDetails?.logoBase64 || await getResizedLogoBase64("/logo/logo.png", 200);
 
   if (format === "print") {
     const mode = data.companyDetails?.posPrintMode || "raw";

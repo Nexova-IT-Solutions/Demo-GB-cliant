@@ -45,6 +45,7 @@ const companyDetailsSchema = z.object({
   receiptLogoWidth: z.number().int().min(100).max(300).default(200),
   receiptLogoHeight: z.number().int().min(40).max(200).default(80),
   receiptPrintArea: z.number().int().min(50).max(120).default(80),
+  logoBase64: z.string().optional().nullable().or(z.literal("")),
 });
 
 type CompanyDetailsValues = z.infer<typeof companyDetailsSchema>;
@@ -53,6 +54,12 @@ export default function CompanyDetailsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Logo upload cropping modal state variables
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
 
   const form = useForm<CompanyDetailsValues>({
     resolver: zodResolver(companyDetailsSchema),
@@ -70,6 +77,7 @@ export default function CompanyDetailsPage() {
       receiptLogoWidth: 200,
       receiptLogoHeight: 80,
       receiptPrintArea: 80,
+      logoBase64: "",
     },
   });
 
@@ -94,6 +102,7 @@ export default function CompanyDetailsPage() {
           receiptLogoWidth: data.receiptLogoWidth ?? 200,
           receiptLogoHeight: data.receiptLogoHeight ?? 80,
           receiptPrintArea: data.receiptPrintArea ?? 80,
+          logoBase64: data.logoBase64 || "",
         });
       } catch (error) {
         toast.error("Failed to load company details");
@@ -104,6 +113,54 @@ export default function CompanyDetailsPage() {
 
     fetchDetails();
   }, [form]);
+
+  // Hook to redraw canvas on cropping dialog settings changes
+  useEffect(() => {
+    if (!cropImageSrc) return;
+    const canvas = document.getElementById("crop-canvas") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Fill canvas background with white
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Center the image draw
+      const drawWidth = img.width * zoom;
+      const drawHeight = img.height * zoom;
+      const startX = (canvas.width - drawWidth) / 2 + offsetX;
+      const startY = (canvas.height - drawHeight) / 2 + offsetY;
+
+      ctx.drawImage(img, startX, startY, drawWidth, drawHeight);
+    };
+    img.src = cropImageSrc;
+  }, [cropImageSrc, zoom, offsetX, offsetY]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+      setZoom(1);
+      setOffsetX(0);
+      setOffsetY(0);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleConfirmCrop = () => {
+    const canvas = document.getElementById("crop-canvas") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    form.setValue("logoBase64", dataUrl);
+    setCropImageSrc(null);
+    toast.success("Logo cropped successfully!");
+  };
 
   const [printers, setPrinters] = useState<string[]>([]);
   const [isConnectingQz, setIsConnectingQz] = useState(false);
@@ -339,6 +396,54 @@ export default function CompanyDetailsPage() {
                   <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter complete address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Custom Logo Upload with Cropper trigger */}
+            <FormField
+              control={form.control}
+              name="logoBase64"
+              render={({ field }) => (
+                <FormItem className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2">
+                  <FormLabel className="font-semibold text-slate-800">Company Logo (Printed on Receipts)</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-col sm:flex-row items-center gap-4 mt-1">
+                      {field.value ? (
+                        <div className="relative group shrink-0">
+                          <img
+                            src={field.value}
+                            alt="Company Logo Preview"
+                            className="w-20 h-20 object-contain bg-white border border-slate-200 rounded-lg p-1 shadow-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => field.onChange("")}
+                            className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-md transition-colors"
+                            title="Remove logo"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 bg-slate-100 border border-dashed border-slate-300 rounded-lg flex items-center justify-center text-[10px] text-slate-400 font-bold shrink-0">
+                          NO LOGO
+                        </div>
+                      )}
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="max-w-[280px] h-9 text-xs file:bg-slate-100 file:border-0 file:rounded-md file:text-xs file:font-semibold hover:file:bg-slate-200 cursor-pointer"
+                        />
+                        <p className="text-[10px] text-slate-400">
+                          Upload PNG/JPG. Will open cropping canvas to position and zoom the logo properly.
+                        </p>
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -601,12 +706,21 @@ export default function CompanyDetailsPage() {
                   <h3 className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-2">Live Receipt Preview</h3>
                   <div className="bg-[#FAF9F5] border border-amber-100 rounded-xl p-5 shadow-inner font-mono text-[11px] leading-relaxed text-[#1e293b] select-none overflow-x-auto">
                     <div className="flex flex-col items-center mb-4">
-                      <div 
-                        className="bg-slate-200 border-2 border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-500 font-bold mb-2 transition-all"
-                        style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${form.watch("receiptLogoHeight") / 2}px` }}
-                      >
-                        LOGO ({form.watch("receiptLogoWidth")}x{form.watch("receiptLogoHeight")}px)
-                      </div>
+                      {form.watch("logoBase64") ? (
+                        <img 
+                          src={form.watch("logoBase64")!} 
+                          alt="Receipt Logo Preview"
+                          className="object-contain mb-2 bg-white transition-all border border-slate-200 rounded p-0.5"
+                          style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${form.watch("receiptLogoHeight") / 2}px` }}
+                        />
+                      ) : (
+                        <div 
+                          className="bg-slate-200 border-2 border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-500 font-bold mb-2 transition-all"
+                          style={{ width: `${form.watch("receiptLogoWidth") / 2}px`, height: `${form.watch("receiptLogoHeight") / 2}px` }}
+                        >
+                          LOGO ({form.watch("receiptLogoWidth")}x{form.watch("receiptLogoHeight")}px)
+                        </div>
+                      )}
                       <div className="font-bold text-xs">{form.watch("companyName") || "Sohar Pet Center"}</div>
                       <div className="text-[10px] text-center max-w-[240px] mt-1">{form.watch("address") || "Sohar, North Al Batinah"}</div>
                       <div className="text-[10px] mt-0.5">Tel: {form.watch("mobileNumber") || "+96894750350"}</div>
@@ -691,6 +805,98 @@ export default function CompanyDetailsPage() {
           </form>
         </Form>
       </div>
+    
+
+    {/* Canvas-Based Interactive Cropping Modal */}
+    {cropImageSrc && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden flex flex-col border border-slate-200 animate-in fade-in zoom-in duration-150">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-bold text-sm text-slate-800">Crop Logo</h3>
+            <button 
+              type="button" 
+              className="text-slate-400 hover:text-slate-600 transition-colors font-semibold"
+              onClick={() => setCropImageSrc(null)}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="p-6 flex flex-col items-center gap-6 bg-slate-50">
+            {/* Interactive Preview Canvas */}
+            <div 
+              className="relative border-2 border-dashed border-slate-300 bg-white shadow-inner rounded-xl overflow-hidden flex items-center justify-center transition-all"
+              style={{ width: '220px', height: '220px' }}
+            >
+              <canvas
+                id="crop-canvas"
+                width="220"
+                height="220"
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Scale & Alignment Controls */}
+            <div className="w-full space-y-4">
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold text-slate-700">
+                  <span>Zoom / Scale</span>
+                  <span className="text-[#A7066A]">{Math.round(zoom * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.2"
+                  max="4.0"
+                  step="0.05"
+                  value={zoom}
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold text-slate-700">
+                  <span>Horizontal Position (Move X)</span>
+                  <span className="text-[#A7066A]">{offsetX} px</span>
+                </div>
+                <input
+                  type="range"
+                  min="-200"
+                  max="200"
+                  step="1"
+                  value={offsetX}
+                  onChange={(e) => setOffsetX(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold text-slate-700">
+                  <span>Vertical Position (Move Y)</span>
+                  <span className="text-[#A7066A]">{offsetY} px</span>
+                </div>
+                <input
+                  type="range"
+                  min="-200"
+                  max="200"
+                  step="1"
+                  value={offsetY}
+                  onChange={(e) => setOffsetY(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#A7066A]"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="p-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50/50">
+            <Button type="button" variant="outline" className="h-9 text-xs" onClick={() => setCropImageSrc(null)}>
+              Cancel
+            </Button>
+            <Button type="button" className="bg-[#A7066A] hover:bg-[#8A0558] text-white h-9 text-xs" onClick={handleConfirmCrop}>
+              Crop & Apply Logo
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
