@@ -224,11 +224,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           ? `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`
           : `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3))}`;
         
-        itemsHtml += `
-          <div style="margin-bottom: 4px;">
+      itemsHtml += `
+          <div style="margin-bottom: 3px;">
             <div>${itemName}</div>
-            ${item.sku ? `<div style="font-size: 10px; color: #555;">SKU: ${item.sku}</div>` : ''}
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 11px;">
+            ${item.sku ? `<div style="font-size: 9px; color: #555;">SKU: ${item.sku}</div>` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; margin-top: 1px;">
               <div style="flex: 1;">${qtyPrice}</div>
               <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
             </div>
@@ -245,52 +245,51 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         backgroundColor: "white",
         color: "black",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        fontSize: "12px",
-        lineHeight: "1.3",
+        fontSize: "11px",
+        lineHeight: "1.15",
         padding: "0"
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-bottom: 8px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 60px; object-fit: contain;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-bottom: 3px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 50px; max-width: 50px; object-fit: contain;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
-        <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 4px;">${data.companyDetails?.companyName || "STORE RECEIPT"}</div>
-        <div style="text-align: center; font-size: 11px; margin-bottom: 8px;">
+        <div style="text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 2px;">${data.companyDetails?.companyName || "STORE RECEIPT"}</div>
+        <div style="text-align: center; font-size: 10px; margin-bottom: 4px; line-height: 1.2;">
           ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
           ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
           ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
           ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
           ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
-        <div style="font-size: 11px; margin-bottom: 8px;">
+        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
+        <div style="font-size: 10px; margin-bottom: 4px; line-height: 1.2;">
           <div>Order: ${data.orderNumber}</div>
           <div>Date: ${data.date}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
-        <div style="margin-bottom: 8px;">
+        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
+        <div style="margin-bottom: 4px;">
           ${itemsHtml}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
-        <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 10px;">
           <span>${isEnglish ? 'Subtotal:' : 'Subtotal / المجموع الفرعي:'}</span>
           <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(3)}` : `OMR ${data.subtotal.toFixed(3)} / ${arNum(data.subtotal.toFixed(3))}`}</span>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 12px;">
           <span style="font-weight: bold;">${isEnglish ? 'Total:' : 'Total / المجموع:'}</span>
           <span style="font-weight: bold;">${isEnglish ? `OMR ${data.total.toFixed(3)}` : `OMR ${data.total.toFixed(3)} / ${arNum(data.total.toFixed(3))}`}</span>
         </div>
         ${data.changeDue > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 10px;">
             <span>${isEnglish ? 'Change Due:' : 'Change Due / الباقي:'}</span>
             <span style="font-weight: bold;">${isEnglish ? `OMR ${data.changeDue.toFixed(3)}` : `OMR ${data.changeDue.toFixed(3)} / ${arNum(data.changeDue.toFixed(3))}`}</span>
           </div>
         ` : ''}
-        <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
-        <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #555; padding-bottom: 20px;">Powered by Nexova</div>
+        <div style="text-align: center; margin-top: 10px; margin-bottom: 2px; font-size: 10px;">Thank you for your purchase!</div>
+        <div style="text-align: center; margin-top: 4px; font-size: 8px; color: #555; padding-bottom: 10px;">Powered by Nexova</div>
       `;
 
       document.body.appendChild(container);
