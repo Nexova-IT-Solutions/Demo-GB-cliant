@@ -226,8 +226,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         
       itemsHtml += `
           <div style="margin-bottom: 3px;">
-            <div>${itemName}</div>
-            ${item.sku ? `<div style="font-size: 9px; color: #555;">SKU: ${item.sku}</div>` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
+              <div style="flex: 1; font-weight: 500;">${itemName}</div>
+              ${item.sku ? `<div style="font-size: 8.5px; color: #555; white-space: nowrap; margin-top: 1px;">SKU: ${item.sku}</div>` : ''}
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; margin-top: 1px;">
               <div style="flex: 1;">${qtyPrice}</div>
               <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
@@ -265,8 +267,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         </div>
         <div style="border-top: 1px dashed #000; margin: 2px 0; height: 0; padding-top: 1px;"></div>
         <div style="font-size: 9.5px; margin-bottom: 2px; line-height: 1.15;">
-          <div>Order: ${data.orderNumber}</div>
-          <div>Date: ${data.date}</div>
+          <div style="display: flex; justify-content: space-between; gap: 4px;">
+            <div>Order: ${data.orderNumber}</div>
+            <div>Date: ${data.date}</div>
+          </div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
         </div>
         <div style="border-top: 1px dashed #000; margin: 2px 0; height: 0; padding-top: 1px;"></div>
