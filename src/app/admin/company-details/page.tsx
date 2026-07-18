@@ -728,8 +728,14 @@ export default function CompanyDetailsPage() {
 
                     {/* Monospace formatting calculator */}
                     {(() => {
-                      const charW = form.watch("receiptCharWidth") || 42;
-                      const sep = "-".repeat(charW);
+                      const rawCharW = form.watch("receiptCharWidth");
+                      const charW = Math.max(10, Math.floor(Number(rawCharW) || 42));
+                      
+                      const repeatStr = (str: string, count: number) => {
+                        return str.repeat(Math.max(0, Math.floor(count)));
+                      };
+
+                      const sep = repeatStr("-", charW);
                       
                       // Calc Mock Item Padding
                       const qtyText = "Qty: 2 x OMR 20.000";
@@ -738,16 +744,16 @@ export default function CompanyDetailsPage() {
                       
                       let itemLine = "";
                       if (qtyText.length + priceText.length + 1 <= charW) {
-                        itemLine = qtyText + " ".repeat(charW - qtyText.length - priceText.length) + priceText;
+                        itemLine = qtyText + repeatStr(" ", charW - qtyText.length - priceText.length) + priceText;
                       } else {
-                        itemLine = qtyText + "\n" + " ".repeat(charW - priceText.length) + priceText;
+                        itemLine = qtyText + "\n" + repeatStr(" ", charW - priceText.length) + priceText;
                       }
 
                       // Calc Mock Totals Padding
                       const subtotalLabel = "Subtotal: OMR 36.000";
                       const totalLabel = "Total: OMR 36.000";
-                      const subtotalLine = " ".repeat(Math.max(0, charW - subtotalLabel.length)) + subtotalLabel;
-                      const totalLine = " ".repeat(Math.max(0, charW - totalLabel.length)) + totalLabel;
+                      const subtotalLine = repeatStr(" ", charW - subtotalLabel.length) + subtotalLabel;
+                      const totalLine = repeatStr(" ", charW - totalLabel.length) + totalLabel;
 
                       const textLines = [
                         sep,
