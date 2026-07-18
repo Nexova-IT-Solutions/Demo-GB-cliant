@@ -212,12 +212,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         
         let qtyPrice = isEnglish 
           ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
-          : `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(3)} / ${arNum(item.price.toFixed(3))}`;
+          : `Qty: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(3)} / ${arNum(item.price.toFixed(3))}`;
           
         if (item.discountPercent && item.discountPercent > 0) {
           qtyPrice += isEnglish 
             ? ` (Disc ${item.discountPercent}%)`
-            : ` (Disc / خصم ${item.discountPercent}%)`;
+            : ` (Disc ${item.discountPercent}%)`;
         }
         
         const total = isEnglish
@@ -265,7 +265,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
           ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
         </div>
-        <div style="border-top: 1px dashed #000; margin: 2px 0; height: 0; padding-top: 1px;"></div>
+        <div style="border-top: 1px dashed #000; margin: 4px 0 2px 0; height: 0;"></div>
         <div style="font-size: 9.5px; margin-bottom: 2px; line-height: 1.15;">
           <div style="display: flex; justify-content: space-between; gap: 4px;">
             <div>Order: ${data.orderNumber}</div>
@@ -273,11 +273,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           </div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
         </div>
-        <div style="border-top: 1px dashed #000; margin: 2px 0; height: 0; padding-top: 1px;"></div>
+        <div style="border-top: 1px dashed #000; margin: 4px 0 2px 0; height: 0;"></div>
         <div style="margin-bottom: 2px;">
           ${itemsHtml}
         </div>
-        <div style="border-top: 1px dashed #000; margin: 2px 0; height: 0; padding-top: 1px;"></div>
+        <div style="border-top: 1px dashed #000; margin: 4px 0 2px 0; height: 0;"></div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 9px;">
           <span>${isEnglish ? 'Subtotal:' : 'Subtotal / المجموع الفرعي:'}</span>
           <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(3)}` : `OMR ${data.subtotal.toFixed(3)} / ${arNum(data.subtotal.toFixed(3))}`}</span>
