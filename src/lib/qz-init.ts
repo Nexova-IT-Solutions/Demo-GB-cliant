@@ -129,3 +129,14 @@ export function initQZSecurity(): void {
   _securityConfigured = true;
   console.log("[QZ] Security configured — signed connection ready.");
 }
+
+/**
+ * Ensures QZ security is configured and establishes websocket connection.
+ * Guarantees every connection is configured correctly.
+ */
+export async function connectQZ(): Promise<void> {
+  initQZSecurity();
+  if (!qz.websocket.isActive()) {
+    await qz.websocket.connect({ retries: 0 });
+  }
+}
