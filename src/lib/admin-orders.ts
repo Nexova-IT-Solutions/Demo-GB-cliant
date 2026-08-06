@@ -96,9 +96,10 @@ export function formatOrderStatusLabel(status: string) {
 }
 
 export function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-LK", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "LKR",
-    maximumFractionDigits: 0,
+    currency: "OMR",
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
   }).format(amount);
 }
