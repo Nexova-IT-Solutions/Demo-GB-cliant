@@ -423,48 +423,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
               customerSince={order.user?.createdAt ? formatToLKTime(order.user.createdAt) : formatToLKTime(order.createdAt)}
               locale={locale}
             />
-
-            <Card className="rounded-2xl border border-brand-border bg-white shadow-sm p-5 md:p-6">
-              <CardHeader className="p-0 mb-1.5 bg-transparent">
-                <CardTitle className="text-base font-bold flex items-center gap-2 text-[#1F1720]">
-                  <FileText className="size-4 text-[#A7066A]" />
-                  Status Audit Log
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 pt-0">
-                <div className="relative ml-3 border-l-2 border-slate-200 pl-6">
-                  <div className="space-y-2.5">
-                    {sortedStatusHistory.length > 0 ? (
-                      sortedStatusHistory.map((entry) => (
-                        <div key={entry.id} className="relative">
-                          <span className="absolute -left-[35px] top-0 inline-flex size-5 items-center justify-center rounded-full bg-white">
-                            <span className="size-3 rounded-full bg-[#A7066A]" />
-                          </span>
-                          <div className="space-y-1 pb-1">
-                            <p className="text-sm font-semibold text-[#1F1720]">Order marked as {entry.status.replaceAll("_", " ")}</p>
-                            <p className="text-xs text-[#6B5A64] break-all whitespace-normal w-full">
-                              {formatToLKTime(entry.createdAt)}
-                              {entry.changedByName ? ` by ${entry.changedByName}` : ""}
-                              {entry.changedByUserId ? ` (${entry.changedByUser?.email || 'System Action'})` : ""}
-                            </p>
-                            {/* {entry.note &&
-                            entry.note !== entry.status &&
-                            entry.note !== `Order marked as ${entry.status}` &&
-                            entry.note !== `Order marked as ${entry.status.replaceAll("_", " ")}` ? (
-                              <p className="text-sm text-[#6B5A64]">{entry.note}</p>
-                            ) : null} */}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                        No audit log entries yet.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Status Audit Log hidden as requested */}
           </div>
 
           <div className="space-y-6">
