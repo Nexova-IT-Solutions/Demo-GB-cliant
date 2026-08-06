@@ -32,10 +32,10 @@ export async function GET(req: NextRequest) {
     // Default to current month if no dates provided
     const now = new Date();
     const startDate = startDateStr
-      ? new Date(`${startDateStr}T00:00:00.000Z`)
+      ? new Date(`${startDateStr}T00:00:00.000+04:00`)
       : new Date(now.getFullYear(), now.getMonth(), 1);
     const endDate = endDateStr
-      ? new Date(`${endDateStr}T23:59:59.999Z`)
+      ? new Date(`${endDateStr}T23:59:59.999+04:00`)
       : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -117,8 +117,21 @@ export async function GET(req: NextRequest) {
         webOrders += 1;
       }
 
-      // Daily aggregation
-      const dayKey = order.createdAt.toISOString().split("T")[0];
+      // Daily aggregation (normalized to Oman Timezone)
+      const getOmanDateString = (d: Date) => {
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Muscat",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).formatToParts(d);
+        const y = parts.find(p => p.type === "year")?.value;
+        const m = parts.find(p => p.type === "month")?.value;
+        const day = parts.find(p => p.type === "day")?.value;
+        return `${y}-${m}-${day}`;
+      };
+      
+      const dayKey = getOmanDateString(order.createdAt);
       const dayData = dailyMap.get(dayKey) || { revenue: 0, orders: 0, cost: 0, discounts: 0 };
 
       dayData.revenue += order.total;

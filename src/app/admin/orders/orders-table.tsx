@@ -519,11 +519,12 @@ function EmptyState({
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-LK", {
+  return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "Asia/Muscat",
   }).format(new Date(value));
 }
