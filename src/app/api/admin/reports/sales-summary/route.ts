@@ -157,26 +157,26 @@ export async function GET(req: NextRequest) {
       dailyMap.set(dayKey, dayData);
     }
 
-    // Round all monetary values
-    totalSales = Math.round(totalSales * 100) / 100;
-    totalCostOfSales = Math.round(totalCostOfSales * 100) / 100;
-    totalDiscounts = Math.round(totalDiscounts * 100) / 100;
-    const netProfit = Math.round((totalSales - totalCostOfSales) * 100) / 100;
+    // Round all monetary values to 3 decimal places (OMR precision)
+    totalSales = Math.round(totalSales * 1000) / 1000;
+    totalCostOfSales = Math.round(totalCostOfSales * 1000) / 1000;
+    totalDiscounts = Math.round(totalDiscounts * 1000) / 1000;
+    const netProfit = Math.round((totalSales - totalCostOfSales) * 1000) / 1000;
     const grossMarginPercent =
       totalSales > 0 ? Math.round((netProfit / totalSales) * 10000) / 100 : 0;
     const avgOrderValue =
-      orderCount > 0 ? Math.round((totalSales / orderCount) * 100) / 100 : 0;
+      orderCount > 0 ? Math.round((totalSales / orderCount) * 1000) / 1000 : 0;
 
     // Sort daily sales by date
     const dailySales = Array.from(dailyMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, data]) => ({
         date,
-        revenue: Math.round(data.revenue * 100) / 100,
+        revenue: Math.round(data.revenue * 1000) / 1000,
         orders: data.orders,
-        cost: Math.round(data.cost * 100) / 100,
-        discounts: Math.round(data.discounts * 100) / 100,
-        profit: Math.round((data.revenue - data.cost) * 100) / 100,
+        cost: Math.round(data.cost * 1000) / 1000,
+        discounts: Math.round(data.discounts * 1000) / 1000,
+        profit: Math.round((data.revenue - data.cost) * 1000) / 1000,
       }));
 
     // Payment method breakdown
@@ -184,7 +184,7 @@ export async function GET(req: NextRequest) {
       .sort(([, a], [, b]) => b.total - a.total)
       .map(([method, data]) => ({
         method,
-        total: Math.round(data.total * 100) / 100,
+        total: Math.round(data.total * 1000) / 1000,
         count: data.count,
       }));
 
