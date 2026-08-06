@@ -15,9 +15,9 @@ export function formatPriceServer(amount: number | string, currency: string = "L
   
   const config = CURRENCY_MAP[currency as CurrencyCode] || CURRENCY_MAP.LKR;
   const factor = Math.pow(10, config.decimals);
-  const truncatedAmount = Math.trunc(numericAmount * factor) / factor;
+  const roundedAmount = Math.round(numericAmount * factor) / factor;
 
-  return `${config.symbol}${truncatedAmount.toLocaleString(config.locale, {
+  return `${config.symbol}${roundedAmount.toLocaleString(config.locale, {
     minimumFractionDigits: config.decimals,
     maximumFractionDigits: config.decimals,
   })}`;
