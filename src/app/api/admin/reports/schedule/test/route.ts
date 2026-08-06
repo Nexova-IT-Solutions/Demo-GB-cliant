@@ -82,10 +82,10 @@ export async function POST(req: Request) {
         const costPrice = item.product?.costPrice ?? 0;
         totalCostOfSales += costPrice * item.quantity;
 
-        if (item.discountValue && item.discountValue > 0) {
-          totalDiscounts += item.discountValue * item.quantity;
-        } else if (item.salePrice && item.salePrice < item.unitPrice) {
-          totalDiscounts += (item.unitPrice - item.salePrice) * item.quantity;
+        const originalPrice = item.unitPrice;
+        const finalPrice = item.salePrice !== null && item.salePrice !== undefined ? item.salePrice : item.unitPrice;
+        if (originalPrice > finalPrice) {
+          totalDiscounts += (originalPrice - finalPrice) * item.quantity;
         }
       }
     }

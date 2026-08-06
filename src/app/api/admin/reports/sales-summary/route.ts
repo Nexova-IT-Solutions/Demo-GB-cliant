@@ -145,11 +145,10 @@ export async function GET(req: NextRequest) {
         dayData.cost += itemCost;
 
         // Item-level discount: difference between unitPrice and salePrice (if discounted)
-        if (item.discountValue && item.discountValue > 0) {
-          totalDiscounts += item.discountValue * item.quantity;
-          dayData.discounts += item.discountValue * item.quantity;
-        } else if (item.salePrice && item.salePrice < item.unitPrice) {
-          const itemDiscount = (item.unitPrice - item.salePrice) * item.quantity;
+        const originalPrice = item.unitPrice;
+        const finalPrice = item.salePrice !== null && item.salePrice !== undefined ? item.salePrice : item.unitPrice;
+        if (originalPrice > finalPrice) {
+          const itemDiscount = (originalPrice - finalPrice) * item.quantity;
           totalDiscounts += itemDiscount;
           dayData.discounts += itemDiscount;
         }
